@@ -1,0 +1,19 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-19T12:07:44.134234Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_3zoi1i4w5b3j_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "product inventory location warehouse quantity",
+        "search_mode": "graph",
+        "graph_hint": "domain"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

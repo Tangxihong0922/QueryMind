@@ -1,0 +1,71 @@
+{
+  "role": "tool",
+  "content": "column_name,data_type\nid,integer\nbusinessentityid,integer\nphonenumber,character varying\nphonenumbertypeid,integer\nmodifieddate,timestamp without time zone\n\n\nResults saved to file: query_results_ef08375a.csv\n\n**IMPORTANT: FOR VISUALIZE_DATA USE FILENAME: query_results_ef08375a.csv**",
+  "timestamp": "2026-04-18T15:22:56.431078Z",
+  "metadata": {
+    "row_count": 5,
+    "columns": [
+      "column_name",
+      "data_type"
+    ],
+    "query_type": "SELECT",
+    "results": [
+      {
+        "column_name": "id",
+        "data_type": "integer"
+      },
+      {
+        "column_name": "businessentityid",
+        "data_type": "integer"
+      },
+      {
+        "column_name": "phonenumber",
+        "data_type": "character varying"
+      },
+      {
+        "column_name": "phonenumbertypeid",
+        "data_type": "integer"
+      },
+      {
+        "column_name": "modifieddate",
+        "data_type": "timestamp without time zone"
+      }
+    ],
+    "output_file": "query_results_ef08375a.csv",
+    "execution_time_ms": 20.912228152155876
+  },
+  "tool_result": {
+    "row_count": 5,
+    "columns": [
+      "column_name",
+      "data_type"
+    ],
+    "query_type": "SELECT",
+    "results": [
+      {
+        "column_name": "id",
+        "data_type": "integer"
+      },
+      {
+        "column_name": "businessentityid",
+        "data_type": "integer"
+      },
+      {
+        "column_name": "phonenumber",
+        "data_type": "character varying"
+      },
+      {
+        "column_name": "phonenumbertypeid",
+        "data_type": "integer"
+      },
+      {
+        "column_name": "modifieddate",
+        "data_type": "timestamp without time zone"
+      }
+    ],
+    "output_file": "query_results_ef08375a.csv",
+    "execution_time_ms": 20.912228152155876
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_hnq2troux2aa_1"
+}

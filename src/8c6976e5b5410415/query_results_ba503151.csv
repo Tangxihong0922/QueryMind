@@ -1,0 +1,141 @@
+table_schema,table_name,column_name,data_type
+production,product,productid,integer
+production,product,name,character varying
+production,product,productnumber,character varying
+production,product,makeflag,boolean
+production,product,finishedgoodsflag,boolean
+production,product,color,character varying
+production,product,safetystocklevel,smallint
+production,product,reorderpoint,smallint
+production,product,standardcost,numeric
+production,product,listprice,numeric
+production,product,size,character varying
+production,product,sizeunitmeasurecode,character
+production,product,weightunitmeasurecode,character
+production,product,weight,numeric
+production,product,daystomanufacture,integer
+production,product,productline,character
+production,product,class,character
+production,product,style,character
+production,product,productsubcategoryid,integer
+production,product,productmodelid,integer
+production,product,sellstartdate,timestamp without time zone
+production,product,sellenddate,timestamp without time zone
+production,product,discontinueddate,timestamp without time zone
+production,product,rowguid,uuid
+production,product,modifieddate,timestamp without time zone
+production,productcategory,productcategoryid,integer
+production,productcategory,name,character varying
+production,productcategory,rowguid,uuid
+production,productcategory,modifieddate,timestamp without time zone
+production,productcosthistory,productid,integer
+production,productcosthistory,startdate,timestamp without time zone
+production,productcosthistory,enddate,timestamp without time zone
+production,productcosthistory,standardcost,numeric
+production,productcosthistory,modifieddate,timestamp without time zone
+production,productdescription,productdescriptionid,integer
+production,productdescription,description,character varying
+production,productdescription,rowguid,uuid
+production,productdescription,modifieddate,timestamp without time zone
+production,productdocument,productid,integer
+production,productdocument,modifieddate,timestamp without time zone
+production,productdocument,documentnode,character varying
+production,productinventory,productid,integer
+production,productinventory,locationid,smallint
+production,productinventory,shelf,character varying
+production,productinventory,bin,smallint
+production,productinventory,quantity,smallint
+production,productinventory,rowguid,uuid
+production,productinventory,modifieddate,timestamp without time zone
+production,productlistpricehistory,productid,integer
+production,productlistpricehistory,startdate,timestamp without time zone
+production,productlistpricehistory,enddate,timestamp without time zone
+production,productlistpricehistory,listprice,numeric
+production,productlistpricehistory,modifieddate,timestamp without time zone
+production,productmodel,productmodelid,integer
+production,productmodel,name,character varying
+production,productmodel,catalogdescription,xml
+production,productmodel,instructions,xml
+production,productmodel,rowguid,uuid
+production,productmodel,modifieddate,timestamp without time zone
+production,productmodelillustration,productmodelid,integer
+production,productmodelillustration,illustrationid,integer
+production,productmodelillustration,modifieddate,timestamp without time zone
+production,productmodelproductdescriptionculture,productmodelid,integer
+production,productmodelproductdescriptionculture,productdescriptionid,integer
+production,productmodelproductdescriptionculture,cultureid,character
+production,productmodelproductdescriptionculture,modifieddate,timestamp without time zone
+production,productphoto,productphotoid,integer
+production,productphoto,thumbnailphoto,bytea
+production,productphoto,thumbnailphotofilename,character varying
+production,productphoto,largephoto,bytea
+production,productphoto,largephotofilename,character varying
+production,productphoto,modifieddate,timestamp without time zone
+production,productproductphoto,productid,integer
+production,productproductphoto,productphotoid,integer
+production,productproductphoto,primary,boolean
+production,productproductphoto,modifieddate,timestamp without time zone
+production,productreview,productreviewid,integer
+production,productreview,productid,integer
+production,productreview,reviewername,character varying
+production,productreview,reviewdate,timestamp without time zone
+production,productreview,emailaddress,character varying
+production,productreview,rating,integer
+production,productreview,comments,character varying
+production,productreview,modifieddate,timestamp without time zone
+production,productsubcategory,productsubcategoryid,integer
+production,productsubcategory,productcategoryid,integer
+production,productsubcategory,name,character varying
+production,productsubcategory,rowguid,uuid
+production,productsubcategory,modifieddate,timestamp without time zone
+production,vproductmodelcatalogdescription,productmodelid,integer
+production,vproductmodelcatalogdescription,name,character varying
+production,vproductmodelcatalogdescription,Summary,character varying
+production,vproductmodelcatalogdescription,manufacturer,character varying
+production,vproductmodelcatalogdescription,copyright,character varying
+production,vproductmodelcatalogdescription,producturl,character varying
+production,vproductmodelcatalogdescription,warrantyperiod,character varying
+production,vproductmodelcatalogdescription,warrantydescription,character varying
+production,vproductmodelcatalogdescription,noofyears,character varying
+production,vproductmodelcatalogdescription,maintenancedescription,character varying
+production,vproductmodelcatalogdescription,wheel,character varying
+production,vproductmodelcatalogdescription,saddle,character varying
+production,vproductmodelcatalogdescription,pedal,character varying
+production,vproductmodelcatalogdescription,bikeframe,character varying
+production,vproductmodelcatalogdescription,crankset,character varying
+production,vproductmodelcatalogdescription,pictureangle,character varying
+production,vproductmodelcatalogdescription,picturesize,character varying
+production,vproductmodelcatalogdescription,productphotoid,character varying
+production,vproductmodelcatalogdescription,material,character varying
+production,vproductmodelcatalogdescription,color,character varying
+production,vproductmodelcatalogdescription,productline,character varying
+production,vproductmodelcatalogdescription,style,character varying
+production,vproductmodelcatalogdescription,riderexperience,character varying
+production,vproductmodelcatalogdescription,rowguid,uuid
+production,vproductmodelcatalogdescription,modifieddate,timestamp without time zone
+production,vproductmodelinstructions,productmodelid,integer
+production,vproductmodelinstructions,name,character varying
+production,vproductmodelinstructions,instructions,character varying
+production,vproductmodelinstructions,LocationID,integer
+production,vproductmodelinstructions,SetupHours,numeric
+production,vproductmodelinstructions,MachineHours,numeric
+production,vproductmodelinstructions,LaborHours,numeric
+production,vproductmodelinstructions,LotSize,integer
+production,vproductmodelinstructions,Step,character varying
+production,vproductmodelinstructions,rowguid,uuid
+production,vproductmodelinstructions,modifieddate,timestamp without time zone
+purchasing,productvendor,productid,integer
+purchasing,productvendor,businessentityid,integer
+purchasing,productvendor,averageleadtime,integer
+purchasing,productvendor,standardprice,numeric
+purchasing,productvendor,lastreceiptcost,numeric
+purchasing,productvendor,lastreceiptdate,timestamp without time zone
+purchasing,productvendor,minorderqty,integer
+purchasing,productvendor,maxorderqty,integer
+purchasing,productvendor,onorderqty,integer
+purchasing,productvendor,unitmeasurecode,character
+purchasing,productvendor,modifieddate,timestamp without time zone
+sales,specialofferproduct,specialofferid,integer
+sales,specialofferproduct,productid,integer
+sales,specialofferproduct,rowguid,uuid
+sales,specialofferproduct,modifieddate,timestamp without time zone

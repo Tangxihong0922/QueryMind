@@ -1,0 +1,17 @@
+table_schema,table_name
+person,person
+person,personphone
+sales,salespersonquotahistory
+sales,personcreditcard
+sales,salesorderheader
+sales,salesorderdetail
+sales,salesperson
+sales,salesorderheadersalesreason
+sales,salesterritory
+sales,salestaxrate
+sales,salesreason
+sales,salesterritoryhistory
+sales,vpersondemographics
+sales,vsalesperson
+sales,vsalespersonsalesbyfiscalyearsdata
+sales,vsalespersonsalesbyfiscalyears

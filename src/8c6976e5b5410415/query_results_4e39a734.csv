@@ -1,0 +1,291 @@
+businessentityid,nationalidnumber,loginid,jobtitle,vacationhours,employeewithfewestvacationintitle
+245,363910111,adventure-works\barbara1,Accountant,58,245
+248,480951955,adventure-works\mike0,Accountant,59,245
+241,30845,adventure-works\david6,Accounts Manager,57,241
+246,663843431,adventure-works\dragan0,Accounts Payable Specialist,63,246
+247,519756660,adventure-works\janet0,Accounts Payable Specialist,64,246
+242,363923697,adventure-works\deborah0,Accounts Receivable Specialist,60,242
+243,60517918,adventure-works\candy0,Accounts Receivable Specialist,61,242
+244,931190412,adventure-works\bryan1,Accounts Receivable Specialist,62,242
+272,525932996,adventure-works\janaina0,Application Specialist,71,272
+269,671089628,adventure-works\dan0,Application Specialist,72,272
+268,314747499,adventure-works\ramesh0,Application Specialist,73,272
+267,58317344,adventure-works\karen1,Application Specialist,74,272
+262,231203233,adventure-works\david5,Assistant to the Chief Financial Officer,56,262
+239,619308550,adventure-works\mindy0,Benefits Specialist,51,239
+255,466142721,adventure-works\gordon0,Buyer,52,255
+258,785853949,adventure-works\erin0,Buyer,53,255
+257,381073001,adventure-works\eric2,Buyer,54,255
+259,20269531,adventure-works\ben0,Buyer,55,255
+253,407505660,adventure-works\linda2,Buyer,56,255
+254,482810518,adventure-works\fukiko0,Buyer,57,255
+256,367453993,adventure-works\frank2,Buyer,58,255
+251,603686790,adventure-works\mikael0,Buyer,59,255
+252,792847334,adventure-works\arvind0,Buyer,60,255
+1,295847284,adventure-works\ken0,Chief Executive Officer,99,1
+234,184188301,adventure-works\laura1,Chief Financial Officer,0,234
+221,260805477,adventure-works\chris1,Control Specialist,75,221
+218,540688287,adventure-works\tengiz0,Control Specialist,76,221
+271,929666391,adventure-works\dan1,Database Administrator,66,271
+270,643805155,adventure-works\françois0,Database Administrator,67,271
+15,56920285,adventure-works\sharon0,Design Engineer,4,15
+5,695256908,adventure-works\gail0,Design Engineer,5,15
+6,998320692,adventure-works\jossef0,Design Engineer,6,15
+219,242381745,adventure-works\sean1,Document Control Assistant,78,219
+220,260770918,adventure-works\karen0,Document Control Assistant,79,219
+217,345106466,adventure-works\zainal0,Document Control Manager,77,217
+3,509647174,adventure-works\roberto0,Engineering Manager,2,3
+287,982310417,adventure-works\amy0,European Sales Manager,21,287
+233,552560652,adventure-works\magnus0,Facilities Administrative Assistant,87,233
+227,141165819,adventure-works\gary1,Facilities Manager,86,227
+249,121491555,adventure-works\wendy0,Finance Manager,55,249
+237,416679555,adventure-works\hao0,Human Resources Administrative Assistant,52,237
+236,476980013,adventure-works\grant0,Human Resources Administrative Assistant,53,237
+235,535145551,adventure-works\paula0,Human Resources Manager,54,235
+263,441044382,adventure-works\jean0,Information Services Manager,65,263
+230,28414965,adventure-works\stuart1,Janitor,88,230
+232,646304055,adventure-works\pat0,Janitor,89,230
+229,879334904,adventure-works\lori1,Janitor,90,230
+231,153479919,adventure-works\jo1,Janitor,91,230
+228,553069203,adventure-works\christian0,Maintenance Supervisor,92,228
+20,323403273,adventure-works\wanida0,Marketing Assistant,41,20
+17,253022876,adventure-works\kevin0,Marketing Assistant,42,20
+19,52541318,adventure-works\mary2,Marketing Assistant,43,20
+16,24756624,adventure-works\david0,Marketing Manager,40,16
+21,243322160,adventure-works\terry0,Marketing Specialist,44,21
+22,95958330,adventure-works\sariya0,Marketing Specialist,45,21
+23,767955365,adventure-works\mary0,Marketing Specialist,46,21
+24,72636981,adventure-works\jill0,Marketing Specialist,47,21
+18,222969461,adventure-works\john5,Marketing Specialist,48,21
+222,685233686,adventure-works\ascott0,Master Scheduler,44,222
+266,672243793,adventure-works\peter1,Network Administrator,69,266
+265,749389530,adventure-works\ashvini0,Network Administrator,70,266
+264,858323870,adventure-works\stephanie0,Network Manager,68,264
+274,502097814,adventure-works\stephen0,North American Sales Manager,14,274
+285,481044938,adventure-works\syed0,Pacific Sales Manager,20,285
+26,277173473,adventure-works\peter0,Production Control Manager,43,26
+47,33237992,adventure-works\andrew0,Production Supervisor - WC10,65,47
+102,360868122,adventure-works\zheng0,Production Supervisor - WC10,66,47
+87,7201901,adventure-works\cristian0,Production Supervisor - WC10,67,47
+134,45615666,adventure-works\eric0,Production Supervisor - WC20,40,134
+152,319472946,adventure-works\yuhong0,Production Supervisor - WC20,41,134
+180,862951447,adventure-works\katie0,Production Supervisor - WC20,42,134
+166,60114406,adventure-works\jack0,Production Supervisor - WC30,68,166
+145,386315192,adventure-works\cynthia0,Production Supervisor - WC30,69,166
+71,578935259,adventure-works\michael3,Production Supervisor - WC30,70,166
+192,634335025,adventure-works\brenda0,Production Supervisor - WC40,71,192
+78,370989364,adventure-works\reuben0,Production Supervisor - WC40,72,192
+127,750905084,adventure-works\david4,Production Supervisor - WC40,73,192
+160,712885347,adventure-works\jeff0,Production Supervisor - WC45,74,160
+186,551834634,adventure-works\shane0,Production Supervisor - WC45,75,160
+205,332349500,adventure-works\lori0,Production Supervisor - WC45,76,160
+108,630184120,adventure-works\jinghao0,Production Supervisor - WC50,77,108
+93,778552911,adventure-works\kok-ho0,Production Supervisor - WC50,78,108
+55,233069302,adventure-works\taylor0,Production Supervisor - WC50,79,108
+27,446466105,adventure-works\jo0,Production Supervisor - WC60,80,27
+62,494170342,adventure-works\john0,Production Supervisor - WC60,81,27
+40,309738752,adventure-works\jolynn0,Production Supervisor - WC60,82,27
+48,690627818,adventure-works\ruth0,Production Technician - WC10,83,48
+50,844973625,adventure-works\sidney0,Production Technician - WC10,84,48
+51,132674823,adventure-works\jeffrey0,Production Technician - WC10,85,48
+52,565090917,adventure-works\doris0,Production Technician - WC10,86,48
+53,9659517,adventure-works\diane0,Production Technician - WC10,87,48
+49,912265825,adventure-works\barry0,Production Technician - WC10,88,48
+54,109272464,adventure-works\bonnie0,Production Technician - WC10,89,48
+105,801365500,adventure-works\kevin2,Production Technician - WC10,90,48
+107,393421437,adventure-works\christopher0,Production Technician - WC10,91,48
+106,561196580,adventure-works\john4,Production Technician - WC10,92,48
+103,455563743,adventure-works\ebru0,Production Technician - WC10,93,48
+104,717889520,adventure-works\mary1,Production Technician - WC10,94,48
+91,390124815,adventure-works\kimberly0,Production Technician - WC10,95,48
+89,90888098,adventure-works\patrick0,Production Technician - WC10,96,48
+90,82638150,adventure-works\danielle0,Production Technician - WC10,97,48
+92,826454897,adventure-works\tom0,Production Technician - WC10,98,48
+88,294148271,adventure-works\betsy0,Production Technician - WC10,99,48
+139,113393530,adventure-works\hung-fu0,Production Technician - WC20,0,139
+141,872923042,adventure-works\min0,Production Technician - WC20,1,139
+143,56772045,adventure-works\krishna0,Production Technician - WC20,2,139
+142,163347032,adventure-works\olinda0,Production Technician - WC20,3,139
+136,701156975,adventure-works\sylvester0,Production Technician - WC20,4,139
+140,339233463,adventure-works\prasanna0,Production Technician - WC20,5,139
+144,886023130,adventure-works\paul1,Production Technician - WC20,6,139
+138,25011600,adventure-works\samantha0,Production Technician - WC20,7,139
+137,63761469,adventure-works\anibal0,Production Technician - WC20,8,139
+135,964089218,adventure-works\ivo0,Production Technician - WC20,9,139
+154,97728960,adventure-works\raymond0,Production Technician - WC20,10,139
+156,322160340,adventure-works\lane0,Production Technician - WC20,11,139
+157,812797414,adventure-works\linda1,Production Technician - WC20,12,139
+159,404159499,adventure-works\terrence0,Production Technician - WC20,13,139
+158,300946911,adventure-works\shelley0,Production Technician - WC20,14,139
+153,568596888,adventure-works\hanying0,Production Technician - WC20,15,139
+155,212801092,adventure-works\fadi0,Production Technician - WC20,16,139
+183,969985265,adventure-works\barbara0,Production Technician - WC20,17,139
+184,305522471,adventure-works\john2,Production Technician - WC20,18,139
+185,621932914,adventure-works\stefen0,Production Technician - WC20,19,139
+181,545337468,adventure-works\michael0,Production Technician - WC20,20,139
+182,368920189,adventure-works\nitin0,Production Technician - WC20,21,139
+172,364818297,adventure-works\marc0,Production Technician - WC30,22,172
+175,259388196,adventure-works\reed0,Production Technician - WC30,23,172
+177,551346974,adventure-works\russell1,Production Technician - WC30,24,172
+167,498138869,adventure-works\david1,Production Technician - WC30,25,172
+170,476115505,adventure-works\george0,Production Technician - WC30,26,172
+178,568626529,adventure-works\john3,Production Technician - WC30,27,172
+174,585408256,adventure-works\benjamin0,Production Technician - WC30,28,172
+176,860123571,adventure-works\david7,Production Technician - WC30,29,172
+179,587567941,adventure-works\jan0,Production Technician - WC30,30,172
+169,351069889,adventure-works\susan1,Production Technician - WC30,31,172
+171,746373306,adventure-works\david3,Production Technician - WC30,32,172
+173,87268837,adventure-works\eugene0,Production Technician - WC30,33,172
+168,271438431,adventure-works\garrett0,Production Technician - WC30,34,172
+150,878395493,adventure-works\michael5,Production Technician - WC30,35,172
+146,160739235,adventure-works\jianshuo0,Production Technician - WC30,36,172
+147,604664374,adventure-works\sandra0,Production Technician - WC30,37,172
+148,733022683,adventure-works\jason0,Production Technician - WC30,38,172
+149,764853868,adventure-works\andy0,Production Technician - WC30,39,172
+151,993310268,adventure-works\rostislav0,Production Technician - WC30,40,172
+72,443968955,adventure-works\steven0,Production Technician - WC30,41,172
+73,138280935,adventure-works\carole0,Production Technician - WC30,42,172
+74,420023788,adventure-works\bjorn0,Production Technician - WC30,43,172
+75,363996959,adventure-works\michiko0,Production Technician - WC30,44,172
+76,227319668,adventure-works\carol0,Production Technician - WC30,45,172
+77,301435199,adventure-works\merav0,Production Technician - WC30,46,172
+194,295971920,adventure-works\fred0,Production Technician - WC40,47,194
+197,632092621,adventure-works\rajesh0,Production Technician - WC40,48,194
+198,19312190,adventure-works\lorraine0,Production Technician - WC40,49,194
+202,436757988,adventure-works\tawana0,Production Technician - WC40,50,194
+203,693168613,adventure-works\ken1,Production Technician - WC40,51,194
+193,761597760,adventure-works\alejandro0,Production Technician - WC40,52,194
+196,370487086,adventure-works\shammi0,Production Technician - WC40,53,194
+199,992874797,adventure-works\paula1,Production Technician - WC40,54,194
+201,746201340,adventure-works\brian0,Production Technician - WC40,55,194
+200,749211824,adventure-works\frank0,Production Technician - WC40,56,194
+204,440379437,adventure-works\gabe0,Production Technician - WC40,57,194
+195,918737118,adventure-works\kevin1,Production Technician - WC40,58,194
+86,769680433,adventure-works\ryan0,Production Technician - WC40,59,194
+79,697712387,adventure-works\eric1,Production Technician - WC40,60,194
+83,988315686,adventure-works\patrick1,Production Technician - WC40,61,194
+82,58791499,adventure-works\jack1,Production Technician - WC40,62,194
+85,1662732,adventure-works\brian2,Production Technician - WC40,63,194
+81,413787783,adventure-works\mihail0,Production Technician - WC40,64,194
+80,943170460,adventure-works\sandeep0,Production Technician - WC40,65,194
+84,947029962,adventure-works\frank3,Production Technician - WC40,66,194
+132,1300049,adventure-works\nicole0,Production Technician - WC40,67,194
+128,384162788,adventure-works\paul0,Production Technician - WC40,68,194
+129,502058701,adventure-works\gary0,Production Technician - WC40,69,194
+133,830150469,adventure-works\michael1,Production Technician - WC40,70,194
+130,578953538,adventure-works\rob1,Production Technician - WC40,71,194
+131,273260055,adventure-works\baris0,Production Technician - WC40,72,194
+164,65848458,adventure-works\andrew1,Production Technician - WC45,73,164
+161,275962311,adventure-works\kirk0,Production Technician - WC45,74,164
+162,514829225,adventure-works\laura0,Production Technician - WC45,75,164
+165,539490372,adventure-works\chris0,Production Technician - WC45,76,164
+163,377784364,adventure-works\alex0,Production Technician - WC45,77,164
+191,399658727,adventure-works\lionel0,Production Technician - WC45,78,164
+187,713403643,adventure-works\yvonne0,Production Technician - WC45,79,164
+188,435234965,adventure-works\douglas0,Production Technician - WC45,80,164
+189,187369436,adventure-works\janeth0,Production Technician - WC45,81,164
+190,456839592,adventure-works\robert0,Production Technician - WC45,82,164
+210,20244403,adventure-works\belinda0,Production Technician - WC45,83,164
+206,835460180,adventure-works\stuart0,Production Technician - WC45,84,164
+207,687685941,adventure-works\greg0,Production Technician - WC45,85,164
+208,199546871,adventure-works\scott0,Production Technician - WC45,86,164
+209,167554340,adventure-works\kathie0,Production Technician - WC45,87,164
+97,370581729,adventure-works\mandar0,Production Technician - WC50,0,97
+95,674171828,adventure-works\jim0,Production Technician - WC50,1,97
+99,431859843,adventure-works\nuan0,Production Technician - WC50,2,97
+101,153288994,adventure-works\houman0,Production Technician - WC50,3,97
+98,152085091,adventure-works\sameer0,Production Technician - WC50,4,97
+96,912141525,adventure-works\elizabeth0,Production Technician - WC50,5,97
+94,718299860,adventure-works\russell0,Production Technician - WC50,6,97
+100,204035155,adventure-works\lolan0,Production Technician - WC50,7,97
+61,92096924,adventure-works\diane2,Production Technician - WC50,8,97
+56,652535724,adventure-works\denise0,Production Technician - WC50,9,97
+57,10708100,adventure-works\frank1,Production Technician - WC50,10,97
+58,571658797,adventure-works\kendall0,Production Technician - WC50,11,97
+59,843479922,adventure-works\bob0,Production Technician - WC50,12,97
+60,827686041,adventure-works\pete0,Production Technician - WC50,13,97
+118,222400012,adventure-works\don0,Production Technician - WC50,88,97
+120,211789056,adventure-works\kitti0,Production Technician - WC50,89,97
+110,857651804,adventure-works\jun0,Production Technician - WC50,90,97
+112,981597097,adventure-works\john1,Production Technician - WC50,91,97
+115,563680513,adventure-works\angela0,Production Technician - WC50,92,97
+111,415823523,adventure-works\suroor0,Production Technician - WC50,93,97
+119,334834274,adventure-works\michael4,Production Technician - WC50,94,97
+109,113695504,adventure-works\alice0,Production Technician - WC50,95,97
+113,54759846,adventure-works\linda0,Production Technician - WC50,96,97
+114,342607223,adventure-works\mindaugas0,Production Technician - WC50,97,97
+116,398737566,adventure-works\michael2,Production Technician - WC50,98,97
+117,599942664,adventure-works\chad0,Production Technician - WC50,99,97
+30,410742000,adventure-works\britta0,Production Technician - WC60,14,30
+34,754372876,adventure-works\suchitra0,Production Technician - WC60,15,30
+37,442121106,adventure-works\chris2,Production Technician - WC60,16,30
+33,801758002,adventure-works\annik0,Production Technician - WC60,17,30
+31,750246141,adventure-works\margie0,Production Technician - WC60,18,30
+29,948320468,adventure-works\mark1,Production Technician - WC60,19,30
+36,788456780,adventure-works\jose0,Production Technician - WC60,20,30
+28,14417807,adventure-works\guy1,Production Technician - WC60,21,30
+35,999440576,adventure-works\brandon0,Production Technician - WC60,22,30
+32,330211482,adventure-works\rebecca0,Production Technician - WC60,23,30
+38,6298838,adventure-works\kim1,Production Technician - WC60,24,30
+39,461786517,adventure-works\ed0,Production Technician - WC60,25,30
+64,582347317,adventure-works\michael7,Production Technician - WC60,26,30
+68,537092325,adventure-works\charles0,Production Technician - WC60,27,30
+66,834186596,adventure-works\karan0,Production Technician - WC60,28,30
+65,8066363,adventure-works\randy0,Production Technician - WC60,29,30
+63,414476027,adventure-works\maciej0,Production Technician - WC60,30,30
+69,752513276,adventure-works\steve0,Production Technician - WC60,31,30
+67,63179277,adventure-works\jay0,Production Technician - WC60,32,30
+70,36151748,adventure-works\david2,Production Technician - WC60,33,30
+43,693325305,adventure-works\nancy0,Production Technician - WC60,34,30
+41,458159238,adventure-works\bryan0,Production Technician - WC60,35,30
+46,66073987,adventure-works\eugene1,Production Technician - WC60,36,30
+45,500412746,adventure-works\thomas0,Production Technician - WC60,37,30
+44,276751903,adventure-works\simon0,Production Technician - WC60,38,30
+42,339712426,adventure-works\james0,Production Technician - WC60,39,30
+260,437296311,adventure-works\annette0,Purchasing Assistant,50,260
+261,280633567,adventure-works\reinout0,Purchasing Assistant,51,260
+250,895209680,adventure-works\sheela0,Purchasing Manager,49,250
+211,398223854,adventure-works\hazem0,Quality Assurance Manager,80,211
+212,885055826,adventure-works\peng0,Quality Assurance Supervisor,81,212
+216,403414852,adventure-works\sean0,Quality Assurance Technician,82,216
+215,381772114,adventure-works\mark0,Quality Assurance Technician,83,216
+214,131471224,adventure-works\andreas0,Quality Assurance Technician,84,216
+213,343861179,adventure-works\sootha0,Quality Assurance Technician,85,216
+240,332040978,adventure-works\willis0,Recruiter,49,240
+238,264306399,adventure-works\vidur0,Recruiter,50,240
+8,811994146,adventure-works\diane1,Research and Development Engineer,62,8
+9,658797903,adventure-works\gigi0,Research and Development Engineer,63,8
+10,879342154,adventure-works\michael6,Research and Development Manager,16,10
+7,134969118,adventure-works\dylan0,Research and Development Manager,61,10
+280,61161660,adventure-works\pamela0,Sales Representative,22,280
+283,987554265,adventure-works\david8,Sales Representative,23,280
+277,615389812,adventure-works\jillian0,Sales Representative,24,280
+281,139397894,adventure-works\shu0,Sales Representative,26,280
+276,191644724,adventure-works\linda3,Sales Representative,27,280
+279,716374314,adventure-works\tsvi0,Sales Representative,29,280
+282,399771412,adventure-works\josé1,Sales Representative,31,280
+278,234474252,adventure-works\garrett1,Sales Representative,33,280
+290,134219713,adventure-works\ranjit0,Sales Representative,34,280
+288,954276278,adventure-works\rachel0,Sales Representative,35,280
+286,758596752,adventure-works\lynn0,Sales Representative,36,280
+289,668991357,adventure-works\jae0,Sales Representative,37,280
+275,841560125,adventure-works\michael9,Sales Representative,38,280
+284,90836195,adventure-works\tete0,Sales Representative,39,280
+224,621209647,adventure-works\william0,Scheduling Assistant,45,224
+223,981495526,adventure-works\sairaj0,Scheduling Assistant,46,224
+225,470689086,adventure-works\alan0,Scheduling Assistant,47,224
+226,368691270,adventure-works\brian1,Scheduling Assistant,48,224
+14,42487730,adventure-works\michael8,Senior Design Engineer,3,14
+11,974026903,adventure-works\ovidiu0,Senior Tool Designer,7,11
+4,112457891,adventure-works\rob0,Senior Tool Designer,48,11
+125,584205124,adventure-works\matthias0,Shipping and Receiving Clerk,94,125
+123,337752649,adventure-works\vamsi0,Shipping and Receiving Clerk,95,125
+121,521265716,adventure-works\pilar0,Shipping and Receiving Supervisor,93,121
+126,652779496,adventure-works\jimmy0,Stocker,96,126
+122,586486572,adventure-works\susan0,Stocker,97,126
+124,420776180,adventure-works\kim0,Stocker,98,126
+13,486228782,adventure-works\janice0,Tool Designer,8,13
+12,480168528,adventure-works\thierry0,Tool Designer,9,13
+2,245797967,adventure-works\terri0,Vice President of Engineering,1,2
+25,519899904,adventure-works\james1,Vice President of Production,64,25
+273,112432117,adventure-works\brian3,Vice President of Sales,10,273

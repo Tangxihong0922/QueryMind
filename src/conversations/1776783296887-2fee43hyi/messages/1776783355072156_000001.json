@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T14:55:34.743155Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_1kjpxw091xjc_1",
+      "name": "search_saved_correct_tool_uses",
+      "arguments": {
+        "question": "fetch rows from product table where sellstartdate is not null and productline equals T"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

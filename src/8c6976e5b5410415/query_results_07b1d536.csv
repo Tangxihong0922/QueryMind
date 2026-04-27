@@ -1,0 +1,13 @@
+column_name
+id
+specialofferid
+description
+discountpct
+type
+category
+startdate
+enddate
+minqty
+maxqty
+rowguid
+modifieddate

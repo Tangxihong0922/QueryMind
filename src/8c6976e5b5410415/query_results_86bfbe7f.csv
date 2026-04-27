@@ -1,0 +1,4 @@
+column_name,data_type
+countryregioncode,character varying
+name,character varying
+modifieddate,timestamp without time zone

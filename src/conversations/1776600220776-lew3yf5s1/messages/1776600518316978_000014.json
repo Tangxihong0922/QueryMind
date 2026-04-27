@@ -1,0 +1,19 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-19T12:08:01.233999Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_imbxypmo24d0_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "inventory stock warehouse shelf bin",
+        "search_mode": "vector",
+        "limit": 20
+      }
+    }
+  ],
+  "tool_call_id": null
+}

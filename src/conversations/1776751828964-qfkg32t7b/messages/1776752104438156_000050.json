@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T06:14:02.560188Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_6f1fcd0878b046deb22c8506",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "-- Check employee-businessentity relationship\nSELECT e.businessentityid, p.businessentityid AS person_bid\nFROM humanresources.employee e\nINNER JOIN person.person p ON e.businessentityid = p.businessentityid\nWHERE e.businessentityid IN (1, 2, 3, 4, 5)\nLIMIT 5;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

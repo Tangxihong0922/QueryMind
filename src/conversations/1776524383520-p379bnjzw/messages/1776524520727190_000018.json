@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:01:16.054443Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_qp07u4slcn9h_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT current_database()"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

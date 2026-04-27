@@ -1,0 +1,177 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 10 related table(s):\n\n--- Table 1: adventureworks.production.culture ---\nDomain: Localization\nDescription: Lookup table containing the languages in which some AdventureWorks data is stored.\nFields:\n  - name (character varying(50)): The display name of the language or culture (e.g., English, Spanish, French)\n  - cultureid (character(6)) [PK]: The standardized culture identifier code (e.g., en-US, es-MX) used to format dates, numbers, and currency for specific regions\n  - modifieddate (timestamp without time zone): The timestamp recording when this language or culture record was last modified in the system\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.production.productproductphoto ---\nDomain: Product\nDescription: Cross-reference table mapping products and product photos.\nFields:\n  - primary (boolean): Indicates whether this photo is the primary (default) image displayed for the product in catalogs and listings\n  - modifieddate (timestamp without time zone): Timestamp recording when this product-photo association was last updated for audit and synchronization purposes\n  - productphotoid (integer(32,0)) [PK]: Foreign key referencing the specific product photo record containing the actual image data and metadata\n  - productid (integer(32,0)) [PK] [FK]: Foreign key referencing the product this photo is associated with in the catalog\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.production.productdescription ---\nDomain: Product\nDescription: Product descriptions in several languages.\nFields:\n  - productdescriptionid (integer(32,0)) [PK]: Primary key identifier for the product description record\n  - modifieddate (timestamp without time zone): Date and time when the product description was last modified or updated\n  - description (character varying(400)): The actual textual description content of a product, typically in a specific language\n  - rowguid (uuid): Globally unique identifier assigned to each row for database replication and synchronization purposes\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.production.productcategory ---\nDomain: Product\nDescription: High-level product categorization.\nFields:\n  - name (character varying(50)): Business name of the product category (e.g., Bikes, Components, Clothing, Accessories)\n  - modifieddate (timestamp without time zone): Timestamp indicating when the product category record was last modified\n  - rowguid (uuid): Globally unique identifier assigned to each record for database replication and synchronization purposes\n  - productcategoryid (integer(32,0)) [PK]: Unique identifier for the product category serving as the primary key\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.sales.salesterritoryhistory ---\nDomain: Sales Territory\nDescription: Sales representative transfers to other sales territories.\nFields:\n  - startdate (timestamp without time zone) [PK]: Date when the sales representative began working in the sales territory\n  - rowguid (uuid): System-generated unique identifier for the record\n  - enddate (timestamp without time zone): Date when the sales representative stopped working in the sales territory; null if currently assigned\n  - territoryid (integer(32,0)) [PK] [FK]: Identifier of the sales territory the representative is/was assigned to\n  - businessentityid (integer(32,0)) [PK] [FK]: Identifier of the sales representative (employee) assigned to the territory\n  - modifieddate (timestamp without time zone): Date and time when the record was last modified\nMatch reason: Source: vector\n\n--- Table 6: adventureworks.production.productmodel ---\nDomain: Product\nDescription: Product model classification.\nFields:\n  - rowguid (uuid): System-generated globally unique identifier used for database replication, synchronization, and cross-reference across systems\n  - name (character varying(50)): Business name of the product model used for identification, reporting, and association with manufactured products\n  - modifieddate (timestamp without time zone): Timestamp recording when the product model record was last updated for audit and data quality tracking\n  - productmodelid (integer(32,0)) [PK]: Unique sequential identifier serving as the primary key to uniquely reference each product model in the system\n  - catalogdescription (xml): XML document containing structured catalog content such as product features, specifications, and imagery for customer-facing display in sales channels\n  - instructions (xml): XML document containing detailed manufacturing or assembly instructions, work specifications, and quality standards used by production teams\nMatch reason: Source: vector\n\n--- Table 7: adventureworks.sales.creditcard ---\nDomain: Payment\nDescription: Customer credit card information.\nFields:\n  - expyear (smallint(16,0)): The 4-digit year when the credit card expires and is no longer valid for transactions\n  - expmonth (smallint(16,0)): The month when the credit card expires and is no longer valid for transactions\n  - cardtype (character varying(50)): The brand or network of the credit card, such as Visa, MasterCard, American Express, or Discover\n  - creditcardid (integer(32,0)) [PK]: Unique identifier for the credit card record in the system, used as a reference key for linking to customer orders\n  - modifieddate (timestamp without time zone): Date and time when the credit card record was last updated or modified in the system\n  - cardnumber (character varying(25)): The unique credit card number used to identify and process payments for customer transactions\nMatch reason: Source: vector\n\n--- Table 8: adventureworks.production.productmodelillustration ---\nDomain: Product\nDescription: Cross-reference table mapping product models and illustrations.\nFields:\n  - illustrationid (integer(32,0)) [PK]: Identifier of the illustration such as a diagram, schematic, or photograph associated with the product model\n  - modifieddate (timestamp without time zone): Date and time when the product model illustration mapping was last modified\n  - productmodelid (integer(32,0)) [PK]: Identifier of the product model that the illustration represents\nMatch reason: Source: vector\n\n--- Table 9: adventureworks.humanresources.employee ---\nDomain: Human Resources\nDescription: Employee information such as salary, department, and title.\nFields:\n  - organizationnode (character varying): Hierarchical position identifier within the organization's structure for reporting relationships and org chart navigation\n  - modifieddate (timestamp without time zone): Timestamp of the most recent modification to the employee record\n  - rowguid (uuid): Globally unique identifier assigned to the row for replication and data synchronization purposes\n  - currentflag (boolean): Boolean indicating whether the employee is currently active in the organization\n  - sickleavehours (smallint(16,0)): Accumulated sick leave hours available for the employee to use\n  - vacationhours (smallint(16,0)): Accumulated vacation hours available for the employee to use\n  - salariedflag (boolean): Boolean indicating whether the employee is paid a fixed salary versus hourly wages\n  - hiredate (date): Date when the employee was officially hired and began employment\n  - gender (character(1)): Employee's gender code for demographic reporting and legal compliance\n  - maritalstatus (character(1)): Employee's marital status (M for married, S for single) for tax withholding and benefits purposes\n  - birthdate (date): Employee's date of birth used for age verification and benefits eligibility\n  - jobtitle (character varying(50)): Official job title or position held by the employee within the organization\n  - loginid (character varying(256)): Employee's network login credential for system authentication\n  - nationalidnumber (character varying(15)): Government-issued identification number (such as Social Security Number) used for tax and legal compliance\n  - businessentityid (integer(32,0)) [PK]: Primary key identifier for the employee entity in the system\nMatch reason: Source: vector\n\n--- Table 10: adventureworks.person.emailaddress ---\nDomain: Person\nDescription: Where to send a person email.\nFields:\n  - rowguid (uuid): System-generated unique identifier assigned to each email address record for auditing and data replication purposes\n  - modifieddate (timestamp without time zone): Date and time when the email address record was last modified or updated\n  - emailaddressid (integer(32,0)) [PK]: Primary key identifier that uniquely identifies each email address record in the system\n  - businessentityid (integer(32,0)) [PK] [FK]: Foreign key reference to the person (business entity) who owns or is associated with this email address\n  - emailaddress (character varying(50)): The actual email address value used for sending electronic communications to the person\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-19T11:59:26.223471Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "purchasing vendor",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.production.culture",
+      "adventureworks.production.productproductphoto",
+      "adventureworks.production.productdescription",
+      "adventureworks.production.productcategory",
+      "adventureworks.sales.salesterritoryhistory",
+      "adventureworks.production.productmodel",
+      "adventureworks.sales.creditcard",
+      "adventureworks.production.productmodelillustration",
+      "adventureworks.humanresources.employee",
+      "adventureworks.person.emailaddress"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.production.culture",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "culture"
+      },
+      {
+        "full_name": "adventureworks.production.productproductphoto",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productproductphoto"
+      },
+      {
+        "full_name": "adventureworks.production.productdescription",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productdescription"
+      },
+      {
+        "full_name": "adventureworks.production.productcategory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productcategory"
+      },
+      {
+        "full_name": "adventureworks.sales.salesterritoryhistory",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesterritoryhistory"
+      },
+      {
+        "full_name": "adventureworks.production.productmodel",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productmodel"
+      },
+      {
+        "full_name": "adventureworks.sales.creditcard",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "creditcard"
+      },
+      {
+        "full_name": "adventureworks.production.productmodelillustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productmodelillustration"
+      },
+      {
+        "full_name": "adventureworks.humanresources.employee",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employee"
+      },
+      {
+        "full_name": "adventureworks.person.emailaddress",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "emailaddress"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 459.2250040732324
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "purchasing vendor",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.production.culture",
+      "adventureworks.production.productproductphoto",
+      "adventureworks.production.productdescription",
+      "adventureworks.production.productcategory",
+      "adventureworks.sales.salesterritoryhistory",
+      "adventureworks.production.productmodel",
+      "adventureworks.sales.creditcard",
+      "adventureworks.production.productmodelillustration",
+      "adventureworks.humanresources.employee",
+      "adventureworks.person.emailaddress"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.production.culture",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "culture"
+      },
+      {
+        "full_name": "adventureworks.production.productproductphoto",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productproductphoto"
+      },
+      {
+        "full_name": "adventureworks.production.productdescription",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productdescription"
+      },
+      {
+        "full_name": "adventureworks.production.productcategory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productcategory"
+      },
+      {
+        "full_name": "adventureworks.sales.salesterritoryhistory",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesterritoryhistory"
+      },
+      {
+        "full_name": "adventureworks.production.productmodel",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productmodel"
+      },
+      {
+        "full_name": "adventureworks.sales.creditcard",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "creditcard"
+      },
+      {
+        "full_name": "adventureworks.production.productmodelillustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productmodelillustration"
+      },
+      {
+        "full_name": "adventureworks.humanresources.employee",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employee"
+      },
+      {
+        "full_name": "adventureworks.person.emailaddress",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "emailaddress"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 459.2250040732324
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_d3w8l0o5fpfg_1"
+}

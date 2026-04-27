@@ -1,0 +1,4 @@
+column_name,data_type
+businessentityid,integer
+rowguid,uuid
+modifieddate,timestamp without time zone

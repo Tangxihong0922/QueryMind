@@ -1,0 +1,14 @@
+column_name
+id
+shiftid
+name
+starttime
+endtime
+modifieddate
+id
+businessentityid
+name
+salespersonid
+demographics
+rowguid
+modifieddate

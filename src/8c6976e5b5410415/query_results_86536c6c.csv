@@ -1,0 +1,10 @@
+table_name,table_schema
+person,person
+personphone,person
+salespersonquotahistory,sales
+personcreditcard,sales
+salesperson,sales
+vpersondemographics,sales
+vsalesperson,sales
+vsalespersonsalesbyfiscalyearsdata,sales
+vsalespersonsalesbyfiscalyears,sales

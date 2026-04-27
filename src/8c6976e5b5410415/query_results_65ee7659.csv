@@ -1,0 +1,8 @@
+column_name,data_type,is_nullable
+productid,integer,NO
+locationid,smallint,NO
+shelf,character varying,NO
+bin,smallint,NO
+quantity,smallint,NO
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

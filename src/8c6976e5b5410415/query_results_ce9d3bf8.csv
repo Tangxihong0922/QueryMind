@@ -1,0 +1,10 @@
+column_name,data_type,is_nullable
+addressid,integer,NO
+addressline1,character varying,NO
+addressline2,character varying,YES
+city,character varying,NO
+stateprovinceid,integer,NO
+postalcode,character varying,NO
+spatiallocation,bytea,YES
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

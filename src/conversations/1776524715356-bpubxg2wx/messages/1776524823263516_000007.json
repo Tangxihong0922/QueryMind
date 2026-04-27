@@ -1,0 +1,177 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 10 related table(s):\n\n--- Table 1: adventureworks.person.addresstype ---\nDomain: Person\nDescription: Types of addresses stored in the Address table.\nFields:\n  - rowguid (uuid): System-generated globally unique identifier used for database replication and data synchronization purposes\n  - modifieddate (timestamp without time zone): Date and time when the address type definition was last updated or modified\n  - name (character varying(50)): Descriptive label of the address type such as Home, Work, Billing, or Shipping\n  - addresstypeid (integer(32,0)) [PK]: Unique numeric identifier serving as the primary key for each address type record\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.person.countryregion ---\nDomain: Location\nDescription: Lookup table containing the ISO standard codes for countries and regions.\nFields:\n  - modifieddate (timestamp without time zone): The date and time when the country or region record was last modified, used for data synchronization and audit tracking\n  - name (character varying(50)): The official full name of the country or region as defined by the ISO standard\n  - countryregioncode (character varying(3)) [PK]: The unique 3-letter ISO 3166-1 alpha-3 code that identifies the country or region\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.production.culture ---\nDomain: Localization\nDescription: Lookup table containing the languages in which some AdventureWorks data is stored.\nFields:\n  - name (character varying(50)): The display name of the language or culture (e.g., English, Spanish, French)\n  - cultureid (character(6)) [PK]: The standardized culture identifier code (e.g., en-US, es-MX) used to format dates, numbers, and currency for specific regions\n  - modifieddate (timestamp without time zone): The timestamp recording when this language or culture record was last modified in the system\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.production.billofmaterials ---\nDomain: Manufacturing\nDescription: Items required to make bicycles and bicycle subassemblies. It identifies the heirarchical relationship between a parent product and its components.\nFields:\n  - modifieddate (timestamp without time zone): Timestamp of the most recent modification to this bill of materials record, indicating when the data was last updated\n  - perassemblyqty (numeric(8,2)): Quantity of the component required per one unit of the parent product assembly\n  - startdate (timestamp without time zone): Effective date when this bill of materials configuration becomes valid and can be used in production\n  - unitmeasurecode (character(3)) [FK]: Three-character code specifying the unit of measure for the component quantity (e.g., EA for each, LB for pounds)\n  - bomlevel (smallint(16,0)): Numeric level in the product hierarchy indicating the nesting depth (0 for top-level assemblies, increasing for sub-components)\n  - productassemblyid (integer(32,0)) [FK]: Reference to the parent product that will be assembled from components (the finished or intermediate product being manufactured)\n  - enddate (timestamp without time zone): Expiration date when this bill of materials configuration is no longer valid; null indicates it is currently active\n  - componentid (integer(32,0)) [FK]: Reference to the child part or component that goes into making the parent product assembly\n  - billofmaterialsid (integer(32,0)) [PK]: Unique identifier for each bill of materials record, serving as the primary key for this table\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.production.illustration ---\nDomain: Product\nDescription: Bicycle assembly diagrams.\nFields:\n  - modifieddate (timestamp without time zone): Timestamp indicating when the bicycle assembly diagram was last modified or updated\n  - illustrationid (integer(32,0)) [PK]: Unique identifier for each bicycle assembly diagram illustration record\n  - diagram (xml): XML-formatted assembly diagram containing visual instructions for bicycle component assembly\nMatch reason: Source: vector\n\n--- Table 6: adventureworks.purchasing.vendor ---\nDomain: Vendor\nDescription: Companies from whom Adventure Works Cycles purchases parts or other goods.\nFields:\n  - purchasingwebserviceurl (character varying(1024)): Web service endpoint URL used for electronic data interchange and automated purchasing transactions with the vendor\n  - name (character varying(50)): Official business name of the vendor or supplier company\n  - activeflag (boolean): Indicator of whether the vendor is currently operational and conducting business\n  - accountnumber (character varying(15)): Internal accounting code assigned to track and process financial transactions with the vendor\n  - businessentityid (integer(32,0)) [PK]: Unique identifier referencing the underlying business entity record for data consistency across the enterprise\n  - creditrating (smallint(16,0)): Numerical assessment of the vendor's creditworthiness and financial reliability, typically on a scale where lower values indicate better credit standing\n  - modifieddate (timestamp without time zone): Timestamp recording the most recent update to the vendor's master record for audit and synchronization purposes\n  - preferredvendorstatus (boolean): Flag designating whether the vendor is approved and prioritized as a preferred supplier for purchasing decisions\nMatch reason: Source: vector\n\n--- Table 7: adventureworks.sales.salesreason ---\nDomain: Sales\nDescription: Lookup table of customer purchase reasons.\nFields:\n  - name (character varying(50)): Descriptive name of the sales reason (e.g., 'Price', 'Quality', 'Promotion', 'Recommendation')\n  - reasontype (character varying(50)): Category classification of the sales reason (e.g., 'Marketing', 'Product', 'Service', 'Competitive')\n  - salesreasonid (integer(32,0)) [PK]: Unique identifier for each sales reason record, serving as the primary key\n  - modifieddate (timestamp without time zone): Timestamp recording when the sales reason record was last updated\nMatch reason: Source: vector\n\n--- Table 8: adventureworks.production.productdocument ---\nDomain: Product\nDescription: Cross-reference table mapping products to related product documents.\nFields:\n  - productid (integer(32,0)) [PK] [FK]: Foreign key to the product master record, identifying the specific product that the associated document pertains to\n  - documentnode (character varying) [PK]: Hierarchical identifier referencing the specific document in the document repository, indicating its location in the document structure\n  - modifieddate (timestamp without time zone): Timestamp recording when the product-document association was last updated, used for audit trails and data synchronization processes\nMatch reason: Source: vector\n\n--- Table 9: adventureworks.person.phonenumbertype ---\nDomain: Person\nDescription: Type of phone number of a person.\nFields:\n  - modifieddate (timestamp without time zone): System timestamp indicating when the phone number type record was last modified or updated\n  - name (character varying(50)): Business-friendly name describing the phone number type (e.g., Home, Work, Mobile, Fax)\n  - phonenumbertypeid (integer(32,0)) [PK]: Primary key identifier that uniquely represents a specific phone number type category in the system\nMatch reason: Source: vector\n\n--- Table 10: adventureworks.person.stateprovince ---\nDomain: Geography\nDescription: State and province lookup table.\nFields:\n  - name (character varying(50)): Full official name of the state or province (e.g., California, Ontario)\n  - territoryid (integer(32,0)): Foreign key to the sales territory this state or province is assigned to for regional reporting\n  - isonlystateprovinceflag (boolean): Flag indicating if this is the only state or province in its country (rarely used, for special cases like Washington DC)\n  - stateprovincecode (character(3)): Official abbreviation code for the state or province (e.g., CA, NY, ON)\n  - stateprovinceid (integer(32,0)) [PK]: Primary key identifier for the state or province record\n  - modifieddate (timestamp without time zone): Timestamp recording when the state or province record was last updated\n  - rowguid (uuid): Globally unique identifier used for database replication and synchronization\n  - countryregioncode (character varying(3)) [FK]: Foreign key linking to the country this state or province belongs to\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-18T15:05:33.422870Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "find tables about employees hiring and departments",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.person.addresstype",
+      "adventureworks.person.countryregion",
+      "adventureworks.production.culture",
+      "adventureworks.production.billofmaterials",
+      "adventureworks.production.illustration",
+      "adventureworks.purchasing.vendor",
+      "adventureworks.sales.salesreason",
+      "adventureworks.production.productdocument",
+      "adventureworks.person.phonenumbertype",
+      "adventureworks.person.stateprovince"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.person.addresstype",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "addresstype"
+      },
+      {
+        "full_name": "adventureworks.person.countryregion",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "countryregion"
+      },
+      {
+        "full_name": "adventureworks.production.culture",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "culture"
+      },
+      {
+        "full_name": "adventureworks.production.billofmaterials",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "billofmaterials"
+      },
+      {
+        "full_name": "adventureworks.production.illustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "illustration"
+      },
+      {
+        "full_name": "adventureworks.purchasing.vendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "vendor"
+      },
+      {
+        "full_name": "adventureworks.sales.salesreason",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesreason"
+      },
+      {
+        "full_name": "adventureworks.production.productdocument",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productdocument"
+      },
+      {
+        "full_name": "adventureworks.person.phonenumbertype",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "phonenumbertype"
+      },
+      {
+        "full_name": "adventureworks.person.stateprovince",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "stateprovince"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 356.3591600395739
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "find tables about employees hiring and departments",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.person.addresstype",
+      "adventureworks.person.countryregion",
+      "adventureworks.production.culture",
+      "adventureworks.production.billofmaterials",
+      "adventureworks.production.illustration",
+      "adventureworks.purchasing.vendor",
+      "adventureworks.sales.salesreason",
+      "adventureworks.production.productdocument",
+      "adventureworks.person.phonenumbertype",
+      "adventureworks.person.stateprovince"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.person.addresstype",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "addresstype"
+      },
+      {
+        "full_name": "adventureworks.person.countryregion",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "countryregion"
+      },
+      {
+        "full_name": "adventureworks.production.culture",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "culture"
+      },
+      {
+        "full_name": "adventureworks.production.billofmaterials",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "billofmaterials"
+      },
+      {
+        "full_name": "adventureworks.production.illustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "illustration"
+      },
+      {
+        "full_name": "adventureworks.purchasing.vendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "vendor"
+      },
+      {
+        "full_name": "adventureworks.sales.salesreason",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesreason"
+      },
+      {
+        "full_name": "adventureworks.production.productdocument",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productdocument"
+      },
+      {
+        "full_name": "adventureworks.person.phonenumbertype",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "phonenumbertype"
+      },
+      {
+        "full_name": "adventureworks.person.stateprovince",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "stateprovince"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 356.3591600395739
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_h7r8jy0nqlld_1"
+}

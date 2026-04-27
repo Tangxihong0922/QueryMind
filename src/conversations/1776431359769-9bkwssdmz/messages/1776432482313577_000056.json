@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T13:27:52.230833Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_4mkejzke9446_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT Name FROM HumanResources.Department;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

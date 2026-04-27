@@ -1,0 +1,4 @@
+table_schema,table_name
+person,address
+person,countryregion
+person,stateprovince

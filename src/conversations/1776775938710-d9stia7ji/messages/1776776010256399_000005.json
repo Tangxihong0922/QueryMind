@@ -1,0 +1,19 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T12:52:44.172248Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_vlcxysu7si4d_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "limit": 10,
+        "query": "product table columns productid productnumber name sellstartdate productline",
+        "search_mode": "vector"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

@@ -1,0 +1,8 @@
+{
+  "role": "tool",
+  "content": "Agent memory is unavailable, so no historical tool usage patterns were searched.",
+  "timestamp": "2026-04-16T13:51:55.649381Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": "call_93b6afd08d504ba6b322b62d"
+}

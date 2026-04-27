@@ -1,0 +1,16 @@
+department,lastname,rate,cume_dist,percent_rank
+Document Control,Arifin,17.7885,1.0,1.0
+Document Control,Kharatishvili,16.8269,0.8,0.5
+Document Control,Norred,16.8269,0.8,0.5
+Document Control,Chai,10.2500,0.4,0.0
+Document Control,Berge,10.2500,0.4,0.0
+Information Services,Trenary,50.4808,1.0,1.0
+Information Services,Conroy,39.6635,0.9,0.8888888888888888
+Information Services,Wilson,38.4615,0.8,0.6666666666666666
+Information Services,Ajenstat,38.4615,0.8,0.6666666666666666
+Information Services,Connelly,32.4519,0.6,0.4444444444444444
+Information Services,Sharma,32.4519,0.6,0.4444444444444444
+Information Services,Berg,27.4038,0.4,0.0
+Information Services,Meyyappan,27.4038,0.4,0.0
+Information Services,Bacon,27.4038,0.4,0.0
+Information Services,Bueno,27.4038,0.4,0.0

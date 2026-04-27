@@ -1,0 +1,21 @@
+{
+  "role": "tool",
+  "content": "Query executed successfully. No rows returned.",
+  "timestamp": "2026-04-18T15:02:00.710212Z",
+  "metadata": {
+    "row_count": 0,
+    "columns": [],
+    "query_type": "SELECT",
+    "results": [],
+    "execution_time_ms": 26.319808326661587
+  },
+  "tool_result": {
+    "row_count": 0,
+    "columns": [],
+    "query_type": "SELECT",
+    "results": [],
+    "execution_time_ms": 26.319808326661587
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_4awgnuxt1t6l_1"
+}

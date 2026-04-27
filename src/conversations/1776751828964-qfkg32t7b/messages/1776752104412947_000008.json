@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T06:11:31.405295Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_e87ae636402440bb8c2e9323",
+      "name": "schema_retrieve",
+      "arguments": {
+        "domain_filter": "Human Resources",
+        "query": "employee department"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

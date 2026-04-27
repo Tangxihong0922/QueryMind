@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "\n\nLet me try a different search approach to find the relevant tables.\n\n",
+  "timestamp": "2026-04-24T08:24:22.895767Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_ba9fc99aaa004641b1b827a6",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "sales order header",
+        "search_mode": "vector"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

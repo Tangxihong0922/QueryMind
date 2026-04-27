@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T14:26:47.105235Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_d4ndzbdmzl41_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT name, listprice, 'LeastExpensive' AS LeastExpensive\nFROM (\n    SELECT name, listprice, \n           ROW_NUMBER() OVER (ORDER BY listprice ASC) AS rn,\n           MIN(listprice) OVER (PARTITION BY productsubcategoryid) AS min_price\n    FROM production.product\n    WHERE productsubcategoryid = 37\n) ranked\nWHERE listprice = min_price\nORDER BY listprice;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

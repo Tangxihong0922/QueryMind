@@ -1,0 +1,19 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T18:53:52.522039Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_beepml5o918e_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "employee table name first last humanresources",
+        "search_mode": "vector",
+        "limit": 5
+      }
+    }
+  ],
+  "tool_call_id": null
+}

@@ -1,0 +1,24 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T06:13:23.764863Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_ac5af6a6bf154843bb19e93e",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'humanresources' AND table_name = 'vemployeedepartmenthistory' ORDER BY ordinal_position;"
+      }
+    },
+    {
+      "id": "call_09048880b94c45a8b6f0afc8",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM humanresources.vemployeedepartmenthistory LIMIT 5;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

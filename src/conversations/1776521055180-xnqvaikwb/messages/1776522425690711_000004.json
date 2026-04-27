@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "I need to find the main product table with the name, listprice, and subcategory fields. Let me search more specifically.\n",
+  "timestamp": "2026-04-18T14:26:32.512359Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_h4nnx28q8lhp_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "product master table name listprice productsubcategory",
+        "search_mode": "vector"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

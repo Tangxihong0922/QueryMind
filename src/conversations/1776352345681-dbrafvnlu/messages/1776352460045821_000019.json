@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-16T15:14:20.003774Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_2p3ppi9yxwkh_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM customer LIMIT 5"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

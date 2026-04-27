@@ -1,0 +1,322 @@
+from __future__ import annotations
+"""
+Schema context enhancer for injecting schema retrieval rules and results into LLM context.
+
+This enhancer injects:
+1. Search mode selection rules into system prompt
+2. Schema retrieval results into LLM messages
+"""
+
+import logging
+import re
+from typing import TYPE_CHECKING, List, Optional
+
+from .base import LlmContextEnhancer
+
+if TYPE_CHECKING:
+    from ...core.user.models import User
+    from ...core.llm.models import LlmMessage
+
+logger = logging.getLogger(__name__)
+
+
+_SCHEMA_LOCK_STATE_RE = re.compile(r"schema_locked:\s*(true|false)", re.IGNORECASE)
+
+
+def _extract_schema_locked(system_prompt: str) -> Optional[bool]:
+    match = _SCHEMA_LOCK_STATE_RE.search(system_prompt or "")
+    if not match:
+        return None
+    return match.group(1).lower() == "true"
+
+
+# Search mode selection rules for system prompt injection
+SCHEMA_RETRIEVE_RULES = """
+## Schema Retrieval Tool - Search Mode Selection Rules
+
+When using the 'schema_retrieve' tool, select the appropriate search mode based on query semantics:
+
+### When seed_tables is NOT provided, choose from:
+
+- **hybrid** (Balanced mode, default)
+  - Use for: Most general business queries
+  - Examples: "find order-related data", "what tables contain customer information"
+
+- **vector** (Semantic priority)
+  - Use for: Simple queries without specific table relationship descriptions
+  - Examples: "find tables related to customer analysis", "what tables are about sales"
+
+- **graph** (Relationship exploration)
+  - Use for: Complex cross-table aggregations requiring FK relationship exploration
+  - Examples: "find all related tables from orders", "check foreign key relationships of products table"
+
+### When seed_tables IS provided (injected by system):
+
+- **expand** (Seed expansion)
+  - Use for: User query can be solved by finding more related tables based on seed_tables through FK relationships
+  - Examples: Given orders table, "find all tables related to orders"
+  - Note: Fall back to other modes when expand cannot satisfy the query
+
+### Stable Graph Hints:
+
+- **graph_hint=domain**: Use when the user explicitly names a business domain
+- **graph_hint=fields**: Use when the user asks about explicit columns / field names
+- **graph_hint=expand**: Use only when seed_tables are available from prior schema_retrieve output
+- **graph_hint=none**: Use when no graph-specific evidence is present
+
+### Tool Parameters:
+- query: Required. Natural language business query.
+- search_mode: Optional. hybrid/vector/graph/expand. Auto-selected based on rules above if not specified.
+- graph_hint: Optional. none/domain/fields/expand. Use to make graph intent explicit.
+- required_fields: Optional. Explicit field names mentioned by the user; keep empty if none.
+- limit: Optional. Max results to return (default: 10)
+- similarity_threshold: Optional. Vector similarity threshold (default: 0.4)
+- domain_filter: Optional. Business domain filter (e.g., 'Order', 'Inventory')
+- seed_tables: Optional. Seed table names for expand mode (provided by system when applicable)
+"""
+
+
+class SchemaContextEnhancer(LlmContextEnhancer):
+    """Enhancer for injecting schema retrieval rules and results into LLM context.
+
+    This enhancer:
+    1. Injects search mode selection rules into system prompt
+    2. Formats and injects schema retrieval results into messages
+    3. Prefers turn-local schema snapshots over history replay when available
+
+    The rules help the LLM make informed decisions about search mode selection.
+
+    Example:
+        >>> enhancer = SchemaContextEnhancer()
+        >>> enhanced_prompt = await enhancer.enhance_system_prompt(prompt, message, user)
+    """
+
+    def __init__(
+        self,
+        tool_name: str = "schema_retrieve",
+        max_tables: int = 10,
+        max_fields_per_table: int = 15
+    ):
+        """Initialize the enhancer.
+
+        Args:
+            tool_name: Name of the schema retrieve tool (default: "schema_retrieve")
+            max_tables: Maximum number of tables to include in context
+            max_fields_per_table: Maximum fields per table to include
+        """
+        self._tool_name = tool_name
+        self._max_tables = max_tables
+        self._max_fields_per_table = max_fields_per_table
+
+    async def enhance_system_prompt(
+        self,
+        system_prompt: str,
+        user_message: str,
+        user: "User"
+    ) -> str:
+        """Enhance system prompt with schema retrieval rules.
+
+        This method appends the search mode selection rules to the system prompt,
+        helping the LLM make informed decisions about when and how to use the
+        schema retrieval tool.
+
+        Args:
+            system_prompt: The original system prompt
+            user_message: The initial user message
+            user: The user making the request
+
+        Returns:
+            Enhanced system prompt with schema retrieval rules
+        """
+        schema_locked = _extract_schema_locked(system_prompt)
+        if schema_locked is True:
+            return system_prompt
+
+        # Append the rules to system prompt when schema discovery is still open.
+        if SCHEMA_RETRIEVE_RULES not in system_prompt:
+            return system_prompt + "\n\n" + SCHEMA_RETRIEVE_RULES
+        return system_prompt
+
+    def _extract_schema_summary(self, message: "LlmMessage") -> Optional[dict]:
+        metadata = getattr(message, "metadata", {}) or {}
+        summary = metadata.get("last_schema_summary")
+        if isinstance(summary, dict) and summary:
+            return summary
+
+        governance = metadata.get("schema_governance")
+        if isinstance(governance, dict):
+            summary = governance.get("last_schema_summary")
+            if isinstance(summary, dict) and summary:
+                return summary
+
+        schema_context = metadata.get("schema_retrieve_context")
+        if isinstance(schema_context, dict) and schema_context:
+            selected_tables = list(schema_context.get("seed_tables", []) or [])
+            selected_table_refs = list(
+                schema_context.get("seed_table_refs", []) or []
+            )
+            if (
+                selected_tables
+                or selected_table_refs
+                or schema_context.get("summary_text")
+                or schema_context.get("last_query")
+            ):
+                return {
+                    "tool_name": self._tool_name,
+                    "query": schema_context.get("last_query", ""),
+                    "search_mode": schema_context.get(
+                        "last_search_mode",
+                        schema_context.get("search_mode", "unknown"),
+                    ),
+                    "graph_hint": schema_context.get("graph_hint", "none"),
+                    "required_fields": schema_context.get("required_fields", []),
+                    "domain_filter": schema_context.get("domain_filter"),
+                    "selected_tables": selected_tables,
+                    "selected_table_refs": selected_table_refs,
+                    "summary_text": schema_context.get("summary_text"),
+                    "schema_locked": schema_context.get("schema_locked", False),
+                    "lock_reason": schema_context.get("lock_reason"),
+                    "success": bool(selected_tables),
+                    "total_results": len(selected_tables),
+                }
+
+        return None
+
+    def _extract_schema_result_metadata(self, message: "LlmMessage") -> Optional[dict]:
+        if hasattr(message, "tool_result") and message.tool_result:
+            metadata = (
+                message.tool_result
+                if isinstance(message.tool_result, dict)
+                else getattr(message.tool_result, "metadata", {}) or {}
+            )
+            if not metadata and hasattr(message, "metadata"):
+                metadata = message.metadata or {}
+            if metadata.get("tool_name") == self._tool_name:
+                return metadata
+
+        metadata = getattr(message, "metadata", {}) or {}
+        if metadata.get("tool_name") == self._tool_name:
+            return metadata
+
+        return None
+
+    async def enhance_user_messages(
+        self,
+        messages: List["LlmMessage"],
+        user: "User"
+    ) -> List["LlmMessage"]:
+        """Enhance user messages with schema retrieval results.
+
+        This method looks for schema retrieval results in the conversation
+        and injects formatted schema information as context.
+
+        Args:
+            messages: The list of messages to enhance
+            user: The user making the request
+
+        Returns:
+            Enhanced list of messages with schema context
+        """
+        # Find the most recent explicit schema summary or schema retrieval result.
+        schema_summary = None
+        schema_result = None
+        for msg in reversed(messages):
+            schema_summary = self._extract_schema_summary(msg)
+            schema_result_metadata = self._extract_schema_result_metadata(msg)
+            if schema_summary:
+                if schema_result_metadata:
+                    schema_result = msg
+                break
+
+            if schema_result_metadata:
+                schema_result = msg
+                break
+
+        if not schema_summary and not schema_result:
+            logger.debug("No schema retrieval result found in messages")
+            return messages
+
+        # Format schema context
+        try:
+            schema_context = self._format_schema_context(
+                schema_summary=schema_summary,
+                tool_result=schema_result,
+            )
+            if not schema_context:
+                return messages
+
+            # Create a system message with schema context
+            if messages:
+                schema_message = type(messages[0])(
+                    role="system",
+                    content=f"【Current Retrieved Schema Information】\n\n{schema_context}"
+                )
+                return [schema_message] + messages
+            return messages
+
+        except Exception as e:
+            logger.warning(f"Failed to format schema context: {e}")
+            return messages
+
+    def _format_schema_context(
+        self,
+        schema_summary: Optional[dict] = None,
+        tool_result=None,
+    ) -> Optional[str]:
+        """Format schema retrieval result into readable context.
+
+        Args:
+            schema_summary: Explicit schema summary from governance state
+            tool_result: ToolResult or metadata dict containing schema information
+
+        Returns:
+            Formatted schema context string or None
+        """
+        metadata = {}
+        if schema_summary:
+            metadata = schema_summary
+        elif isinstance(tool_result, dict):
+            metadata = tool_result
+        else:
+            metadata = getattr(tool_result, "metadata", {}) or {}
+
+        search_mode = metadata.get("search_mode", "unknown")
+        query = metadata.get("query", "")
+        total_results = int(metadata.get("total_results", 0) or 0)
+
+        if not total_results and not schema_summary:
+            return None
+
+        lines = [
+            f"Search Mode: {search_mode}",
+            f"Query: {query}",
+            f"Results: {total_results} table(s)",
+        ]
+
+        selected_tables = metadata.get("selected_tables") or []
+        if selected_tables:
+            preview = ", ".join(str(table) for table in selected_tables[:5])
+            if len(selected_tables) > 5:
+                preview += f", ... (+{len(selected_tables) - 5})"
+            lines.append(f"Tables: {preview}")
+        else:
+            lines.append("Tables: none")
+
+        summary_text = metadata.get("summary_text")
+        if summary_text:
+            lines.append(f"Summary: {summary_text}")
+
+        lock_reason = metadata.get("lock_reason")
+        if lock_reason:
+            lines.append(f"Lock: {lock_reason}")
+
+        # Extract table information from tool result
+        if isinstance(tool_result, dict):
+            content = tool_result.get("result_for_llm") or tool_result.get("content", "")
+        else:
+            content = getattr(tool_result, 'result_for_llm', None) or getattr(tool_result, 'content', '')
+
+        if content:
+            lines.append(content)
+
+        return "\n".join(lines)

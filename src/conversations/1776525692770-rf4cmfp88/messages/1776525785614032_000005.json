@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:21:55.263986Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_sbz043gzku14_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "phone number personphonenumber",
+        "search_mode": null
+      }
+    }
+  ],
+  "tool_call_id": null
+}

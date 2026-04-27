@@ -1,0 +1,26 @@
+column_name,data_type,is_nullable
+salesorderid,integer,NO
+revisionnumber,smallint,NO
+orderdate,timestamp without time zone,NO
+duedate,timestamp without time zone,NO
+shipdate,timestamp without time zone,YES
+status,smallint,NO
+onlineorderflag,boolean,NO
+purchaseordernumber,character varying,YES
+accountnumber,character varying,YES
+customerid,integer,NO
+salespersonid,integer,YES
+territoryid,integer,YES
+billtoaddressid,integer,NO
+shiptoaddressid,integer,NO
+shipmethodid,integer,NO
+creditcardid,integer,YES
+creditcardapprovalcode,character varying,YES
+currencyrateid,integer,YES
+subtotal,numeric,NO
+taxamt,numeric,NO
+freight,numeric,NO
+totaldue,numeric,YES
+comment,character varying,YES
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

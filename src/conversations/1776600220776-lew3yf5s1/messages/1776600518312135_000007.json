@@ -1,0 +1,177 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 10 related table(s):\n\n--- Table 1: adventureworks.humanresources.department ---\nDomain: Organization\nDescription: Lookup table storing the official list of departments within Adventure Works Cycles, used as a reference to categorize employees, assign organizational responsibilities, and define company structure for HR and reporting purposes.\nFields:\n  - modifieddate (timestamp without time zone): The timestamp recording when the department information was most recently updated in the system\n  - groupname (character varying(50)): The organizational group or division that the department belongs to, representing higher-level company structure (e.g., Manufacturing, Executive, Research and Development)\n  - name (character varying(50)): The official business name or title of the department (e.g., Engineering, Sales, Marketing)\n  - departmentid (integer(32,0)) [PK]: A unique sequential identifier assigned to each department record in the system\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.production.productsubcategory ---\nDomain: Product\nDescription: Product subcategories. See ProductCategory table.\nFields:\n  - productsubcategoryid (integer(32,0)) [PK]: Primary key identifier that uniquely represents each product subcategory within the system\n  - modifieddate (timestamp without time zone): Timestamp indicating when the subcategory record was last modified for audit and synchronization purposes\n  - name (character varying(50)): The business name of the product subcategory (e.g., Mountain Bikes, Road Frames, Touring Bicycles)\n  - rowguid (uuid): Globally unique identifier used for database replication and data synchronization across systems\n  - productcategoryid (integer(32,0)) [FK]: Foreign key reference to the parent product category, establishing the hierarchical relationship between category and subcategory\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.production.productdescription ---\nDomain: Product\nDescription: Product descriptions in several languages.\nFields:\n  - productdescriptionid (integer(32,0)) [PK]: Primary key identifier for the product description record\n  - modifieddate (timestamp without time zone): Date and time when the product description was last modified or updated\n  - description (character varying(400)): The actual textual description content of a product, typically in a specific language\n  - rowguid (uuid): Globally unique identifier assigned to each row for database replication and synchronization purposes\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.purchasing.shipmethod ---\nDomain: Shipping\nDescription: Shipping company lookup table.\nFields:\n  - modifieddate (timestamp without time zone): Date and time when the shipping method record was last modified\n  - shiprate (numeric): Additional per-unit or variable shipping rate charged for this method\n  - shipbase (numeric): Base or flat rate cost for using this shipping method\n  - rowguid (uuid): Globally unique identifier assigned to each shipping method for cross-system data synchronization\n  - shipmethodid (integer(32,0)) [PK]: Primary key identifier for the shipping method record\n  - name (character varying(50)): Name of the shipping company or method (e.g., UPS, FedEx, DHL, overnight, ground)\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.humanresources.shift ---\nDomain: Human Resources\nDescription: Work shift lookup table.\nFields:\n  - endtime (time without time zone): Scheduled end time of the work shift\n  - shiftid (integer(32,0)) [PK]: Primary key and unique identifier for each work shift record\n  - name (character varying(50)): Descriptive name of the shift such as Day, Evening, or Night shift\n  - modifieddate (timestamp without time zone): Audit timestamp recording when the shift record was last updated\n  - starttime (time without time zone): Scheduled start time of the work shift\nMatch reason: Source: vector\n\n--- Table 6: adventureworks.production.culture ---\nDomain: Localization\nDescription: Lookup table containing the languages in which some AdventureWorks data is stored.\nFields:\n  - name (character varying(50)): The display name of the language or culture (e.g., English, Spanish, French)\n  - cultureid (character(6)) [PK]: The standardized culture identifier code (e.g., en-US, es-MX) used to format dates, numbers, and currency for specific regions\n  - modifieddate (timestamp without time zone): The timestamp recording when this language or culture record was last modified in the system\nMatch reason: Source: vector\n\n--- Table 7: adventureworks.person.businessentity ---\nDomain: Business Entity\nDescription: Source of the ID that connects vendors, customers, and employees with address and contact information.\nFields:\n  - modifieddate (timestamp without time zone): Date and time when the business entity record was last modified, supporting audit trails and data synchronization processes\n  - rowguid (uuid): Globally unique identifier assigned to each business entity record, used for database replication, synchronization, or as an alternative unique key\n  - businessentityid (integer(32,0)) [PK]: Primary key and unique numeric identifier for each business entity, used as the common reference to link customers, vendors, and employees to their addresses and contact details\nMatch reason: Source: vector\n\n--- Table 8: adventureworks.sales.store ---\nDomain: Store\nDescription: Customers (resellers) of Adventure Works products.\nFields:\n  - salespersonid (integer(32,0)) [FK]: Identifier of the salesperson assigned to manage and support this store account\n  - demographics (xml): XML document containing store demographic information including location type, sales territory, and business characteristics\n  - rowguid (uuid): Globally unique identifier assigned to each store record for system-wide reference\n  - name (character varying(50)): Official business name of the store or reseller entity\n  - modifieddate (timestamp without time zone): Timestamp indicating when the store record was last updated in the system\n  - businessentityid (integer(32,0)) [PK]: Foreign key reference to the core business entity table containing foundational information about this store organization\nMatch reason: Source: vector\n\n--- Table 9: adventureworks.production.illustration ---\nDomain: Product\nDescription: Bicycle assembly diagrams.\nFields:\n  - modifieddate (timestamp without time zone): Timestamp indicating when the bicycle assembly diagram was last modified or updated\n  - illustrationid (integer(32,0)) [PK]: Unique identifier for each bicycle assembly diagram illustration record\n  - diagram (xml): XML-formatted assembly diagram containing visual instructions for bicycle component assembly\nMatch reason: Source: vector\n\n--- Table 10: adventureworks.production.productcosthistory ---\nDomain: Product\nDescription: Changes in the cost of a product over time.\nFields:\n  - enddate (timestamp without time zone): The last date when this cost version was effective; after this date, a new cost superseded this record\n  - modifieddate (timestamp without time zone): The date and time when this cost record was last updated or modified in the system\n  - standardcost (numeric): The monetary value representing the standard cost of the product during this effective period\n  - startdate (timestamp without time zone) [PK]: The first date when this cost version became effective and was used for valuation purposes\n  - productid (integer(32,0)) [PK] [FK]: The unique identifier of the product for which this cost history record applies\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-19T12:07:49.037142Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "\u5e93\u5b58 \u4ed3\u5e93 \u4ea7\u54c1 \u4f4d\u7f6e",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.humanresources.department",
+      "adventureworks.production.productsubcategory",
+      "adventureworks.production.productdescription",
+      "adventureworks.purchasing.shipmethod",
+      "adventureworks.humanresources.shift",
+      "adventureworks.production.culture",
+      "adventureworks.person.businessentity",
+      "adventureworks.sales.store",
+      "adventureworks.production.illustration",
+      "adventureworks.production.productcosthistory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.humanresources.department",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "department"
+      },
+      {
+        "full_name": "adventureworks.production.productsubcategory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productsubcategory"
+      },
+      {
+        "full_name": "adventureworks.production.productdescription",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productdescription"
+      },
+      {
+        "full_name": "adventureworks.purchasing.shipmethod",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "shipmethod"
+      },
+      {
+        "full_name": "adventureworks.humanresources.shift",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "shift"
+      },
+      {
+        "full_name": "adventureworks.production.culture",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "culture"
+      },
+      {
+        "full_name": "adventureworks.person.businessentity",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentity"
+      },
+      {
+        "full_name": "adventureworks.sales.store",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "store"
+      },
+      {
+        "full_name": "adventureworks.production.illustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "illustration"
+      },
+      {
+        "full_name": "adventureworks.production.productcosthistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productcosthistory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 785.5113628320396
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "\u5e93\u5b58 \u4ed3\u5e93 \u4ea7\u54c1 \u4f4d\u7f6e",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.humanresources.department",
+      "adventureworks.production.productsubcategory",
+      "adventureworks.production.productdescription",
+      "adventureworks.purchasing.shipmethod",
+      "adventureworks.humanresources.shift",
+      "adventureworks.production.culture",
+      "adventureworks.person.businessentity",
+      "adventureworks.sales.store",
+      "adventureworks.production.illustration",
+      "adventureworks.production.productcosthistory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.humanresources.department",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "department"
+      },
+      {
+        "full_name": "adventureworks.production.productsubcategory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productsubcategory"
+      },
+      {
+        "full_name": "adventureworks.production.productdescription",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productdescription"
+      },
+      {
+        "full_name": "adventureworks.purchasing.shipmethod",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "shipmethod"
+      },
+      {
+        "full_name": "adventureworks.humanresources.shift",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "shift"
+      },
+      {
+        "full_name": "adventureworks.production.culture",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "culture"
+      },
+      {
+        "full_name": "adventureworks.person.businessentity",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentity"
+      },
+      {
+        "full_name": "adventureworks.sales.store",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "store"
+      },
+      {
+        "full_name": "adventureworks.production.illustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "illustration"
+      },
+      {
+        "full_name": "adventureworks.production.productcosthistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productcosthistory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 785.5113628320396
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_vvtv5qi9ylvt_1"
+}

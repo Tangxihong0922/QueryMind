@@ -1,0 +1,11 @@
+column_name,data_type,is_nullable,column_default
+salesorderid,integer,NO,
+salesorderdetailid,integer,NO,nextval('sales.salesorderdetail_salesorderdetailid_seq'::regclass)
+carriertrackingnumber,character varying,YES,
+orderqty,smallint,NO,
+productid,integer,NO,
+specialofferid,integer,NO,
+unitprice,numeric,NO,
+unitpricediscount,numeric,NO,0.0
+rowguid,uuid,NO,uuid_generate_v1()
+modifieddate,timestamp without time zone,NO,now()

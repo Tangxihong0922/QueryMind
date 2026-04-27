@@ -1,0 +1,15 @@
+name,jobtitle,groupname,grouping_level,employeecount
+Finance,Accountant,Executive General and Administration,Detail Row,2
+Production Control,Scheduling Assistant,Manufacturing,Detail Row,4
+Finance,Accounts Payable Specialist,Executive General and Administration,Detail Row,2
+Finance,Accounts Receivable Specialist,Executive General and Administration,Detail Row,3
+Finance,Accounts Manager,Executive General and Administration,Detail Row,1
+Production Control,Production Control Manager,Manufacturing,Detail Row,1
+Finance,Finance Manager,Executive General and Administration,Detail Row,1
+Production Control,Master Scheduler,Manufacturing,Detail Row,1
+Finance,Assistant to the Chief Financial Officer,Executive General and Administration,Detail Row,1
+Finance,,Executive General and Administration,Subtotal by Department,10
+Production Control,,Manufacturing,Subtotal by Department,6
+,,Executive General and Administration,Subtotal by Group,10
+,,Manufacturing,Subtotal by Group,6
+,,,Grand Total,16

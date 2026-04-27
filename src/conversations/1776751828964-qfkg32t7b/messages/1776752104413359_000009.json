@@ -1,0 +1,93 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 4 related table(s):\n\n--- Table 1: adventureworks.humanresources.employee ---\nDomain: Human Resources\nDescription: Employee information such as salary, department, and title.\nFields:\n  - organizationnode (character varying): Hierarchical position identifier within the organization's structure for reporting relationships and org chart navigation\n  - modifieddate (timestamp without time zone): Timestamp of the most recent modification to the employee record\n  - rowguid (uuid): Globally unique identifier assigned to the row for replication and data synchronization purposes\n  - currentflag (boolean): Boolean indicating whether the employee is currently active in the organization\n  - sickleavehours (smallint(16,0)): Accumulated sick leave hours available for the employee to use\n  - vacationhours (smallint(16,0)): Accumulated vacation hours available for the employee to use\n  - salariedflag (boolean): Boolean indicating whether the employee is paid a fixed salary versus hourly wages\n  - hiredate (date): Date when the employee was officially hired and began employment\n  - gender (character(1)): Employee's gender code for demographic reporting and legal compliance\n  - maritalstatus (character(1)): Employee's marital status (M for married, S for single) for tax withholding and benefits purposes\n  - birthdate (date): Employee's date of birth used for age verification and benefits eligibility\n  - jobtitle (character varying(50)): Official job title or position held by the employee within the organization\n  - loginid (character varying(256)): Employee's network login credential for system authentication\n  - nationalidnumber (character varying(15)): Government-issued identification number (such as Social Security Number) used for tax and legal compliance\n  - businessentityid (integer(32,0)) [PK]: Primary key identifier for the employee entity in the system\nMatch reason: Source: graph\n\n--- Table 2: adventureworks.humanresources.employeedepartmenthistory ---\nDomain: Human Resources\nDescription: Employee department transfers.\nFields:\n  - modifieddate (timestamp without time zone): Date and time when this assignment record was last modified\n  - enddate (date): Date when the employee ended their assignment in this department (NULL if still active)\n  - startdate (date) [PK]: Date when the employee began their assignment in this department\n  - shiftid (smallint(16,0)) [PK] [FK]: Identifier of the work shift during the employee's assignment to this department\n  - departmentid (smallint(16,0)) [PK] [FK]: Identifier of the department to which the employee was assigned\n  - businessentityid (integer(32,0)) [PK] [FK]: Unique identifier of the employee who was assigned to the department\nMatch reason: Source: graph\n\n--- Table 3: adventureworks.humanresources.jobcandidate ---\nDomain: Human Resources\nDescription: R\u00c3\u00a9sum\u00c3\u00a9s submitted to Human Resources by job applicants.\nFields:\n  - jobcandidateid (integer(32,0)) [PK]: Primary key identifier uniquely identifying each job candidate in the HR system\n  - modifieddate (timestamp without time zone): Timestamp recording when the candidate record or resume was last modified or updated\n  - businessentityid (integer(32,0)) [FK]: Foreign key reference to the business entity (person) who submitted the job application and resume\n  - resume (xml): XML document containing the candidate's submitted resume/CV including work history, education, skills, and qualifications\nMatch reason: Source: graph\n\n--- Table 4: adventureworks.humanresources.shift ---\nDomain: Human Resources\nDescription: Work shift lookup table.\nFields:\n  - endtime (time without time zone): Scheduled end time of the work shift\n  - shiftid (integer(32,0)) [PK]: Primary key and unique identifier for each work shift record\n  - name (character varying(50)): Descriptive name of the shift such as Day, Evening, or Night shift\n  - modifieddate (timestamp without time zone): Audit timestamp recording when the shift record was last updated\n  - starttime (time without time zone): Scheduled start time of the work shift\nMatch reason: Source: graph\n",
+  "timestamp": "2026-04-21T06:11:31.717298Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "employee department",
+    "total_results": 4,
+    "selected_tables": [
+      "adventureworks.humanresources.employee",
+      "adventureworks.humanresources.employeedepartmenthistory",
+      "adventureworks.humanresources.jobcandidate",
+      "adventureworks.humanresources.shift"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.humanresources.employee",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employee"
+      },
+      {
+        "full_name": "adventureworks.humanresources.employeedepartmenthistory",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employeedepartmenthistory"
+      },
+      {
+        "full_name": "adventureworks.humanresources.jobcandidate",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "jobcandidate"
+      },
+      {
+        "full_name": "adventureworks.humanresources.shift",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "shift"
+      }
+    ],
+    "domain_filter": "Human Resources",
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 305.0994761288166
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "employee department",
+    "total_results": 4,
+    "selected_tables": [
+      "adventureworks.humanresources.employee",
+      "adventureworks.humanresources.employeedepartmenthistory",
+      "adventureworks.humanresources.jobcandidate",
+      "adventureworks.humanresources.shift"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.humanresources.employee",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employee"
+      },
+      {
+        "full_name": "adventureworks.humanresources.employeedepartmenthistory",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employeedepartmenthistory"
+      },
+      {
+        "full_name": "adventureworks.humanresources.jobcandidate",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "jobcandidate"
+      },
+      {
+        "full_name": "adventureworks.humanresources.shift",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "shift"
+      }
+    ],
+    "domain_filter": "Human Resources",
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 305.0994761288166
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_e87ae636402440bb8c2e9323"
+}

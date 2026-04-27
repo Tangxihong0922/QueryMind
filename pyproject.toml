@@ -1,0 +1,86 @@
+[project]
+name = "querymind"
+version = "0.1.0"
+description = "LLM-powered SQL query agent with RAG capabilities"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "QueryMind Team"}
+]
+keywords = ["llm", "sql", "rag", "agent", "postgresql", "neo4j"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # === Core ===
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "pydantic>=2.0",
+    "python-dotenv>=1.0.0",
+
+    # === LLM Services ===
+    "anthropic>=0.25.0",
+    "openai>=1.0.0",
+
+    # === Database ===
+    "psycopg2-binary>=2.9.0",
+    "pgvector>=0.2.0",
+    "pandas>=2.0",
+
+    # === Graph Database ===
+    "neo4j>=5.0.0",
+
+    # === Memory (Mem0) ===
+    "mem0ai>=0.1.0",
+
+    # === Visualization ===
+    "plotly>=5.0",
+
+    # === Monitoring ===
+    "prometheus-client>=0.17.0",
+    "tqdm>=4.66.0",
+
+    # === Configuration ===
+    "pyyaml>=6.0",
+    "sqlglot>=26.0.0",
+
+    # === LOAD .ENV ===
+    "python-dotenv>=1.0.0,<2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["QueryMind"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false

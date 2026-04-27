@@ -1,0 +1,88 @@
+table_name,column_name,data_type
+address,addressid,integer
+address,addressline1,character varying
+address,addressline2,character varying
+address,city,character varying
+address,stateprovinceid,integer
+address,postalcode,character varying
+address,spatiallocation,bytea
+address,rowguid,uuid
+address,modifieddate,timestamp without time zone
+addresstype,addresstypeid,integer
+addresstype,name,character varying
+addresstype,rowguid,uuid
+addresstype,modifieddate,timestamp without time zone
+businessentity,businessentityid,integer
+businessentity,rowguid,uuid
+businessentity,modifieddate,timestamp without time zone
+businessentityaddress,businessentityid,integer
+businessentityaddress,addressid,integer
+businessentityaddress,addresstypeid,integer
+businessentityaddress,rowguid,uuid
+businessentityaddress,modifieddate,timestamp without time zone
+businessentitycontact,businessentityid,integer
+businessentitycontact,personid,integer
+businessentitycontact,contacttypeid,integer
+businessentitycontact,rowguid,uuid
+businessentitycontact,modifieddate,timestamp without time zone
+contacttype,contacttypeid,integer
+contacttype,name,character varying
+contacttype,modifieddate,timestamp without time zone
+countryregion,countryregioncode,character varying
+countryregion,name,character varying
+countryregion,modifieddate,timestamp without time zone
+emailaddress,businessentityid,integer
+emailaddress,emailaddressid,integer
+emailaddress,emailaddress,character varying
+emailaddress,rowguid,uuid
+emailaddress,modifieddate,timestamp without time zone
+password,businessentityid,integer
+password,passwordhash,character varying
+password,passwordsalt,character varying
+password,rowguid,uuid
+password,modifieddate,timestamp without time zone
+person,businessentityid,integer
+person,persontype,character
+person,namestyle,boolean
+person,title,character varying
+person,firstname,character varying
+person,middlename,character varying
+person,lastname,character varying
+person,suffix,character varying
+person,emailpromotion,integer
+person,additionalcontactinfo,xml
+person,demographics,xml
+person,rowguid,uuid
+person,modifieddate,timestamp without time zone
+personphone,businessentityid,integer
+personphone,phonenumber,character varying
+personphone,phonenumbertypeid,integer
+personphone,modifieddate,timestamp without time zone
+phonenumbertype,phonenumbertypeid,integer
+phonenumbertype,name,character varying
+phonenumbertype,modifieddate,timestamp without time zone
+stateprovince,stateprovinceid,integer
+stateprovince,stateprovincecode,character
+stateprovince,countryregioncode,character varying
+stateprovince,isonlystateprovinceflag,boolean
+stateprovince,name,character varying
+stateprovince,territoryid,integer
+stateprovince,rowguid,uuid
+stateprovince,modifieddate,timestamp without time zone
+vadditionalcontactinfo,businessentityid,integer
+vadditionalcontactinfo,firstname,character varying
+vadditionalcontactinfo,middlename,character varying
+vadditionalcontactinfo,lastname,character varying
+vadditionalcontactinfo,telephonenumber,xml
+vadditionalcontactinfo,telephonespecialinstructions,text
+vadditionalcontactinfo,street,xml
+vadditionalcontactinfo,city,xml
+vadditionalcontactinfo,stateprovince,xml
+vadditionalcontactinfo,postalcode,xml
+vadditionalcontactinfo,countryregion,xml
+vadditionalcontactinfo,homeaddressspecialinstructions,xml
+vadditionalcontactinfo,emailaddress,xml
+vadditionalcontactinfo,emailspecialinstructions,text
+vadditionalcontactinfo,emailtelephonenumber,xml
+vadditionalcontactinfo,rowguid,uuid
+vadditionalcontactinfo,modifieddate,timestamp without time zone

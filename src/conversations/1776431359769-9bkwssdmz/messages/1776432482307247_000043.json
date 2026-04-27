@@ -1,0 +1,8 @@
+{
+  "role": "user",
+  "content": "Write a query to return the department, last name, rate, hire date, and the last hire date within each department partitioned by rate. The query should retrieve data for specific departments ('Information Services' and 'Document Control').",
+  "timestamp": "2026-04-17T13:27:31.222615Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": null
+}

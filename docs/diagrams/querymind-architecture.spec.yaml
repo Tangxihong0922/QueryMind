@@ -1,0 +1,906 @@
+meta:
+  theme: tech-blue
+  layout: vertical
+  source: edited
+  title: QueryMind Architecture
+modules: []
+nodes:
+  - id: n2
+    label: QUERYMIND ARCHITECTURE FLOW
+    type: service
+    position:
+      x: 880
+      'y': 40
+    size: xl
+    style:
+      fillColor: '#0F172A'
+      strokeColor: '#0F172A'
+      fontColor: '#FFFFFF'
+      strokeWidth: 1.2
+      fontSize: 18
+  - id: n3
+    label: n3
+    type: service
+    position:
+      x: 880
+      'y': 152
+    size: xl
+    style:
+      fillColor: '#F8FAFF'
+      strokeColor: '#BFDBFE'
+      strokeWidth: 1.2
+  - id: n4
+    label: n4
+    type: service
+    position:
+      x: 880
+      'y': 312
+    size: xl
+    style:
+      fillColor: '#F7FDF9'
+      strokeColor: '#A7F3D0'
+      strokeWidth: 1.2
+  - id: n5
+    label: n5
+    type: service
+    position:
+      x: 880
+      'y': 504
+    size: xl
+    style:
+      fillColor: '#FFFBF0'
+      strokeColor: '#FCD34D'
+      strokeWidth: 1.2
+  - id: n6
+    label: n6
+    type: service
+    position:
+      x: 880
+      'y': 704
+    size: xl
+    style:
+      fillColor: '#FBF8FF'
+      strokeColor: '#DDD6FE'
+      strokeWidth: 1.2
+  - id: n7
+    label: n7
+    type: service
+    position:
+      x: 880
+      'y': 896
+    size: xl
+    style:
+      fillColor: '#FFF7FA'
+      strokeColor: '#FBCFE8'
+      strokeWidth: 1.2
+  - id: n8
+    label: n8
+    type: service
+    position:
+      x: 880
+      'y': 1096
+    size: xl
+    style:
+      fillColor: '#F4FBFD'
+      strokeColor: '#BAE6FD'
+      strokeWidth: 1.2
+  - id: n9
+    label: REQUEST BOUNDARY
+    type: service
+    position:
+      x: 168
+      'y': 112
+    size: xl
+    style:
+      fillColor: '#2563EB'
+      strokeColor: '#2563EB'
+      fontColor: '#FFFFFF'
+      strokeWidth: 1.2
+      fontSize: 13
+  - id: n10
+    label: AGENT CONTROL PLANE
+    type: service
+    position:
+      x: 184
+      'y': 256
+    size: xl
+    style:
+      fillColor: '#047857'
+      strokeColor: '#047857'
+      fontColor: '#FFFFFF'
+      strokeWidth: 1.2
+      fontSize: 13
+  - id: n11
+    label: CONTEXT ASSEMBLY
+    type: service
+    position:
+      x: 168
+      'y': 448
+    size: xl
+    style:
+      fillColor: '#B45309'
+      strokeColor: '#B45309'
+      fontColor: '#FFFFFF'
+      strokeWidth: 1.2
+      fontSize: 13
+  - id: n12
+    label: TOOL & POLICY PLANE
+    type: service
+    position:
+      x: 184
+      'y': 632
+    size: xl
+    style:
+      fillColor: '#6D28D9'
+      strokeColor: '#6D28D9'
+      fontColor: '#FFFFFF'
+      strokeWidth: 1.2
+      fontSize: 13
+  - id: n13
+    label: MEMORY & SCHEMA PLANE
+    type: service
+    position:
+      x: 184
+      'y': 832
+    size: xl
+    style:
+      fillColor: '#BE185D'
+      strokeColor: '#BE185D'
+      fontColor: '#FFFFFF'
+      strokeWidth: 1.2
+      fontSize: 13
+  - id: n14
+    label: RUNTIME INTEGRATIONS
+    type: service
+    position:
+      x: 184
+      'y': 1024
+    size: xl
+    style:
+      fillColor: '#0E7490'
+      strokeColor: '#0E7490'
+      fontColor: '#FFFFFF'
+      strokeWidth: 1.2
+      fontSize: 13
+  - id: n15
+    label: RequestContext
+    type: service
+    position:
+      x: 176
+      'y': 168
+    size: large
+    style:
+      fillColor: '#DBEAFE'
+      strokeColor: '#2563EB'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n16
+    label: UserResolver
+    type: user
+    position:
+      x: 432
+      'y': 168
+    size: large
+    style:
+      fillColor: '#DBEAFE'
+      strokeColor: '#2563EB'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n17
+    label: User
+    type: user
+    position:
+      x: 680
+      'y': 168
+    size: medium
+    style:
+      fillColor: '#E0F2FE'
+      strokeColor: '#0284C7'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n18
+    label: WorkflowHandler
+    type: service
+    position:
+      x: 176
+      'y': 312
+    size: large
+    style:
+      fillColor: '#D1FAE5'
+      strokeColor: '#059669'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n19
+    label: ConversationStore
+    type: database
+    position:
+      x: 424
+      'y': 312
+    size: large
+    style:
+      fillColor: '#D1FAE5'
+      strokeColor: '#059669'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n20
+    label: Middleware
+    type: service
+    position:
+      x: 664
+      'y': 312
+    size: medium
+    style:
+      fillColor: '#D1FAE5'
+      strokeColor: '#059669'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n21
+    label: Hooks
+    type: service
+    position:
+      x: 152
+      'y': 392
+    size: medium
+    style:
+      fillColor: '#F0FDF4'
+      strokeColor: '#059669'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n22
+    label: ErrorRecovery
+    type: loss
+    position:
+      x: 320
+      'y': 392
+    size: medium
+    style:
+      fillColor: '#F0FDF4'
+      strokeColor: '#059669'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n23
+    label: Observability
+    type: service
+    position:
+      x: 520
+      'y': 392
+    size: medium
+    style:
+      fillColor: '#F0FDF4'
+      strokeColor: '#059669'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n24
+    label: Audit
+    type: service
+    position:
+      x: 704
+      'y': 392
+    size: medium
+    style:
+      fillColor: '#F0FDF4'
+      strokeColor: '#059669'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n25
+    label: ToolContextEnricher
+    type: service
+    position:
+      x: 184
+      'y': 504
+    size: large
+    style:
+      fillColor: '#FEF3C7'
+      strokeColor: '#D97706'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n26
+    label: Tool schemas
+    type: service
+    position:
+      x: 432
+      'y': 504
+    size: medium
+    style:
+      fillColor: '#FFFBEB'
+      strokeColor: '#D97706'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n27
+    label: SystemPromptBuilder
+    type: service
+    position:
+      x: 712
+      'y': 504
+    size: large
+    style:
+      fillColor: '#FEF3C7'
+      strokeColor: '#D97706'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n28
+    label: LlmContextEnhancer
+    type: service
+    position:
+      x: 184
+      'y': 576
+    size: large
+    style:
+      fillColor: '#FEF3C7'
+      strokeColor: '#D97706'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n29
+    label: ConversationFilter
+    type: service
+    position:
+      x: 432
+      'y': 576
+    size: large
+    style:
+      fillColor: '#FFFBEB'
+      strokeColor: '#D97706'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n30
+    label: ToolRegistry / RLSToolRegistry
+    type: service
+    position:
+      x: 192
+      'y': 696
+    size: xl
+    style:
+      fillColor: '#EDE9FE'
+      strokeColor: '#7C3AED'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n31
+    label: Validation
+    type: decision
+    position:
+      x: 424
+      'y': 696
+    size: large
+    style:
+      fillColor: '#FEF3C7'
+      strokeColor: '#D97706'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n32
+    label: Policy transform
+    type: service
+    position:
+      x: 648
+      'y': 696
+    size: large
+    style:
+      fillColor: '#EDE9FE'
+      strokeColor: '#7C3AED'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n33
+    label: Execution
+    type: service
+    position:
+      x: 872
+      'y': 696
+    size: medium
+    style:
+      fillColor: '#EDE9FE'
+      strokeColor: '#7C3AED'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n34
+    label: Access checks
+    type: service
+    position:
+      x: 352
+      'y': 776
+    size: medium
+    style:
+      fillColor: '#F5F3FF'
+      strokeColor: '#7C3AED'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n35
+    label: RLS rules
+    type: service
+    position:
+      x: 528
+      'y': 776
+    size: medium
+    style:
+      fillColor: '#F5F3FF'
+      strokeColor: '#7C3AED'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n36
+    label: Audit logging
+    type: document
+    position:
+      x: 728
+      'y': 776
+    size: medium
+    style:
+      fillColor: '#F5F3FF'
+      strokeColor: '#7C3AED'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n37
+    label: AgentMemory (Mem0)
+    type: database
+    position:
+      x: 176
+      'y': 904
+    size: large
+    style:
+      fillColor: '#FCE7F3'
+      strokeColor: '#DB2777'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n38
+    label: SchemaMemory (Neo4j + Mem0)
+    type: database
+    position:
+      x: 448
+      'y': 904
+    size: xl
+    style:
+      fillColor: '#FCE7F3'
+      strokeColor: '#DB2777'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n39
+    label: SchemaManagementService
+    type: service
+    position:
+      x: 744
+      'y': 896
+    size: large
+    style:
+      fillColor: '#FCE7F3'
+      strokeColor: '#DB2777'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n40
+    label: retrieval
+    type: service
+    position:
+      x: 216
+      'y': 968
+    size: medium
+    style:
+      fillColor: '#FFF1F7'
+      strokeColor: '#DB2777'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n41
+    label: expansion
+    type: service
+    position:
+      x: 408
+      'y': 968
+    size: medium
+    style:
+      fillColor: '#FFF1F7'
+      strokeColor: '#DB2777'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n42
+    label: curation
+    type: service
+    position:
+      x: 592
+      'y': 968
+    size: medium
+    style:
+      fillColor: '#FFF1F7'
+      strokeColor: '#DB2777'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n43
+    label: Runtime bridge
+    type: service
+    position:
+      x: 168
+      'y': 1096
+    size: medium
+    style:
+      fillColor: '#E0F2FE'
+      strokeColor: '#0891B2'
+      fontColor: '#0F172A'
+      strokeWidth: 1.5
+  - id: n44
+    label: LLM service
+    type: service
+    position:
+      x: 392
+      'y': 1072
+    size: medium
+    style:
+      fillColor: '#ECFEFF'
+      strokeColor: '#0891B2'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n45
+    label: SQL runners
+    type: database
+    position:
+      x: 584
+      'y': 1072
+    size: medium
+    style:
+      fillColor: '#ECFEFF'
+      strokeColor: '#0891B2'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n46
+    label: FileSystem
+    type: document
+    position:
+      x: 784
+      'y': 1072
+    size: medium
+    style:
+      fillColor: '#ECFEFF'
+      strokeColor: '#0891B2'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n47
+    label: ConversationStore
+    type: database
+    position:
+      x: 992
+      'y': 1072
+    size: large
+    style:
+      fillColor: '#ECFEFF'
+      strokeColor: '#0891B2'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n48
+    label: Neo4j
+    type: database
+    position:
+      x: 440
+      'y': 1152
+    size: medium
+    style:
+      fillColor: '#ECFEFF'
+      strokeColor: '#0891B2'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n49
+    label: Mem0
+    type: database
+    position:
+      x: 632
+      'y': 1152
+    size: medium
+    style:
+      fillColor: '#ECFEFF'
+      strokeColor: '#0891B2'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+  - id: n50
+    label: Audit logger
+    type: document
+    position:
+      x: 840
+      'y': 1152
+    size: medium
+    style:
+      fillColor: '#ECFEFF'
+      strokeColor: '#0891B2'
+      fontColor: '#0F172A'
+      strokeWidth: 1.2
+edges:
+  - from: n15
+    to: n16
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n16
+    to: n17
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n17
+    to: n18
+    type: primary
+    label: request
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n18
+    to: n19
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n19
+    to: n20
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n18
+    to: n21
+    type: data
+    style:
+      strokeColor: '#64748B'
+      strokeWidth: 1.5
+      dashed: true
+      dashPattern: 6 4
+      endArrow: block
+      endFill: true
+  - from: n18
+    to: n22
+    type: data
+    style:
+      strokeColor: '#64748B'
+      strokeWidth: 1.5
+      dashed: true
+      dashPattern: 6 4
+      endArrow: block
+      endFill: true
+  - from: n19
+    to: n23
+    type: data
+    style:
+      strokeColor: '#64748B'
+      strokeWidth: 1.5
+      dashed: true
+      dashPattern: 6 4
+      endArrow: block
+      endFill: true
+  - from: n20
+    to: n24
+    type: data
+    style:
+      strokeColor: '#64748B'
+      strokeWidth: 1.5
+      dashed: true
+      dashPattern: 6 4
+      endArrow: block
+      endFill: true
+  - from: n20
+    to: n25
+    type: primary
+    label: context
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n20
+    to: n28
+    type: data
+    style:
+      strokeColor: '#64748B'
+      strokeWidth: 1.5
+      dashed: true
+      dashPattern: 6 4
+      endArrow: block
+      endFill: true
+  - from: n25
+    to: n26
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n26
+    to: n27
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n28
+    to: n29
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n29
+    to: n27
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n27
+    to: n30
+    type: primary
+    label: policy
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n30
+    to: n31
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n34
+    to: n31
+    type: data
+    style:
+      strokeColor: '#64748B'
+      strokeWidth: 1.5
+      dashed: true
+      dashPattern: 6 4
+      endArrow: block
+      endFill: true
+  - from: n31
+    to: n32
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n35
+    to: n32
+    type: data
+    style:
+      strokeColor: '#64748B'
+      strokeWidth: 1.5
+      dashed: true
+      dashPattern: 6 4
+      endArrow: block
+      endFill: true
+  - from: n32
+    to: n33
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n36
+    to: n33
+    type: data
+    style:
+      strokeColor: '#64748B'
+      strokeWidth: 1.5
+      dashed: true
+      dashPattern: 6 4
+      endArrow: block
+      endFill: true
+  - from: n33
+    to: n37
+    type: primary
+    label: memory
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n37
+    to: n38
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n38
+    to: n39
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n39
+    to: n40
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n40
+    to: n41
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n41
+    to: n42
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n42
+    to: n43
+    type: primary
+    label: runtime
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n43
+    to: n44
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n43
+    to: n45
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n43
+    to: n46
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n43
+    to: n47
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n43
+    to: n48
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n43
+    to: n49
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true
+  - from: n43
+    to: n50
+    type: primary
+    style:
+      strokeColor: '#1E293B'
+      strokeWidth: 2
+      endArrow: block
+      endFill: true

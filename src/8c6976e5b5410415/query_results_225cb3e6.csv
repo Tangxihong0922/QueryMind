@@ -1,0 +1,4 @@
+column_name,data_type,is_nullable
+businessentityid,integer,NO
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

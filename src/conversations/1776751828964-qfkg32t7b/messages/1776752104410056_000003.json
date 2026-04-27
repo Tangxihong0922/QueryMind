@@ -1,0 +1,107 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 5 related table(s):\n\n--- Table 1: adventureworks.production.productsubcategory ---\nDomain: Product\nDescription: Product subcategories. See ProductCategory table.\nFields:\n  - productsubcategoryid (integer(32,0)) [PK]: Primary key identifier that uniquely represents each product subcategory within the system\n  - modifieddate (timestamp without time zone): Timestamp indicating when the subcategory record was last modified for audit and synchronization purposes\n  - name (character varying(50)): The business name of the product subcategory (e.g., Mountain Bikes, Road Frames, Touring Bicycles)\n  - rowguid (uuid): Globally unique identifier used for database replication and data synchronization across systems\n  - productcategoryid (integer(32,0)) [FK]: Foreign key reference to the parent product category, establishing the hierarchical relationship between category and subcategory\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.purchasing.purchaseorderheader ---\nDomain: Procurement\nDescription: General purchase order information. See PurchaseOrderDetail.\nFields:\n  - orderdate (timestamp without time zone): Date and time when the purchase order was originally created and submitted to the vendor\n  - status (smallint(16,0)): Numeric code representing the current lifecycle stage of the purchase order (e.g., pending, approved, received, closed)\n  - vendorid (integer(32,0)) [FK]: Foreign key reference to the vendor/supplier from whom goods or services are being procured\n  - modifieddate (timestamp without time zone): Timestamp of the most recent update to any field in this purchase order record\n  - subtotal (numeric): Total monetary value of all line items before taxes, shipping, and other charges\n  - employeeid (integer(32,0)): Foreign key to the employee who initiated or approved the purchase order\n  - taxamt (numeric): Total tax amount applied to the purchase order based on applicable tax rates and jurisdictions\n  - shipmethodid (integer(32,0)) [FK]: Identifier for the shipping carrier and method used (e.g., ground, express, freight)\n  - revisionnumber (smallint(16,0)): Version indicator tracking the number of times this purchase order has been modified, enabling change history and audit trails\n  - freight (numeric): Shipping and handling costs associated with transporting goods from vendor to organization\n  - purchaseorderid (integer(32,0)) [PK]: Unique identifier for each purchase order, serving as the primary key for referencing and tracking individual orders\n  - shipdate (timestamp without time zone): Date and time when the ordered goods were shipped or are scheduled to ship from the vendor\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.production.productcosthistory ---\nDomain: Product\nDescription: Changes in the cost of a product over time.\nFields:\n  - enddate (timestamp without time zone): The last date when this cost version was effective; after this date, a new cost superseded this record\n  - modifieddate (timestamp without time zone): The date and time when this cost record was last updated or modified in the system\n  - standardcost (numeric): The monetary value representing the standard cost of the product during this effective period\n  - startdate (timestamp without time zone) [PK]: The first date when this cost version became effective and was used for valuation purposes\n  - productid (integer(32,0)) [PK] [FK]: The unique identifier of the product for which this cost history record applies\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.production.product ---\nDomain: Product\nDescription: Products sold or used in the manfacturing of sold products.\nFields:\n  - productid (integer(32,0)) [PK]: Unique identifier for each product in the catalog, serving as the primary key for product-related transactions and relationships\n  - sellstartdate (timestamp without time zone): Date when the product became available for sale, marking the beginning of the product's active sales lifecycle\n  - weight (numeric(8,2)): Physical weight of the product used for shipping calculations, inventory tracking, and freight cost estimation\n  - sellenddate (timestamp without time zone): Date when the product was removed from active sales, indicating the end of the product's market availability\n  - weightunitmeasurecode (character(3)) [FK]: Unit of measurement for the product weight, such as LB (pounds) or KG (kilograms), ensuring consistent weight interpretation\n  - standardcost (numeric): Baseline cost used for inventory valuation, margin calculation, and standard costing accounting purposes\n  - style (character(2)): Product style classification code that categorizes products by style variant for segmentation and reporting\n  - makeflag (boolean): Boolean indicator showing whether the product is manufactured in-house (true) or purchased from external vendors (false)\n  - modifieddate (timestamp without time zone): Date and time when the product record was last updated, used for change tracking and data synchronization\n  - finishedgoodsflag (boolean): Boolean flag indicating if the product is a finished good ready for customer sale versus a raw material or component\n  - productsubcategoryid (integer(32,0)) [FK]: Foreign key linking to the product subcategory classification, enabling hierarchical product categorization\n  - productmodelid (integer(32,0)): Foreign key to the product model specification, linking to detailed model and engineering information\n  - productline (character(2)): Product line code classifying products into product families such as R (Road), M (Mountain), or T (Touring) for marketing and reporting\n  - safetystocklevel (smallint(16,0)): Minimum inventory buffer quantity to prevent stockouts during lead times, protecting against demand variability\n  - size (character varying(5)): Product size attribute for items like clothing, footwear, or equipment where size is relevant to customer selection\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.production.transactionhistory ---\nDomain: Inventory\nDescription: Record of each purchase order, sales order, or work order transaction year to date.\nFields:\n  - transactiontype (character(1)): Single-character code indicating the type of transaction (e.g., P for Purchase, S for Sales, W for Work Order)\n  - modifieddate (timestamp without time zone): Timestamp when the transaction record was last updated or modified in the system\n  - quantity (integer(32,0)): Number of units involved in the transaction for the associated product\n  - productid (integer(32,0)) [FK]: Unique identifier referencing the product being transacted in this record\n  - transactionid (integer(32,0)) [PK]: Primary key and unique identifier for each individual transaction record\n  - referenceorderid (integer(32,0)): Foreign key linking to the parent order (purchase, sales, or work order) that initiated this transaction\n  - transactiondate (timestamp without time zone): Date and time when the actual transaction occurred in the business process\n  - actualcost (numeric): Real monetary cost incurred for the transaction, used for financial reporting and cost analysis\n  - referenceorderlineid (integer(32,0)): Foreign key referencing the specific line item within the parent order, allowing granular transaction tracking\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-21T06:10:49.889382Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "employee salary rate department Information Services Document Control",
+    "total_results": 5,
+    "selected_tables": [
+      "adventureworks.production.productsubcategory",
+      "adventureworks.purchasing.purchaseorderheader",
+      "adventureworks.production.productcosthistory",
+      "adventureworks.production.product",
+      "adventureworks.production.transactionhistory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.production.productsubcategory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productsubcategory"
+      },
+      {
+        "full_name": "adventureworks.purchasing.purchaseorderheader",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "purchaseorderheader"
+      },
+      {
+        "full_name": "adventureworks.production.productcosthistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productcosthistory"
+      },
+      {
+        "full_name": "adventureworks.production.product",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "product"
+      },
+      {
+        "full_name": "adventureworks.production.transactionhistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "transactionhistory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 713.5039181448519
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "employee salary rate department Information Services Document Control",
+    "total_results": 5,
+    "selected_tables": [
+      "adventureworks.production.productsubcategory",
+      "adventureworks.purchasing.purchaseorderheader",
+      "adventureworks.production.productcosthistory",
+      "adventureworks.production.product",
+      "adventureworks.production.transactionhistory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.production.productsubcategory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productsubcategory"
+      },
+      {
+        "full_name": "adventureworks.purchasing.purchaseorderheader",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "purchaseorderheader"
+      },
+      {
+        "full_name": "adventureworks.production.productcosthistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productcosthistory"
+      },
+      {
+        "full_name": "adventureworks.production.product",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "product"
+      },
+      {
+        "full_name": "adventureworks.production.transactionhistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "transactionhistory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 713.5039181448519
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_cc976f54d5eb4ed2a2b930ed"
+}

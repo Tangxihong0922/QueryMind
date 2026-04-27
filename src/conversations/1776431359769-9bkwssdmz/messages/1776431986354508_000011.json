@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T13:19:36.931204Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_ab0rl0tru1k9_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "product",
+        "search_mode": "hybrid",
+        "limit": 20
+      }
+    }
+  ],
+  "tool_call_id": null
+}

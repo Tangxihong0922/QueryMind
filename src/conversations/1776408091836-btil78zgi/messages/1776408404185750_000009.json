@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T06:46:14.534748Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_bd6l71bitkrw_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "\nSELECT \n    EXTRACT(YEAR FROM QuotaDate) AS QuotaYear,\n    EXTRACT(QUARTER FROM QuotaDate) AS Quarter,\n    SalesQuota,\n    VAR_POP(SalesQuota) OVER (PARTITION BY EXTRACT(YEAR FROM QuotaDate)) AS PopulationVariance\nFROM Sales.SalesPersonQuotaHistory\nWHERE BusinessEntityID = 277 \n  AND EXTRACT(YEAR FROM QuotaDate) = 2012\nORDER BY Quarter;\n"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

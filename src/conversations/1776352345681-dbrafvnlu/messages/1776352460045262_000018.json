@@ -1,0 +1,8 @@
+{
+  "role": "tool",
+  "content": "relation \"customers\" does not exist\nLINE 1: SELECT * FROM customers LIMIT 5\n                      ^\n",
+  "timestamp": "2026-04-16T15:14:17.526474Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": "call_function_azjbak29h6ui_1"
+}

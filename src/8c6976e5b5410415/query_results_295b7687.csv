@@ -1,0 +1,15 @@
+table_schema,table_name,table_type
+person,address,BASE TABLE
+person,addresstype,BASE TABLE
+person,businessentity,BASE TABLE
+person,businessentityaddress,BASE TABLE
+person,businessentitycontact,BASE TABLE
+person,emailaddress,BASE TABLE
+purchasing,productvendor,BASE TABLE
+purchasing,vendor,BASE TABLE
+purchasing,vvendorwithaddresses,VIEW
+purchasing,vvendorwithcontacts,VIEW
+sales,store,BASE TABLE
+sales,vstorewithaddresses,VIEW
+sales,vstorewithcontacts,VIEW
+sales,vstorewithdemographics,VIEW

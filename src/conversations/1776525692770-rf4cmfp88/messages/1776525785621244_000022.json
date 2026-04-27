@@ -1,0 +1,167 @@
+{
+  "role": "tool",
+  "content": "column_name,data_type\nbusinessentityid,integer\nfirstname,character varying\nmiddlename,character varying\nlastname,character varying\ntelephonenumber,xml\ntelephonespecialinstructions,text\nstreet,xml\ncity,xml\nstateprovince,xml\npostalcode,xml\ncountryregion,xml\nhomeaddressspecialinstructions,xml\nemailaddress,xml\nemailspecialinstructions,text\nemailtelephonenumber,xml\nrowguid,uuid\nmodifieddate,timestamp without time zone\n\n\nResults saved to file: query_results_7dabf240.csv\n\n**IMPORTANT: FOR VISUALIZE_DATA USE FILENAME: query_results_7dabf240.csv**",
+  "timestamp": "2026-04-18T15:22:27.235725Z",
+  "metadata": {
+    "row_count": 17,
+    "columns": [
+      "column_name",
+      "data_type"
+    ],
+    "query_type": "SELECT",
+    "results": [
+      {
+        "column_name": "businessentityid",
+        "data_type": "integer"
+      },
+      {
+        "column_name": "firstname",
+        "data_type": "character varying"
+      },
+      {
+        "column_name": "middlename",
+        "data_type": "character varying"
+      },
+      {
+        "column_name": "lastname",
+        "data_type": "character varying"
+      },
+      {
+        "column_name": "telephonenumber",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "telephonespecialinstructions",
+        "data_type": "text"
+      },
+      {
+        "column_name": "street",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "city",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "stateprovince",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "postalcode",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "countryregion",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "homeaddressspecialinstructions",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "emailaddress",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "emailspecialinstructions",
+        "data_type": "text"
+      },
+      {
+        "column_name": "emailtelephonenumber",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "rowguid",
+        "data_type": "uuid"
+      },
+      {
+        "column_name": "modifieddate",
+        "data_type": "timestamp without time zone"
+      }
+    ],
+    "output_file": "query_results_7dabf240.csv",
+    "execution_time_ms": 23.732288274914026
+  },
+  "tool_result": {
+    "row_count": 17,
+    "columns": [
+      "column_name",
+      "data_type"
+    ],
+    "query_type": "SELECT",
+    "results": [
+      {
+        "column_name": "businessentityid",
+        "data_type": "integer"
+      },
+      {
+        "column_name": "firstname",
+        "data_type": "character varying"
+      },
+      {
+        "column_name": "middlename",
+        "data_type": "character varying"
+      },
+      {
+        "column_name": "lastname",
+        "data_type": "character varying"
+      },
+      {
+        "column_name": "telephonenumber",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "telephonespecialinstructions",
+        "data_type": "text"
+      },
+      {
+        "column_name": "street",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "city",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "stateprovince",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "postalcode",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "countryregion",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "homeaddressspecialinstructions",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "emailaddress",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "emailspecialinstructions",
+        "data_type": "text"
+      },
+      {
+        "column_name": "emailtelephonenumber",
+        "data_type": "xml"
+      },
+      {
+        "column_name": "rowguid",
+        "data_type": "uuid"
+      },
+      {
+        "column_name": "modifieddate",
+        "data_type": "timestamp without time zone"
+      }
+    ],
+    "output_file": "query_results_7dabf240.csv",
+    "execution_time_ms": 23.732288274914026
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_z8w9d4vwmic7_1"
+}

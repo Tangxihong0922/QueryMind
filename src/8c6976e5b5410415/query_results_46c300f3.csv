@@ -1,0 +1,27 @@
+column_name,data_type
+id,integer
+salesorderid,integer
+revisionnumber,smallint
+orderdate,timestamp without time zone
+duedate,timestamp without time zone
+shipdate,timestamp without time zone
+status,smallint
+onlineorderflag,boolean
+purchaseordernumber,character varying
+accountnumber,character varying
+customerid,integer
+salespersonid,integer
+territoryid,integer
+billtoaddressid,integer
+shiptoaddressid,integer
+shipmethodid,integer
+creditcardid,integer
+creditcardapprovalcode,character varying
+currencyrateid,integer
+subtotal,numeric
+taxamt,numeric
+freight,numeric
+totaldue,numeric
+comment,character varying
+rowguid,uuid
+modifieddate,timestamp without time zone

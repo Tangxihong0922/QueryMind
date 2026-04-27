@@ -1,0 +1,18 @@
+column_name,data_type
+businessentityid,integer
+firstname,character varying
+middlename,character varying
+lastname,character varying
+telephonenumber,xml
+telephonespecialinstructions,text
+street,xml
+city,xml
+stateprovince,xml
+postalcode,xml
+countryregion,xml
+homeaddressspecialinstructions,xml
+emailaddress,xml
+emailspecialinstructions,text
+emailtelephonenumber,xml
+rowguid,uuid
+modifieddate,timestamp without time zone

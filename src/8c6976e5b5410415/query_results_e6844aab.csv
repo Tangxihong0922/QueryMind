@@ -1,0 +1,6 @@
+addressid,addressline1,addressline2,city,stateprovinceid,postalcode,spatiallocation,rowguid,modifieddate
+1,1970 Napa Ct.,,Bothell,79,98011,<memory at 0x7f78561bd480>,9aadcb0d-36cf-483f-84d8-585c2d4ec6e9,2018-12-03
+2,9833 Mt. Dias Blv.,,Bothell,79,98011,<memory at 0x7f783a63b7c0>,32a54b9e-e034-4bfb-b573-a71cde60d8c0,2019-11-30
+3,7484 Roundtree Drive,,Bothell,79,98011,<memory at 0x7f783a63b400>,4c506923-6d1b-452c-a07c-baa6f5b142a4,2024-03-06
+4,9539 Glenside Dr,,Bothell,79,98011,<memory at 0x7f783a63ba00>,e5946c78-4bcc-477f-9fa1-cc09de16a880,2020-02-03
+5,1226 Shoe St.,,Bothell,79,98011,<memory at 0x7f7839bbc700>,fbaff937-4a97-4af0-81fd-b849900e9bb0,2019-12-19

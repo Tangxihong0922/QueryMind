@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:21:42.562902Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_7hyzc09q2ono_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "telephone numbers phone contact information with area code",
+        "search_mode": null
+      }
+    }
+  ],
+  "tool_call_id": null
+}

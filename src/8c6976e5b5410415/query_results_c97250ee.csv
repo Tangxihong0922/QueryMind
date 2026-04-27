@@ -1,0 +1,11 @@
+id,departmentid,name,groupname,modifieddate
+1,1,Engineering,Research and Development,2008-04-30
+2,2,Tool Design,Research and Development,2008-04-30
+3,3,Sales,Sales and Marketing,2008-04-30
+4,4,Marketing,Sales and Marketing,2008-04-30
+5,5,Purchasing,Inventory Management,2008-04-30
+6,6,Research and Development,Research and Development,2008-04-30
+7,7,Production,Manufacturing,2008-04-30
+8,8,Production Control,Manufacturing,2008-04-30
+9,9,Human Resources,Executive General and Administration,2008-04-30
+10,10,Finance,Executive General and Administration,2008-04-30

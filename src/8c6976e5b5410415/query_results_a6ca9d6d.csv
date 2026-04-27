@@ -1,0 +1,6 @@
+table_name,column_name,data_type
+businessentityaddress,businessentityid,integer
+businessentityaddress,addressid,integer
+businessentityaddress,addresstypeid,integer
+businessentityaddress,rowguid,uuid
+businessentityaddress,modifieddate,timestamp without time zone

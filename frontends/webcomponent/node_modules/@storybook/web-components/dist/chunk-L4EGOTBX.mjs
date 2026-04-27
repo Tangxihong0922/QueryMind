@@ -1,0 +1,8 @@
+import { entry_preview_exports } from './chunk-X7CW7BOR.mjs';
+import { global } from '@storybook/global';
+import { setDefaultProjectAnnotations, setProjectAnnotations as setProjectAnnotations$1 } from 'storybook/internal/preview-api';
+
+var{window:globalWindow}=global;globalWindow.STORYBOOK_ENV="web-components";function isValidComponent(tagName){if(!tagName)return !1;if(typeof tagName=="string")return !0;throw new Error('Provided component needs to be a string. e.g. component: "my-element"')}function isValidMetaData(customElements){if(!customElements)return !1;if(customElements.tags&&Array.isArray(customElements.tags)||customElements.modules&&Array.isArray(customElements.modules))return !0;throw new Error(`You need to setup valid meta data in your config.js via setCustomElements().
+    See the readme of addon-docs for web components for more details.`)}function setCustomElements(customElements){global.__STORYBOOK_CUSTOM_ELEMENTS__=customElements;}function setCustomElementsManifest(customElements){global.__STORYBOOK_CUSTOM_ELEMENTS_MANIFEST__=customElements;}function getCustomElements(){return global.__STORYBOOK_CUSTOM_ELEMENTS__||global.__STORYBOOK_CUSTOM_ELEMENTS_MANIFEST__}function setProjectAnnotations(projectAnnotations){return setDefaultProjectAnnotations(entry_preview_exports),setProjectAnnotations$1(projectAnnotations)}var{window,EventSource}=global;typeof module<"u"&&module?.hot?.decline&&(module.hot.decline(),new EventSource("__webpack_hmr").addEventListener("message",function(event){try{let{action}=JSON.parse(event.data);action==="built"&&window.location.reload();}catch{}}));
+
+export { getCustomElements, isValidComponent, isValidMetaData, setCustomElements, setCustomElementsManifest, setProjectAnnotations };

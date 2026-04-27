@@ -1,0 +1,26 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T03:53:38.194334Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_qmk2gm62mypu_1",
+      "name": "search_files",
+      "arguments": {
+        "include_content": true,
+        "query": "inventory"
+      }
+    },
+    {
+      "id": "call_function_qmk2gm62mypu_2",
+      "name": "search_files",
+      "arguments": {
+        "include_content": true,
+        "query": "location"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

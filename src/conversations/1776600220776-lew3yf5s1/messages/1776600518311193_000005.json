@@ -1,0 +1,33 @@
+{
+  "role": "tool",
+  "content": "No table schemas found matching 'product inventory location warehouse quantity'",
+  "timestamp": "2026-04-19T12:07:44.142907Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "graph",
+    "graph_hint": "domain",
+    "query": "product inventory location warehouse quantity",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 0.26571517810225487
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "graph",
+    "graph_hint": "domain",
+    "query": "product inventory location warehouse quantity",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 0.26571517810225487
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_3zoi1i4w5b3j_1"
+}

@@ -1,0 +1,6 @@
+column_name,data_type
+locationid,integer
+name,character varying
+costrate,numeric
+availability,numeric
+modifieddate,timestamp without time zone

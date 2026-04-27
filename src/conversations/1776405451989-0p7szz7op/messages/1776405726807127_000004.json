@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "\n\nLet me search more broadly for employee-related tables in the database.\n\n",
+  "timestamp": "2026-04-17T06:01:18.650373Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_55e479c7dc3b4ce488d9d2dd",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "employee data personnel"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

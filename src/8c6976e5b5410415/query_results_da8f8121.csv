@@ -1,0 +1,12 @@
+column_name,data_type
+businessentityid,integer
+title,character varying
+firstname,character varying
+middlename,character varying
+lastname,character varying
+suffix,character varying
+shift,character varying
+department,character varying
+groupname,character varying
+startdate,date
+enddate,date

@@ -1,0 +1,9 @@
+column_name,data_type,is_nullable
+businessentityid,integer,NO
+accountnumber,character varying,NO
+name,character varying,NO
+creditrating,smallint,NO
+preferredvendorstatus,boolean,NO
+activeflag,boolean,NO
+purchasingwebserviceurl,character varying,YES
+modifieddate,timestamp without time zone,NO

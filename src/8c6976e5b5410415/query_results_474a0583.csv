@@ -1,0 +1,10 @@
+column_name,data_type
+businessentityid,integer
+name,character varying
+addresstype,character varying
+addressline1,character varying
+addressline2,character varying
+city,character varying
+stateprovincename,character varying
+postalcode,character varying
+countryregionname,character varying

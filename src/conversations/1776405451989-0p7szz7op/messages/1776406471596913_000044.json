@@ -1,0 +1,8 @@
+{
+  "role": "tool",
+  "content": "column \"column_name\" does not exist\nLINE 1: SELECT column_name FROM HumanResources.vemployeedepartmenthi...\n               ^\n",
+  "timestamp": "2026-04-17T06:14:28.478278Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": "call_function_zb06lqpchvso_1"
+}

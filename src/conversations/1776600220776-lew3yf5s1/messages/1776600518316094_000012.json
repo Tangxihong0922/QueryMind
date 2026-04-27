@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-19T12:07:58.482191Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_ivjirc0yhcle_1",
+      "name": "search_files",
+      "arguments": {
+        "query": "production.product",
+        "include_content": true
+      }
+    }
+  ],
+  "tool_call_id": null
+}

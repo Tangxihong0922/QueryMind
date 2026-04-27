@@ -1,0 +1,29 @@
+column_name,data_type
+businessentityid,integer
+businessentityid,integer
+title,character varying
+title,character varying
+firstname,character varying
+firstname,character varying
+middlename,character varying
+middlename,character varying
+lastname,character varying
+lastname,character varying
+suffix,character varying
+suffix,character varying
+jobtitle,character varying
+jobtitle,character varying
+phonenumber,character varying
+department,character varying
+groupname,character varying
+phonenumbertype,character varying
+startdate,date
+emailaddress,character varying
+emailpromotion,integer
+addressline1,character varying
+addressline2,character varying
+city,character varying
+stateprovincename,character varying
+postalcode,character varying
+countryregionname,character varying
+additionalcontactinfo,xml

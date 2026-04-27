@@ -1,0 +1,17 @@
+table_name,table_schema
+product,production
+productcategory,production
+productcosthistory,production
+productdescription,production
+productdocument,production
+productinventory,production
+productlistpricehistory,production
+productmodel,production
+productmodelillustration,production
+productmodelproductdescriptionculture,production
+productphoto,production
+productproductphoto,production
+productreview,production
+productsubcategory,production
+vproductmodelcatalogdescription,production
+vproductmodelinstructions,production

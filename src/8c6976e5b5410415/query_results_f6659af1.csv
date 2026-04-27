@@ -1,0 +1,5 @@
+table_schema,table_name
+person,address
+person,businessentityaddress
+person,person
+humanresources,employee

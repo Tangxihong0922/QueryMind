@@ -1,0 +1,26 @@
+column_name,data_type
+addressid,integer
+addressline1,character varying
+addressline2,character varying
+city,character varying
+stateprovinceid,integer
+postalcode,character varying
+spatiallocation,bytea
+rowguid,uuid
+modifieddate,timestamp without time zone
+businessentityid,integer
+addressid,integer
+addresstypeid,integer
+rowguid,uuid
+modifieddate,timestamp without time zone
+countryregioncode,character varying
+name,character varying
+modifieddate,timestamp without time zone
+stateprovinceid,integer
+stateprovincecode,character
+countryregioncode,character varying
+isonlystateprovinceflag,boolean
+name,character varying
+territoryid,integer
+rowguid,uuid
+modifieddate,timestamp without time zone

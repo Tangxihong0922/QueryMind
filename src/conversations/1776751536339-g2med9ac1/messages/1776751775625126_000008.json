@@ -1,0 +1,33 @@
+{
+  "role": "tool",
+  "content": "No table schemas found matching 'product location warehouse'",
+  "timestamp": "2026-04-21T06:06:50.185670Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "graph",
+    "graph_hint": "none",
+    "query": "product location warehouse",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 0.24210428819060326
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "graph",
+    "graph_hint": "none",
+    "query": "product location warehouse",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 0.24210428819060326
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_8849f85cbfde41f9be81854f"
+}

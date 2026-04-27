@@ -1,0 +1,8 @@
+{
+  "role": "user",
+  "content": "I want to know the employee with the fewest number of vacation hours compared to other employees with the same job title. Partitions the employees by job title and apply the first value to each partition independently.",
+  "timestamp": "2026-04-17T06:01:02.624469Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": null
+}

@@ -1,0 +1,177 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 10 related table(s):\n\n--- Table 1: adventureworks.person.businessentityaddress ---\nDomain: Person\nDescription: Cross-reference table mapping customers, vendors, and employees to their addresses.\nFields:\n  - addressid (integer(32,0)) [PK] [FK]: Identifier of the address record being associated with the business entity\n  - rowguid (uuid): Globally unique identifier for the record, used for database replication and synchronization across systems\n  - addresstypeid (integer(32,0)) [PK] [FK]: Identifier for the type of address such as billing, shipping, home, or office address\n  - businessentityid (integer(32,0)) [PK] [FK]: Identifier of the business entity such as customer, vendor, or employee associated with this address\n  - modifieddate (timestamp without time zone): Timestamp indicating when the business entity address association was last modified\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.humanresources.employeepayhistory ---\nDomain: Payroll\nDescription: Employee pay history.\nFields:\n  - modifieddate (timestamp without time zone): The timestamp when this pay history record was last updated in the system\n  - ratechangedate (timestamp without time zone) [PK]: The effective date when the employee's pay rate was modified\n  - payfrequency (smallint(16,0)): Payment frequency indicator specifying how often the employee is paid (e.g., 1=Biweekly, 2=Monthly)\n  - businessentityid (integer(32,0)) [PK] [FK]: Foreign key reference to the employee (business entity) receiving the pay rate\n  - rate (numeric): The employee's monetary pay rate, either hourly wage or annual salary amount\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.purchasing.vendor ---\nDomain: Vendor\nDescription: Companies from whom Adventure Works Cycles purchases parts or other goods.\nFields:\n  - purchasingwebserviceurl (character varying(1024)): Web service endpoint URL used for electronic data interchange and automated purchasing transactions with the vendor\n  - name (character varying(50)): Official business name of the vendor or supplier company\n  - activeflag (boolean): Indicator of whether the vendor is currently operational and conducting business\n  - accountnumber (character varying(15)): Internal accounting code assigned to track and process financial transactions with the vendor\n  - businessentityid (integer(32,0)) [PK]: Unique identifier referencing the underlying business entity record for data consistency across the enterprise\n  - creditrating (smallint(16,0)): Numerical assessment of the vendor's creditworthiness and financial reliability, typically on a scale where lower values indicate better credit standing\n  - modifieddate (timestamp without time zone): Timestamp recording the most recent update to the vendor's master record for audit and synchronization purposes\n  - preferredvendorstatus (boolean): Flag designating whether the vendor is approved and prioritized as a preferred supplier for purchasing decisions\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.sales.salesperson ---\nDomain: Sales\nDescription: Sales representative current information.\nFields:\n  - saleslastyear (numeric): Total sales amount the salesperson achieved during the previous fiscal year\n  - salesytd (numeric): Total sales amount the salesperson has achieved year-to-date in the current fiscal year\n  - rowguid (uuid): Globally unique identifier used for database replication and synchronization across systems\n  - territoryid (integer(32,0)) [FK]: Reference to the geographic sales territory assigned to and managed by the salesperson\n  - commissionpct (numeric): Commission rate percentage that the salesperson earns on each sale\n  - modifieddate (timestamp without time zone): Date and time when the salesperson record was last updated or modified\n  - businessentityid (integer(32,0)) [PK]: Primary key reference to the underlying business entity (person) in the employee system\n  - bonus (numeric): Monetary incentive awarded to the salesperson based on meeting or exceeding sales targets\n  - salesquota (numeric): Target sales amount that the salesperson is expected to achieve within a defined period\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.production.document ---\nDomain: Document\nDescription: Product maintenance documents.\nFields:\n  - documentsummary (text): Brief text description summarizing the document content and purpose for quick reference and search\n  - status (smallint(16,0)): Workflow status indicating document approval state such as draft, under review, approved, or archived\n  - filename (character varying(400)): Original file name of the stored document including extension\n  - owner (integer(32,0)): Employee or user ID responsible for maintaining and approving this document\n  - document (bytea): Binary content of the actual document file stored in the database\n  - fileextension (character varying(8)): File type indicator such as PDF, DOCX, or DWG determining how the document can be opened\n  - documentnode (character varying) [PK]: Hierarchical location code within the document organization structure for navigation and categorization\n  - revision (character(5)): Version identifier tracking document iterations such as Rev A, Rev 1.0\n  - changenumber (integer(32,0)): Tracking number linking to the change request that triggered the document update\n  - modifieddate (timestamp without time zone): Timestamp recording when the document was last updated in the system\n  - rowguid (uuid): Unique system identifier for the document record used for data replication and integration\n  - folderflag (boolean): Boolean flag indicating whether the entry represents a folder container or an actual document file\n  - title (character varying(50)): Human-readable document title used for display in user interfaces and search results\nMatch reason: Source: vector\n\n--- Table 6: adventureworks.person.stateprovince ---\nDomain: Geography\nDescription: State and province lookup table.\nFields:\n  - name (character varying(50)): Full official name of the state or province (e.g., California, Ontario)\n  - territoryid (integer(32,0)): Foreign key to the sales territory this state or province is assigned to for regional reporting\n  - isonlystateprovinceflag (boolean): Flag indicating if this is the only state or province in its country (rarely used, for special cases like Washington DC)\n  - stateprovincecode (character(3)): Official abbreviation code for the state or province (e.g., CA, NY, ON)\n  - stateprovinceid (integer(32,0)) [PK]: Primary key identifier for the state or province record\n  - modifieddate (timestamp without time zone): Timestamp recording when the state or province record was last updated\n  - rowguid (uuid): Globally unique identifier used for database replication and synchronization\n  - countryregioncode (character varying(3)) [FK]: Foreign key linking to the country this state or province belongs to\nMatch reason: Source: vector\n\n--- Table 7: adventureworks.sales.personcreditcard ---\nDomain: Customer\nDescription: Cross-reference table mapping people to their credit card information in the CreditCard table.\nFields:\n  - businessentityid (integer(32,0)) [PK]: Identifier of the person (customer or employee) who owns the credit card.\n  - modifieddate (timestamp without time zone): Date and time when the mapping record was last updated.\n  - creditcardid (integer(32,0)) [PK] [FK]: Identifier of the credit card record associated with the person.\nMatch reason: Source: vector\n\n--- Table 8: adventureworks.purchasing.shipmethod ---\nDomain: Shipping\nDescription: Shipping company lookup table.\nFields:\n  - modifieddate (timestamp without time zone): Date and time when the shipping method record was last modified\n  - shiprate (numeric): Additional per-unit or variable shipping rate charged for this method\n  - shipbase (numeric): Base or flat rate cost for using this shipping method\n  - rowguid (uuid): Globally unique identifier assigned to each shipping method for cross-system data synchronization\n  - shipmethodid (integer(32,0)) [PK]: Primary key identifier for the shipping method record\n  - name (character varying(50)): Name of the shipping company or method (e.g., UPS, FedEx, DHL, overnight, ground)\nMatch reason: Source: vector\n\n--- Table 9: adventureworks.sales.store ---\nDomain: Store\nDescription: Customers (resellers) of Adventure Works products.\nFields:\n  - salespersonid (integer(32,0)) [FK]: Identifier of the salesperson assigned to manage and support this store account\n  - demographics (xml): XML document containing store demographic information including location type, sales territory, and business characteristics\n  - rowguid (uuid): Globally unique identifier assigned to each store record for system-wide reference\n  - name (character varying(50)): Official business name of the store or reseller entity\n  - modifieddate (timestamp without time zone): Timestamp indicating when the store record was last updated in the system\n  - businessentityid (integer(32,0)) [PK]: Foreign key reference to the core business entity table containing foundational information about this store organization\nMatch reason: Source: vector\n\n--- Table 10: adventureworks.production.productsubcategory ---\nDomain: Product\nDescription: Product subcategories. See ProductCategory table.\nFields:\n  - productsubcategoryid (integer(32,0)) [PK]: Primary key identifier that uniquely represents each product subcategory within the system\n  - modifieddate (timestamp without time zone): Timestamp indicating when the subcategory record was last modified for audit and synchronization purposes\n  - name (character varying(50)): The business name of the product subcategory (e.g., Mountain Bikes, Road Frames, Touring Bicycles)\n  - rowguid (uuid): Globally unique identifier used for database replication and data synchronization across systems\n  - productcategoryid (integer(32,0)) [FK]: Foreign key reference to the parent product category, establishing the hierarchical relationship between category and subcategory\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-21T06:11:51.295109Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "department name",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.person.businessentityaddress",
+      "adventureworks.humanresources.employeepayhistory",
+      "adventureworks.purchasing.vendor",
+      "adventureworks.sales.salesperson",
+      "adventureworks.production.document",
+      "adventureworks.person.stateprovince",
+      "adventureworks.sales.personcreditcard",
+      "adventureworks.purchasing.shipmethod",
+      "adventureworks.sales.store",
+      "adventureworks.production.productsubcategory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.person.businessentityaddress",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentityaddress"
+      },
+      {
+        "full_name": "adventureworks.humanresources.employeepayhistory",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employeepayhistory"
+      },
+      {
+        "full_name": "adventureworks.purchasing.vendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "vendor"
+      },
+      {
+        "full_name": "adventureworks.sales.salesperson",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesperson"
+      },
+      {
+        "full_name": "adventureworks.production.document",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "document"
+      },
+      {
+        "full_name": "adventureworks.person.stateprovince",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "stateprovince"
+      },
+      {
+        "full_name": "adventureworks.sales.personcreditcard",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "personcreditcard"
+      },
+      {
+        "full_name": "adventureworks.purchasing.shipmethod",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "shipmethod"
+      },
+      {
+        "full_name": "adventureworks.sales.store",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "store"
+      },
+      {
+        "full_name": "adventureworks.production.productsubcategory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productsubcategory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 392.12254295125604
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "department name",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.person.businessentityaddress",
+      "adventureworks.humanresources.employeepayhistory",
+      "adventureworks.purchasing.vendor",
+      "adventureworks.sales.salesperson",
+      "adventureworks.production.document",
+      "adventureworks.person.stateprovince",
+      "adventureworks.sales.personcreditcard",
+      "adventureworks.purchasing.shipmethod",
+      "adventureworks.sales.store",
+      "adventureworks.production.productsubcategory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.person.businessentityaddress",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentityaddress"
+      },
+      {
+        "full_name": "adventureworks.humanresources.employeepayhistory",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employeepayhistory"
+      },
+      {
+        "full_name": "adventureworks.purchasing.vendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "vendor"
+      },
+      {
+        "full_name": "adventureworks.sales.salesperson",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesperson"
+      },
+      {
+        "full_name": "adventureworks.production.document",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "document"
+      },
+      {
+        "full_name": "adventureworks.person.stateprovince",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "stateprovince"
+      },
+      {
+        "full_name": "adventureworks.sales.personcreditcard",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "personcreditcard"
+      },
+      {
+        "full_name": "adventureworks.purchasing.shipmethod",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "shipmethod"
+      },
+      {
+        "full_name": "adventureworks.sales.store",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "store"
+      },
+      {
+        "full_name": "adventureworks.production.productsubcategory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productsubcategory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 392.12254295125604
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_302akiue4olk_2"
+}

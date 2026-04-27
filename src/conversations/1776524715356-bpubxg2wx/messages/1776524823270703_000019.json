@@ -1,0 +1,9 @@
+{
+  "role": "tool",
+  "content": "Invalid arguments: 1 validation error for RunSqlToolArgs\nsql\n  Field required [type=missing, input_value={'_raw': None}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing",
+  "timestamp": "2026-04-18T15:06:02.736389Z",
+  "metadata": {},
+  "tool_result": {},
+  "tool_calls": null,
+  "tool_call_id": "call_function_slr9hrmkme81_1"
+}

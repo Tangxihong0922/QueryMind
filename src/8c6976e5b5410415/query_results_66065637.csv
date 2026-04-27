@@ -1,0 +1,17 @@
+table_name
+purchaseorderheader
+purchaseorderdetail
+workorder
+workorderrouting
+salespersonquotahistory
+salesorderheader
+salesorderdetail
+salesperson
+salesorderheadersalesreason
+salesterritory
+salestaxrate
+salesreason
+salesterritoryhistory
+vsalesperson
+vsalespersonsalesbyfiscalyearsdata
+vsalespersonsalesbyfiscalyears

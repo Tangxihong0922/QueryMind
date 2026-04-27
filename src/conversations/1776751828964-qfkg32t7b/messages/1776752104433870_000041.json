@@ -1,0 +1,24 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T06:13:28.626331Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_f45edd470b7148e2843eb39b",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM humanresources.employeepayhistory ORDER BY businessentityid LIMIT 10;"
+      }
+    },
+    {
+      "id": "call_0aa58fa4e39a4dbb86e0ad3f",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM humanresources.employeedepartmenthistory ORDER BY businessentityid LIMIT 10;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

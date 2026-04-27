@@ -1,0 +1,17 @@
+{
+  "role": "tool",
+  "content": "Query executed successfully. 1 row(s) affected.",
+  "timestamp": "2026-04-17T18:55:44.915978Z",
+  "metadata": {
+    "rows_affected": 1,
+    "query_type": "CREATE",
+    "execution_time_ms": 30.235355254262686
+  },
+  "tool_result": {
+    "rows_affected": 1,
+    "query_type": "CREATE",
+    "execution_time_ms": 30.235355254262686
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_9o1dx1p1bjj1_1"
+}

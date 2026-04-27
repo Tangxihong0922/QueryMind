@@ -1,0 +1,4 @@
+column_name,data_type
+businessentityid,integer
+firstname,character varying
+lastname,character varying

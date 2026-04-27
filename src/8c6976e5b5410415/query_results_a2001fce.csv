@@ -1,0 +1,17 @@
+column_name,data_type
+id,integer
+businessentityid,integer
+nationalidnumber,character varying
+loginid,character varying
+jobtitle,character varying
+birthdate,date
+maritalstatus,character
+gender,character
+hiredate,date
+salariedflag,boolean
+vacationhours,smallint
+sickleavehours,smallint
+currentflag,boolean
+rowguid,uuid
+modifieddate,timestamp without time zone
+organizationnode,character varying

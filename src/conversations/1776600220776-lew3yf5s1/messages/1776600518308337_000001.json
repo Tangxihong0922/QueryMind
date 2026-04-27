@@ -1,0 +1,25 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-19T12:07:37.951584Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_rrc7ofl56f3j_1",
+      "name": "search_saved_correct_tool_uses",
+      "arguments": {
+        "question": "\u67e5\u8be2\u5e93\u5b58\u4ea7\u54c1\u6309\u4f4d\u7f6e\u5206\u533a\u6309\u6570\u91cf\u6392\u540d"
+      }
+    },
+    {
+      "id": "call_function_rrc7ofl56f3j_2",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "\u5e93\u5b58\u4ea7\u54c1 \u5e93\u4f4d \u6570\u91cf inventory location quantity",
+        "search_mode": "hybrid"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

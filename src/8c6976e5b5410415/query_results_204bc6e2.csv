@@ -1,0 +1,4 @@
+table_schema,table_name
+person,vadditionalcontactinfo
+sales,vstorewithcontacts
+purchasing,vvendorwithcontacts

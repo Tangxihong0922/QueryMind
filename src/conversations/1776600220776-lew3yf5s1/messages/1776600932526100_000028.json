@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-19T12:15:25.998913Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_ehdskru4xksb_1",
+      "name": "visualize_data",
+      "arguments": {
+        "filename": "query_results_20090889.csv",
+        "title": null
+      }
+    }
+  ],
+  "tool_call_id": null
+}

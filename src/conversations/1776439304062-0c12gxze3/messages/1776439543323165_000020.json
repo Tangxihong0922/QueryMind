@@ -1,0 +1,8 @@
+{
+  "role": "tool",
+  "content": "Content of 'query_results_05015a01.csv':\n\nbusinessentityid\n274\n275\n276\n277\n278\n279\n280\n281\n282\n283\n284\n285\n286\n287\n288\n289\n290\n",
+  "timestamp": "2026-04-17T15:24:39.776103Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": "call_function_qujxvharqh9f_1"
+}

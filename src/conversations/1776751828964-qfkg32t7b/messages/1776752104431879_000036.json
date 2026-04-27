@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T06:13:17.818121Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_5fe58084e6414f678c968827",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM humanresources.vemployeedepartment LIMIT 5;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

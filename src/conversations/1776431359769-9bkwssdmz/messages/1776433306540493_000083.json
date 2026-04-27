@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T13:41:14.765393Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_enhiked4hzt4_1",
+      "name": "search_saved_correct_tool_uses",
+      "arguments": {
+        "question": "salesperson sales quota year lead window function"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

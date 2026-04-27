@@ -1,0 +1,177 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 10 related table(s):\n\n--- Table 1: adventureworks.person.businessentitycontact ---\nDomain: Contact Management\nDescription: Cross-reference table mapping stores, vendors, and employees to people\nFields:\n  - businessentityid (integer(32,0)) [PK] [FK]: Identifier of the business entity (store, vendor, or employee) that the contact person is associated with\n  - modifieddate (timestamp without time zone): Date and time when the contact relationship record was last modified for audit and synchronization purposes\n  - contacttypeid (integer(32,0)) [PK] [FK]: Identifier of the type of contact role defining the person's function (e.g., primary contact, accounting contact, sales representative) for the business entity\n  - personid (integer(32,0)) [PK] [FK]: Unique identifier of the person who serves as the contact for the business entity\n  - rowguid (uuid): Globally unique identifier assigned to each contact relationship record for replication and cross-reference identification\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.person.contacttype ---\nDomain: Contact\nDescription: Lookup table containing the types of business entity contacts.\nFields:\n  - contacttypeid (integer(32,0)) [PK]: The unique identifier for each contact type category (e.g., Email, Phone, Fax, Mail)\n  - name (character varying(50)): The descriptive name of the contact type such as Email, Phone, or Fax\n  - modifieddate (timestamp without time zone): The date and time when the contact type record was last updated\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.person.emailaddress ---\nDomain: Person\nDescription: Where to send a person email.\nFields:\n  - rowguid (uuid): System-generated unique identifier assigned to each email address record for auditing and data replication purposes\n  - modifieddate (timestamp without time zone): Date and time when the email address record was last modified or updated\n  - emailaddressid (integer(32,0)) [PK]: Primary key identifier that uniquely identifies each email address record in the system\n  - businessentityid (integer(32,0)) [PK] [FK]: Foreign key reference to the person (business entity) who owns or is associated with this email address\n  - emailaddress (character varying(50)): The actual email address value used for sending electronic communications to the person\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.person.businessentityaddress ---\nDomain: Person\nDescription: Cross-reference table mapping customers, vendors, and employees to their addresses.\nFields:\n  - addressid (integer(32,0)) [PK] [FK]: Identifier of the address record being associated with the business entity\n  - rowguid (uuid): Globally unique identifier for the record, used for database replication and synchronization across systems\n  - addresstypeid (integer(32,0)) [PK] [FK]: Identifier for the type of address such as billing, shipping, home, or office address\n  - businessentityid (integer(32,0)) [PK] [FK]: Identifier of the business entity such as customer, vendor, or employee associated with this address\n  - modifieddate (timestamp without time zone): Timestamp indicating when the business entity address association was last modified\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.person.countryregion ---\nDomain: Location\nDescription: Lookup table containing the ISO standard codes for countries and regions.\nFields:\n  - modifieddate (timestamp without time zone): The date and time when the country or region record was last modified, used for data synchronization and audit tracking\n  - name (character varying(50)): The official full name of the country or region as defined by the ISO standard\n  - countryregioncode (character varying(3)) [PK]: The unique 3-letter ISO 3166-1 alpha-3 code that identifies the country or region\nMatch reason: Source: vector\n\n--- Table 6: adventureworks.person.address ---\nDomain: Address\nDescription: Street address information for customers, employees, and vendors.\nFields:\n  - addressline1 (character varying(60)): Primary street address component containing the house or building number and street name\n  - stateprovinceid (integer(32,0)) [FK]: Foreign key reference to the state or province entity defining the administrative region\n  - city (character varying(30)): Name of the city where the address is located\n  - modifieddate (timestamp without time zone): Timestamp indicating when the address record was last updated in the system\n  - spatiallocation (bytea): Binary geographic coordinate data used for mapping and spatial analysis purposes\n  - postalcode (character varying(15)): ZIP code or postal code identifying the geographic delivery area for the address\n  - rowguid (uuid): Globally unique identifier assigned to each address record for database replication and synchronization\n  - addressline2 (character varying(60)): Secondary street address component for additional routing information such as suite, unit, or floor numbers\n  - addressid (integer(32,0)) [PK]: Primary key identifier for each unique address record in the system\nMatch reason: Source: vector\n\n--- Table 7: adventureworks.person.person ---\nDomain: Person\nDescription: Human beings involved with AdventureWorks: employees, customer contacts, and vendor contacts.\nFields:\n  - businessentityid (integer(32,0)) [PK] [FK]: Unique sequential identifier serving as the primary key for each person record in the system\n  - additionalcontactinfo (xml): XML field storing miscellaneous contact information such as phone numbers and addresses beyond the primary contact methods\n  - firstname (character varying(50)): Person's given or first name used in business communications and identification\n  - namestyle (boolean): Boolean flag indicating whether the name follows Eastern name format (1) with family name first or Western format (0) with given name first\n  - persontype (character(2)): Two-character code identifying the person's role: IN for individual customer, EM for employee, SP for sales person, VC for vendor contact, SC for store contact\n  - suffix (character varying(10)): Optional name suffix such as Jr., Sr., PhD, or III used in formal name representation\n  - rowguid (uuid): Globally unique identifier assigned to each record for use in database replication and synchronization scenarios\n  - lastname (character varying(50)): Person's family or surname used in business communications and identification\n  - emailpromotion (integer(32,0)): Integer indicating the level of email marketing consent: 0 for no promotional emails, 1 for AdventureWorks catalog promotions, 2 for partner company promotions\n  - middlename (character varying(50)): Person's middle name or initial used in formal identification\n  - title (character varying(8)): Optional honorific prefix such as Mr., Ms., Mrs., or Dr. used in formal communications\n  - modifieddate (timestamp without time zone): Timestamp recording the most recent date and time when any field in this person record was modified\n  - demographics (xml): XML field containing customer demographic information including age range, occupation, number of children, and income level for marketing analysis\nMatch reason: Source: vector\n\n--- Table 8: adventureworks.person.password ---\nDomain: Security\nDescription: One way hashed authentication information\nFields:\n  - passwordhash (character varying(128)): One-way cryptographic hash of the user's password used to verify identity during authentication without storing plaintext\n  - businessentityid (integer(32,0)) [PK] [FK]: Foreign key reference to the person or business entity that owns this password credential\n  - modifieddate (timestamp without time zone): Timestamp recording when the password was last changed or updated in the system\n  - passwordsalt (character varying(10)): Random value concatenated with password before hashing to defend against rainbow table attacks and enhance security\n  - rowguid (uuid): Globally unique identifier assigned to each password record for internal referencing and system integration\nMatch reason: Source: vector\n\n--- Table 9: adventureworks.person.businessentity ---\nDomain: Business Entity\nDescription: Source of the ID that connects vendors, customers, and employees with address and contact information.\nFields:\n  - modifieddate (timestamp without time zone): Date and time when the business entity record was last modified, supporting audit trails and data synchronization processes\n  - rowguid (uuid): Globally unique identifier assigned to each business entity record, used for database replication, synchronization, or as an alternative unique key\n  - businessentityid (integer(32,0)) [PK]: Primary key and unique numeric identifier for each business entity, used as the common reference to link customers, vendors, and employees to their addresses and contact details\nMatch reason: Source: vector\n\n--- Table 10: adventureworks.person.addresstype ---\nDomain: Person\nDescription: Types of addresses stored in the Address table.\nFields:\n  - rowguid (uuid): System-generated globally unique identifier used for database replication and data synchronization purposes\n  - modifieddate (timestamp without time zone): Date and time when the address type definition was last updated or modified\n  - name (character varying(50)): Descriptive label of the address type such as Home, Work, Billing, or Shipping\n  - addresstypeid (integer(32,0)) [PK]: Unique numeric identifier serving as the primary key for each address type record\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-18T15:21:43.411384Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "telephone numbers phone contact information with area code",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.person.businessentitycontact",
+      "adventureworks.person.contacttype",
+      "adventureworks.person.emailaddress",
+      "adventureworks.person.businessentityaddress",
+      "adventureworks.person.countryregion",
+      "adventureworks.person.address",
+      "adventureworks.person.person",
+      "adventureworks.person.password",
+      "adventureworks.person.businessentity",
+      "adventureworks.person.addresstype"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.person.businessentitycontact",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentitycontact"
+      },
+      {
+        "full_name": "adventureworks.person.contacttype",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "contacttype"
+      },
+      {
+        "full_name": "adventureworks.person.emailaddress",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "emailaddress"
+      },
+      {
+        "full_name": "adventureworks.person.businessentityaddress",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentityaddress"
+      },
+      {
+        "full_name": "adventureworks.person.countryregion",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "countryregion"
+      },
+      {
+        "full_name": "adventureworks.person.address",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "address"
+      },
+      {
+        "full_name": "adventureworks.person.person",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "person"
+      },
+      {
+        "full_name": "adventureworks.person.password",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "password"
+      },
+      {
+        "full_name": "adventureworks.person.businessentity",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentity"
+      },
+      {
+        "full_name": "adventureworks.person.addresstype",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "addresstype"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 791.2385971285403
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "telephone numbers phone contact information with area code",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.person.businessentitycontact",
+      "adventureworks.person.contacttype",
+      "adventureworks.person.emailaddress",
+      "adventureworks.person.businessentityaddress",
+      "adventureworks.person.countryregion",
+      "adventureworks.person.address",
+      "adventureworks.person.person",
+      "adventureworks.person.password",
+      "adventureworks.person.businessentity",
+      "adventureworks.person.addresstype"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.person.businessentitycontact",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentitycontact"
+      },
+      {
+        "full_name": "adventureworks.person.contacttype",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "contacttype"
+      },
+      {
+        "full_name": "adventureworks.person.emailaddress",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "emailaddress"
+      },
+      {
+        "full_name": "adventureworks.person.businessentityaddress",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentityaddress"
+      },
+      {
+        "full_name": "adventureworks.person.countryregion",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "countryregion"
+      },
+      {
+        "full_name": "adventureworks.person.address",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "address"
+      },
+      {
+        "full_name": "adventureworks.person.person",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "person"
+      },
+      {
+        "full_name": "adventureworks.person.password",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "password"
+      },
+      {
+        "full_name": "adventureworks.person.businessentity",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "businessentity"
+      },
+      {
+        "full_name": "adventureworks.person.addresstype",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "addresstype"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 791.2385971285403
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_7hyzc09q2ono_1"
+}

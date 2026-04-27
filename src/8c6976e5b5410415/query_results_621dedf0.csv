@@ -1,0 +1,6 @@
+table_schema,table_name
+person,person
+humanresources,employee
+sales,salesorderheader
+sales,salesorderdetail
+sales,salesperson

@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:13:37.890933Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_3669a9bn3ivb_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM adventureworks.person.personphone FETCH FIRST 10 ROWS ONLY;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

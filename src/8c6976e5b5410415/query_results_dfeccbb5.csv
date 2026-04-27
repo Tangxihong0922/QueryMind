@@ -1,0 +1,26 @@
+column_name,data_type
+departmentid,integer
+name,character varying
+groupname,character varying
+modifieddate,timestamp without time zone
+businessentityid,integer
+nationalidnumber,character varying
+loginid,character varying
+jobtitle,character varying
+birthdate,date
+maritalstatus,character
+gender,character
+hiredate,date
+salariedflag,boolean
+vacationhours,smallint
+sickleavehours,smallint
+currentflag,boolean
+rowguid,uuid
+modifieddate,timestamp without time zone
+organizationnode,character varying
+businessentityid,integer
+departmentid,smallint
+shiftid,smallint
+startdate,date
+enddate,date
+modifieddate,timestamp without time zone

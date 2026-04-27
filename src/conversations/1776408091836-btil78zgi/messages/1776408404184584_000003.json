@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "\n\nLet me first explore the schema of the Sales.SalesPersonQuotaHistory table to understand its structure.\n",
+  "timestamp": "2026-04-17T06:45:59.735824Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_vq51i0tuvr35_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "Sales.SalesPersonQuotaHistory table schema columns data types"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

@@ -1,0 +1,60 @@
+{
+  "name": "@querymind/webcomponent",
+  "version": "0.1.0",
+  "description": "Lit-based web components for QueryMind AI Agents",
+  "main": "dist/querymind-components.js",
+  "scripts": {
+    "sync-version": "node scripts/sync-version.js",
+    "sync-static": "node scripts/sync-static.js",
+    "dev": "vite",
+    "build": "npm run sync-version && tsc && vite build && npm run sync-static",
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "querymind",
+    "ai",
+    "sql",
+    "web-components",
+    "lit",
+    "chat",
+    "llm",
+    "natural-language"
+  ],
+  "author": "Xihong Tang <querymind.ai>",
+  "license": "MIT",
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/querymind-ai/querymind.git",
+    "directory": "frontends/webcomponent"
+  },
+  "homepage": "https://github.com/querymind-ai/querymind",
+  "bugs": {
+    "url": "https://github.com/querymind-ai/querymind/issues"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "lit": "^3.3.1",
+    "marked": "^18.0.0",
+    "plotly.js-dist-min": "^3.1.0"
+  },
+  "devDependencies": {
+    "@storybook/addon-actions": "^8.6.14",
+    "@storybook/addon-controls": "^8.6.14",
+    "@storybook/addon-docs": "^8.6.14",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/web-components": "^8.6.14",
+    "@storybook/web-components-vite": "^8.6.14",
+    "@types/marked": "^5.0.2",
+    "@types/plotly.js-dist-min": "^2.3.4",
+    "storybook": "^8.6.14",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  }
+}

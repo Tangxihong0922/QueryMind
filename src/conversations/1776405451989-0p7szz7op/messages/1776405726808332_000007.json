@@ -1,0 +1,8 @@
+{
+  "role": "tool",
+  "content": "No table schemas found matching 'vacation hours hr human resources'",
+  "timestamp": "2026-04-17T06:01:22.729230Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": "call_43b5bb0a24e94b879babeef0"
+}

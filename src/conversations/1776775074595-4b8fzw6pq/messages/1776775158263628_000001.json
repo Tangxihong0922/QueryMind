@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "\u6211\u6765\u5e2e\u4f60\u5b8c\u6210\u8fd9\u4e2a\u67e5\u8be2\u3002\u9996\u5148\u8ba9\u6211\u641c\u7d22\u76f8\u5173\u7684\u8868\u7ed3\u6784\u3002\n",
+  "timestamp": "2026-04-21T12:38:43.193458Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_pdtdweqr6mnw_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "\u5e93\u5b58\u4ea7\u54c1\u5e93\u5b58\u8868 inventory stock product location",
+        "search_mode": "hybrid"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

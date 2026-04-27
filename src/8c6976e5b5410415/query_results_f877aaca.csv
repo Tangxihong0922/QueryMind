@@ -1,0 +1,5 @@
+table_schema,table_name
+person,address
+person,addresstype
+person,businessentityaddress
+person,emailaddress

@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T18:55:37.187118Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_avkw7ml5syo8_1",
+      "name": "read_file",
+      "arguments": {
+        "filename": "salary_percentile_query.sql"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

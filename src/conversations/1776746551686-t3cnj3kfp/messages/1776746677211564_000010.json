@@ -1,0 +1,205 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: vector\nFound 12 related table(s):\n\n--- Table 1: adventureworks.production.workorder ---\nDomain: Manufacturing\nDescription: Manufacturing work orders.\nFields:\n  - productid (integer(32,0)) [FK]: Reference to the product being manufactured in this work order\n  - modifieddate (timestamp without time zone): The date when the work order record was last updated\n  - workorderid (integer(32,0)) [PK]: Unique identifier for the manufacturing work order\n  - scrapreasonid (smallint(16,0)) [FK]: Reference to the categorized reason explaining why units were scrapped during production\n  - orderqty (integer(32,0)): The planned quantity of products to be produced in this work order\n  - duedate (timestamp without time zone): The target completion date by which the work order should be finished\n  - enddate (timestamp without time zone): The date when production of the work order was completed\n  - startdate (timestamp without time zone): The scheduled or actual date when production of the work order begins\n  - scrappedqty (smallint(16,0)): The number of units scrapped or discarded during production due to defects or errors\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.purchasing.purchaseorderdetail ---\nDomain: Procurement\nDescription: Individual products associated with a specific purchase order. See PurchaseOrderHeader.\nFields:\n  - receivedqty (numeric(8,2)): The quantity of units actually received into inventory from the vendor\n  - unitprice (numeric): The negotiated price per unit charged by the vendor for this product\n  - purchaseorderid (integer(32,0)) [PK] [FK]: Foreign key referencing the parent purchase order header that groups this line item\n  - modifieddate (timestamp without time zone): The timestamp when this purchase order detail record was last updated\n  - duedate (timestamp without time zone): The expected or scheduled date by which the ordered goods should be delivered\n  - rejectedqty (numeric(8,2)): The quantity of received units rejected due to quality or specification issues\n  - productid (integer(32,0)): Foreign key to the product being ordered from the catalog\n  - purchaseorderdetailid (integer(32,0)) [PK]: Unique surrogate key identifying each line item within a purchase order\n  - orderqty (smallint(16,0)): The quantity of product units requested from the vendor\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.production.transactionhistory ---\nDomain: Inventory\nDescription: Record of each purchase order, sales order, or work order transaction year to date.\nFields:\n  - transactiontype (character(1)): Single-character code indicating the type of transaction (e.g., P for Purchase, S for Sales, W for Work Order)\n  - modifieddate (timestamp without time zone): Timestamp when the transaction record was last updated or modified in the system\n  - quantity (integer(32,0)): Number of units involved in the transaction for the associated product\n  - productid (integer(32,0)) [FK]: Unique identifier referencing the product being transacted in this record\n  - transactionid (integer(32,0)) [PK]: Primary key and unique identifier for each individual transaction record\n  - referenceorderid (integer(32,0)): Foreign key linking to the parent order (purchase, sales, or work order) that initiated this transaction\n  - transactiondate (timestamp without time zone): Date and time when the actual transaction occurred in the business process\n  - actualcost (numeric): Real monetary cost incurred for the transaction, used for financial reporting and cost analysis\n  - referenceorderlineid (integer(32,0)): Foreign key referencing the specific line item within the parent order, allowing granular transaction tracking\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.production.productdocument ---\nDomain: Product\nDescription: Cross-reference table mapping products to related product documents.\nFields:\n  - productid (integer(32,0)) [PK] [FK]: Foreign key to the product master record, identifying the specific product that the associated document pertains to\n  - documentnode (character varying) [PK]: Hierarchical identifier referencing the specific document in the document repository, indicating its location in the document structure\n  - modifieddate (timestamp without time zone): Timestamp recording when the product-document association was last updated, used for audit trails and data synchronization processes\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.production.productmodelillustration ---\nDomain: Product\nDescription: Cross-reference table mapping product models and illustrations.\nFields:\n  - illustrationid (integer(32,0)) [PK]: Identifier of the illustration such as a diagram, schematic, or photograph associated with the product model\n  - modifieddate (timestamp without time zone): Date and time when the product model illustration mapping was last modified\n  - productmodelid (integer(32,0)) [PK]: Identifier of the product model that the illustration represents\nMatch reason: Source: vector\n\n--- Table 6: adventureworks.purchasing.productvendor ---\nDomain: Purchasing\nDescription: Cross-reference table mapping vendors with the products they supply.\nFields:\n  - productid (integer(32,0)) [PK]: Unique identifier linking to the product being sourced from this vendor\n  - minorderqty (integer(32,0)): Minimum quantity that must be ordered from this vendor per purchase order\n  - businessentityid (integer(32,0)) [PK] [FK]: Vendor (supplier) identifier from the business entity master\n  - maxorderqty (integer(32,0)): Maximum quantity allowed per purchase order from this vendor\n  - lastreceiptdate (timestamp without time zone): Date when the most recent shipment was received from this vendor\n  - lastreceiptcost (numeric): Unit cost paid for the product in the most recent receipt from this vendor\n  - unitmeasurecode (character(3)): Standard unit of measure for ordering this product from the vendor (e.g., EACH, CASE)\n  - onorderqty (integer(32,0)): Current quantity of this product that has been ordered but not yet received\n  - averageleadtime (integer(32,0)): Average number of days between placing an order and receiving the product from this vendor\n  - standardprice (numeric): Standard unit price charged by this vendor for the product\n  - modifieddate (timestamp without time zone): Date and time when this vendor-product relationship record was last updated\nMatch reason: Source: vector\n\n--- Table 7: adventureworks.purchasing.vendor ---\nDomain: Vendor\nDescription: Companies from whom Adventure Works Cycles purchases parts or other goods.\nFields:\n  - purchasingwebserviceurl (character varying(1024)): Web service endpoint URL used for electronic data interchange and automated purchasing transactions with the vendor\n  - name (character varying(50)): Official business name of the vendor or supplier company\n  - activeflag (boolean): Indicator of whether the vendor is currently operational and conducting business\n  - accountnumber (character varying(15)): Internal accounting code assigned to track and process financial transactions with the vendor\n  - businessentityid (integer(32,0)) [PK]: Unique identifier referencing the underlying business entity record for data consistency across the enterprise\n  - creditrating (smallint(16,0)): Numerical assessment of the vendor's creditworthiness and financial reliability, typically on a scale where lower values indicate better credit standing\n  - modifieddate (timestamp without time zone): Timestamp recording the most recent update to the vendor's master record for audit and synchronization purposes\n  - preferredvendorstatus (boolean): Flag designating whether the vendor is approved and prioritized as a preferred supplier for purchasing decisions\nMatch reason: Source: vector\n\n--- Table 8: adventureworks.production.illustration ---\nDomain: Product\nDescription: Bicycle assembly diagrams.\nFields:\n  - modifieddate (timestamp without time zone): Timestamp indicating when the bicycle assembly diagram was last modified or updated\n  - illustrationid (integer(32,0)) [PK]: Unique identifier for each bicycle assembly diagram illustration record\n  - diagram (xml): XML-formatted assembly diagram containing visual instructions for bicycle component assembly\nMatch reason: Source: vector\n\n--- Table 9: adventureworks.production.transactionhistoryarchive ---\nDomain: Inventory\nDescription: Transactions for previous years.\nFields:\n  - transactiontype (character(1)): Single-character code indicating the type of transaction (e.g., W for Work Order, S for Sales Order, P for Purchase Order)\n  - referenceorderid (integer(32,0)): Foreign key linking to the source order (sales order, purchase order, or work order) that generated this transaction\n  - productid (integer(32,0)): Foreign key referencing the product involved in the transaction\n  - quantity (integer(32,0)): Number of units moved in this transaction\n  - transactiondate (timestamp without time zone): Date and time when the transaction occurred\n  - transactionid (integer(32,0)) [PK]: Unique identifier for each inventory transaction record\n  - actualcost (numeric): True cost incurred for the quantity transacted, used for cost accounting and profitability analysis\n  - referenceorderlineid (integer(32,0)): Line item number within the source order, indicating which specific line item corresponds to this transaction\n  - modifieddate (timestamp without time zone): Date and time when the transaction record was last updated\nMatch reason: Source: vector\n\n--- Table 10: adventureworks.production.workorderrouting ---\nDomain: Manufacturing\nDescription: Work order details.\nFields:\n  - actualstartdate (timestamp without time zone): The actual date and time when this routing operation began execution on the production floor\n  - scheduledenddate (timestamp without time zone): The planned date and time when this routing operation is expected to be completed\n  - scheduledstartdate (timestamp without time zone): The planned date and time when this routing operation is scheduled to begin\n  - actualcost (numeric): The total actual cost incurred for performing this specific routing operation, including labor, materials, and overhead\n  - actualenddate (timestamp without time zone): The actual date and time when this routing operation was finished\n  - workorderid (integer(32,0)) [PK] [FK]: The unique identifier of the parent work order that this routing operation belongs to\n  - plannedcost (numeric): The estimated or budgeted cost for this routing operation prior to execution\n  - locationid (smallint(16,0)) [FK]: The identifier of the work center or physical location where this operation is performed\n  - productid (integer(32,0)) [PK]: The identifier of the product or item being manufactured through this routing operation\n  - actualresourcehrs (numeric(9,4)): The actual number of labor and machine hours consumed during this routing operation\n  - operationsequence (smallint(16,0)) [PK]: The numeric order in which this operation appears in the product's routing path, determining the sequence of manufacturing steps\n  - modifieddate (timestamp without time zone): The timestamp indicating when this routing record was last modified or updated\nMatch reason: Source: vector\n\n--- Table 11: adventureworks.production.productcosthistory ---\nDomain: Product\nDescription: Changes in the cost of a product over time.\nFields:\n  - enddate (timestamp without time zone): The last date when this cost version was effective; after this date, a new cost superseded this record\n  - modifieddate (timestamp without time zone): The date and time when this cost record was last updated or modified in the system\n  - standardcost (numeric): The monetary value representing the standard cost of the product during this effective period\n  - startdate (timestamp without time zone) [PK]: The first date when this cost version became effective and was used for valuation purposes\n  - productid (integer(32,0)) [PK] [FK]: The unique identifier of the product for which this cost history record applies\nMatch reason: Source: vector\n\n--- Table 12: adventureworks.production.productmodel ---\nDomain: Product\nDescription: Product model classification.\nFields:\n  - rowguid (uuid): System-generated globally unique identifier used for database replication, synchronization, and cross-reference across systems\n  - name (character varying(50)): Business name of the product model used for identification, reporting, and association with manufactured products\n  - modifieddate (timestamp without time zone): Timestamp recording when the product model record was last updated for audit and data quality tracking\n  - productmodelid (integer(32,0)) [PK]: Unique sequential identifier serving as the primary key to uniquely reference each product model in the system\n  - catalogdescription (xml): XML document containing structured catalog content such as product features, specifications, and imagery for customer-facing display in sales channels\n  - instructions (xml): XML document containing detailed manufacturing or assembly instructions, work specifications, and quality standards used by production teams\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-21T04:43:16.270315Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "vector",
+    "graph_hint": "none",
+    "query": "inventory stock",
+    "total_results": 12,
+    "selected_tables": [
+      "adventureworks.production.workorder",
+      "adventureworks.purchasing.purchaseorderdetail",
+      "adventureworks.production.transactionhistory",
+      "adventureworks.production.productdocument",
+      "adventureworks.production.productmodelillustration",
+      "adventureworks.purchasing.productvendor",
+      "adventureworks.purchasing.vendor",
+      "adventureworks.production.illustration",
+      "adventureworks.production.transactionhistoryarchive",
+      "adventureworks.production.workorderrouting",
+      "adventureworks.production.productcosthistory",
+      "adventureworks.production.productmodel"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.production.workorder",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "workorder"
+      },
+      {
+        "full_name": "adventureworks.purchasing.purchaseorderdetail",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "purchaseorderdetail"
+      },
+      {
+        "full_name": "adventureworks.production.transactionhistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "transactionhistory"
+      },
+      {
+        "full_name": "adventureworks.production.productdocument",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productdocument"
+      },
+      {
+        "full_name": "adventureworks.production.productmodelillustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productmodelillustration"
+      },
+      {
+        "full_name": "adventureworks.purchasing.productvendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "productvendor"
+      },
+      {
+        "full_name": "adventureworks.purchasing.vendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "vendor"
+      },
+      {
+        "full_name": "adventureworks.production.illustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "illustration"
+      },
+      {
+        "full_name": "adventureworks.production.transactionhistoryarchive",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "transactionhistoryarchive"
+      },
+      {
+        "full_name": "adventureworks.production.workorderrouting",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "workorderrouting"
+      },
+      {
+        "full_name": "adventureworks.production.productcosthistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productcosthistory"
+      },
+      {
+        "full_name": "adventureworks.production.productmodel",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productmodel"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 637.7453142777085
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "vector",
+    "graph_hint": "none",
+    "query": "inventory stock",
+    "total_results": 12,
+    "selected_tables": [
+      "adventureworks.production.workorder",
+      "adventureworks.purchasing.purchaseorderdetail",
+      "adventureworks.production.transactionhistory",
+      "adventureworks.production.productdocument",
+      "adventureworks.production.productmodelillustration",
+      "adventureworks.purchasing.productvendor",
+      "adventureworks.purchasing.vendor",
+      "adventureworks.production.illustration",
+      "adventureworks.production.transactionhistoryarchive",
+      "adventureworks.production.workorderrouting",
+      "adventureworks.production.productcosthistory",
+      "adventureworks.production.productmodel"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.production.workorder",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "workorder"
+      },
+      {
+        "full_name": "adventureworks.purchasing.purchaseorderdetail",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "purchaseorderdetail"
+      },
+      {
+        "full_name": "adventureworks.production.transactionhistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "transactionhistory"
+      },
+      {
+        "full_name": "adventureworks.production.productdocument",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productdocument"
+      },
+      {
+        "full_name": "adventureworks.production.productmodelillustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productmodelillustration"
+      },
+      {
+        "full_name": "adventureworks.purchasing.productvendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "productvendor"
+      },
+      {
+        "full_name": "adventureworks.purchasing.vendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "vendor"
+      },
+      {
+        "full_name": "adventureworks.production.illustration",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "illustration"
+      },
+      {
+        "full_name": "adventureworks.production.transactionhistoryarchive",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "transactionhistoryarchive"
+      },
+      {
+        "full_name": "adventureworks.production.workorderrouting",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "workorderrouting"
+      },
+      {
+        "full_name": "adventureworks.production.productcosthistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productcosthistory"
+      },
+      {
+        "full_name": "adventureworks.production.productmodel",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "productmodel"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 637.7453142777085
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_59mbmzuyirqd_1"
+}

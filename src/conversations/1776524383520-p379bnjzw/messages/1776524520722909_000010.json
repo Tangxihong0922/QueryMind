@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:01:05.752149Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_e1qjldi3ixv1_1",
+      "name": "list_files",
+      "arguments": {
+        "directory": "."
+      }
+    }
+  ],
+  "tool_call_id": null
+}

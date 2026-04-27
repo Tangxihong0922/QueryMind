@@ -1,0 +1,68 @@
+employeeid,jobtitle,vacationhours
+245,Accountant,58
+241,Accounts Manager,57
+246,Accounts Payable Specialist,63
+242,Accounts Receivable Specialist,60
+272,Application Specialist,71
+262,Assistant to the Chief Financial Officer,56
+239,Benefits Specialist,51
+255,Buyer,52
+1,Chief Executive Officer,99
+234,Chief Financial Officer,0
+221,Control Specialist,75
+271,Database Administrator,66
+15,Design Engineer,4
+219,Document Control Assistant,78
+217,Document Control Manager,77
+3,Engineering Manager,2
+287,European Sales Manager,21
+233,Facilities Administrative Assistant,87
+227,Facilities Manager,86
+249,Finance Manager,55
+237,Human Resources Administrative Assistant,52
+235,Human Resources Manager,54
+263,Information Services Manager,65
+230,Janitor,88
+228,Maintenance Supervisor,92
+20,Marketing Assistant,41
+16,Marketing Manager,40
+21,Marketing Specialist,44
+222,Master Scheduler,44
+266,Network Administrator,69
+264,Network Manager,68
+274,North American Sales Manager,14
+285,Pacific Sales Manager,20
+26,Production Control Manager,43
+47,Production Supervisor - WC10,65
+134,Production Supervisor - WC20,40
+166,Production Supervisor - WC30,68
+192,Production Supervisor - WC40,71
+160,Production Supervisor - WC45,74
+108,Production Supervisor - WC50,77
+27,Production Supervisor - WC60,80
+48,Production Technician - WC10,83
+139,Production Technician - WC20,0
+172,Production Technician - WC30,22
+194,Production Technician - WC40,47
+164,Production Technician - WC45,73
+97,Production Technician - WC50,0
+30,Production Technician - WC60,14
+260,Purchasing Assistant,50
+250,Purchasing Manager,49
+211,Quality Assurance Manager,80
+212,Quality Assurance Supervisor,81
+216,Quality Assurance Technician,82
+240,Recruiter,49
+8,Research and Development Engineer,62
+10,Research and Development Manager,16
+280,Sales Representative,22
+224,Scheduling Assistant,45
+14,Senior Design Engineer,3
+11,Senior Tool Designer,7
+125,Shipping and Receiving Clerk,94
+121,Shipping and Receiving Supervisor,93
+126,Stocker,96
+13,Tool Designer,8
+2,Vice President of Engineering,1
+25,Vice President of Production,64
+273,Vice President of Sales,10

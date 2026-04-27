@@ -1,0 +1,9 @@
+{
+  "role": "user",
+  "content": "Please write a SQL query for me. I need to fetch rows from the product table where the sellstartdate is populated (i.e., not null) and the productline equals the letter 'T'. The output should include productid, productnumber, and name. Please sort the results alphabetically by name in ascending order.",
+  "timestamp": "2026-04-21T12:57:17.211147Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": null,
+  "tool_call_id": null
+}

@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:12:49.254020Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_qsukq7nsid6s_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'adventureworks' AND table_name = 'personphone';"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

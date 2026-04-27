@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:01:42.823129Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_zyojt53hfz31_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM Person.Person WHERE BusinessEntityID = 1"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

@@ -1,0 +1,7 @@
+column_name,data_type
+businessentityid,integer
+territoryid,integer
+startdate,timestamp without time zone
+enddate,timestamp without time zone
+rowguid,uuid
+modifieddate,timestamp without time zone

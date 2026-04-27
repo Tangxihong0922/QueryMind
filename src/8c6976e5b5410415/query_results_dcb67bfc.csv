@@ -1,0 +1,14 @@
+column_name,data_type,is_nullable
+businessentityid,integer,NO
+persontype,character,NO
+namestyle,boolean,NO
+title,character varying,YES
+firstname,character varying,NO
+middlename,character varying,YES
+lastname,character varying,NO
+suffix,character varying,YES
+emailpromotion,integer,NO
+additionalcontactinfo,xml,YES
+demographics,xml,YES
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

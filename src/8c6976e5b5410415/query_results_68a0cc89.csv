@@ -1,0 +1,32 @@
+column_name,data_type,table_name
+businessentityid,integer,salesperson
+territoryid,integer,salesperson
+salesquota,numeric,salesperson
+bonus,numeric,salesperson
+commissionpct,numeric,salesperson
+salesytd,numeric,salesperson
+saleslastyear,numeric,salesperson
+rowguid,uuid,salesperson
+modifieddate,timestamp without time zone,salesperson
+businessentityid,integer,vsalesperson
+title,character varying,vsalesperson
+firstname,character varying,vsalesperson
+middlename,character varying,vsalesperson
+lastname,character varying,vsalesperson
+suffix,character varying,vsalesperson
+jobtitle,character varying,vsalesperson
+phonenumber,character varying,vsalesperson
+phonenumbertype,character varying,vsalesperson
+emailaddress,character varying,vsalesperson
+emailpromotion,integer,vsalesperson
+addressline1,character varying,vsalesperson
+addressline2,character varying,vsalesperson
+city,character varying,vsalesperson
+stateprovincename,character varying,vsalesperson
+postalcode,character varying,vsalesperson
+countryregionname,character varying,vsalesperson
+territoryname,character varying,vsalesperson
+territorygroup,character varying,vsalesperson
+salesquota,numeric,vsalesperson
+salesytd,numeric,vsalesperson
+saleslastyear,numeric,vsalesperson

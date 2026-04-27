@@ -1,0 +1,291 @@
+businessentityid,jobtitle,vacationhours,firstname,lastname
+245,Accountant,58,Barbara,Moreland
+248,Accountant,59,Mike,Seamans
+241,Accounts Manager,57,David,Liu
+246,Accounts Payable Specialist,63,Dragan,Tomic
+247,Accounts Payable Specialist,64,Janet,Sheperdigian
+242,Accounts Receivable Specialist,60,Deborah,Poe
+243,Accounts Receivable Specialist,61,Candy,Spoon
+244,Accounts Receivable Specialist,62,Bryan,Walton
+272,Application Specialist,71,Janaina,Bueno
+269,Application Specialist,72,Dan,Bacon
+268,Application Specialist,73,Ramesh,Meyyappan
+267,Application Specialist,74,Karen,Berg
+262,Assistant to the Chief Financial Officer,56,David,Barber
+239,Benefits Specialist,51,Mindy,Martin
+255,Buyer,52,Gordon,Hee
+258,Buyer,53,Erin,Hagens
+257,Buyer,54,Eric,Kurjan
+259,Buyer,55,Ben,Miller
+253,Buyer,56,Linda,Meisner
+254,Buyer,57,Fukiko,Ogisu
+256,Buyer,58,Frank,Pellow
+251,Buyer,59,Mikael,Sandberg
+252,Buyer,60,Arvind,Rao
+1,Chief Executive Officer,99,Ken,Sánchez
+234,Chief Financial Officer,0,Laura,Norman
+221,Control Specialist,75,Chris,Norred
+218,Control Specialist,76,Tengiz,Kharatishvili
+271,Database Administrator,66,Dan,Wilson
+270,Database Administrator,67,François,Ajenstat
+15,Design Engineer,4,Sharon,Salavaria
+5,Design Engineer,5,Gail,Erickson
+6,Design Engineer,6,Jossef,Goldberg
+219,Document Control Assistant,78,Sean,Chai
+220,Document Control Assistant,79,Karen,Berge
+217,Document Control Manager,77,Zainal,Arifin
+3,Engineering Manager,2,Roberto,Tamburello
+287,European Sales Manager,21,Amy,Alberts
+233,Facilities Administrative Assistant,87,Magnus,Hedlund
+227,Facilities Manager,86,Gary,Altman
+249,Finance Manager,55,Wendy,Kahn
+237,Human Resources Administrative Assistant,52,Hao,Chen
+236,Human Resources Administrative Assistant,53,Grant,Culbertson
+235,Human Resources Manager,54,Paula,Barreto de Mattos
+263,Information Services Manager,65,Jean,Trenary
+230,Janitor,88,Stuart,Macrae
+232,Janitor,89,Pat,Coleman
+229,Janitor,90,Lori,Penor
+231,Janitor,91,Jo,Berry
+228,Maintenance Supervisor,92,Christian,Kleinerman
+20,Marketing Assistant,41,Wanida,Benshoof
+17,Marketing Assistant,42,Kevin,Brown
+19,Marketing Assistant,43,Mary,Dempsey
+16,Marketing Manager,40,David,Bradley
+21,Marketing Specialist,44,Terry,Eminhizer
+22,Marketing Specialist,45,Sariya,Harnpadoungsataya
+23,Marketing Specialist,46,Mary,Gibson
+24,Marketing Specialist,47,Jill,Williams
+18,Marketing Specialist,48,John,Wood
+222,Master Scheduler,44,A. Scott,Wright
+266,Network Administrator,69,Peter,Connelly
+265,Network Administrator,70,Ashvini,Sharma
+264,Network Manager,68,Stephanie,Conroy
+274,North American Sales Manager,14,Stephen,Jiang
+285,Pacific Sales Manager,20,Syed,Abbas
+26,Production Control Manager,43,Peter,Krebs
+47,Production Supervisor - WC10,65,Andrew,Hill
+102,Production Supervisor - WC10,66,Zheng,Mu
+87,Production Supervisor - WC10,67,Cristian,Petculescu
+134,Production Supervisor - WC20,40,Eric,Gubbels
+152,Production Supervisor - WC20,41,Yuhong,Li
+180,Production Supervisor - WC20,42,Katie,McAskill-White
+166,Production Supervisor - WC30,68,Jack,Richins
+145,Production Supervisor - WC30,69,Cynthia,Randall
+71,Production Supervisor - WC30,70,Michael,Ray
+192,Production Supervisor - WC40,71,Brenda,Diaz
+78,Production Supervisor - WC40,72,Reuben,D'sa
+127,Production Supervisor - WC40,73,David,Hamilton
+160,Production Supervisor - WC45,74,Jeff,Hay
+186,Production Supervisor - WC45,75,Shane,Kim
+205,Production Supervisor - WC45,76,Lori,Kane
+108,Production Supervisor - WC50,77,Jinghao,Liu
+93,Production Supervisor - WC50,78,Kok-Ho,Loh
+55,Production Supervisor - WC50,79,Taylor,Maxwell
+27,Production Supervisor - WC60,80,Jo,Brown
+62,Production Supervisor - WC60,81,John,Campbell
+40,Production Supervisor - WC60,82,JoLynn,Dobney
+48,Production Technician - WC10,83,Ruth,Ellerbrock
+50,Production Technician - WC10,84,Sidney,Higa
+51,Production Technician - WC10,85,Jeffrey,Ford
+52,Production Technician - WC10,86,Doris,Hartwig
+53,Production Technician - WC10,87,Diane,Glimp
+49,Production Technician - WC10,88,Barry,Johnson
+54,Production Technician - WC10,89,Bonnie,Kearney
+105,Production Technician - WC10,90,Kevin,Homer
+107,Production Technician - WC10,91,Christopher,Hill
+106,Production Technician - WC10,92,John,Kane
+103,Production Technician - WC10,93,Ebru,Ersan
+104,Production Technician - WC10,94,Mary,Baker
+91,Production Technician - WC10,95,Kimberly,Zimmerman
+89,Production Technician - WC10,96,Patrick,Wedge
+90,Production Technician - WC10,97,Danielle,Tiedt
+92,Production Technician - WC10,98,Tom,Vande Velde
+88,Production Technician - WC10,99,Betsy,Stadick
+139,Production Technician - WC20,0,Hung-Fu,Ting
+141,Production Technician - WC20,1,Min,Su
+143,Production Technician - WC20,2,Krishna,Sunkammurali
+142,Production Technician - WC20,3,Olinda,Turner
+136,Production Technician - WC20,4,Sylvester,Valdez
+140,Production Technician - WC20,5,Prasanna,Samarawickrama
+144,Production Technician - WC20,6,Paul,Singh
+138,Production Technician - WC20,7,Samantha,Smith
+137,Production Technician - WC20,8,Anibal,Sousa
+135,Production Technician - WC20,9,Ivo,Salmre
+154,Production Technician - WC20,10,Raymond,Sam
+156,Production Technician - WC20,11,Lane,Sacksteder
+157,Production Technician - WC20,12,Linda,Randall
+159,Production Technician - WC20,13,Terrence,Earls
+158,Production Technician - WC20,14,Shelley,Dyck
+153,Production Technician - WC20,15,Hanying,Feng
+155,Production Technician - WC20,16,Fadi,Fakhouri
+183,Production Technician - WC20,17,Barbara,Decker
+184,Production Technician - WC20,18,John,Chen
+185,Production Technician - WC20,19,Stefen,Hesse
+181,Production Technician - WC20,20,Michael,Hines
+182,Production Technician - WC20,21,Nitin,Mirchandani
+172,Production Technician - WC30,22,Marc,Ingle
+175,Production Technician - WC30,23,Reed,Koch
+177,Production Technician - WC30,24,Russell,King
+167,Production Technician - WC30,25,David,Johnson
+170,Production Technician - WC30,26,George,Li
+178,Production Technician - WC30,27,John,Frum
+174,Production Technician - WC30,28,Benjamin,Martin
+176,Production Technician - WC30,29,David,Lawrence
+179,Production Technician - WC30,30,Jan,Miksovsky
+169,Production Technician - WC30,31,Susan,Metters
+171,Production Technician - WC30,32,David,Yalovsky
+173,Production Technician - WC30,33,Eugene,Zabokritski
+168,Production Technician - WC30,34,Garrett,Young
+150,Production Technician - WC30,35,Michael,Vanderhyde
+146,Production Technician - WC30,36,Jian Shuo,Wang
+147,Production Technician - WC30,37,Sandra,Reátegui Alayo
+148,Production Technician - WC30,38,Jason,Watters
+149,Production Technician - WC30,39,Andy,Ruth
+151,Production Technician - WC30,40,Rostislav,Shabalin
+72,Production Technician - WC30,41,Steven,Selikoff
+73,Production Technician - WC30,42,Carole,Poland
+74,Production Technician - WC30,43,Bjorn,Rettig
+75,Production Technician - WC30,44,Michiko,Osada
+76,Production Technician - WC30,45,Carol,Philips
+77,Production Technician - WC30,46,Merav,Netz
+194,Production Technician - WC40,47,Fred,Northup
+197,Production Technician - WC40,48,Rajesh,Patel
+198,Production Technician - WC40,49,Lorraine,Nay
+202,Production Technician - WC40,50,Tawana,Nusbaum
+203,Production Technician - WC40,51,Ken,Myer
+193,Production Technician - WC40,52,Alejandro,McGuel
+196,Production Technician - WC40,53,Shammi,Mohamed
+199,Production Technician - WC40,54,Paula,Nartker
+201,Production Technician - WC40,55,Brian,Lloyd
+200,Production Technician - WC40,56,Frank,Lee
+204,Production Technician - WC40,57,Gabe,Mares
+195,Production Technician - WC40,58,Kevin,Liu
+86,Production Technician - WC40,59,Ryan,Cornelsen
+79,Production Technician - WC40,60,Eric,Brown
+83,Production Technician - WC40,61,Patrick,Cook
+82,Production Technician - WC40,62,Jack,Creasey
+85,Production Technician - WC40,63,Brian,Goldstein
+81,Production Technician - WC40,64,Mihail,Frintu
+80,Production Technician - WC40,65,Sandeep,Kaliyath
+84,Production Technician - WC40,66,Frank,Martinez
+132,Production Technician - WC40,67,Nicole,Holliday
+128,Production Technician - WC40,68,Paul,Komosinski
+129,Production Technician - WC40,69,Gary,Yukish
+133,Production Technician - WC40,70,Michael,Rothkugel
+130,Production Technician - WC40,71,Rob,Caron
+131,Production Technician - WC40,72,Baris,Cetinok
+164,Production Technician - WC45,73,Andrew,Cencini
+161,Production Technician - WC45,74,Kirk,Koenigsbauer
+162,Production Technician - WC45,75,Laura,Steele
+165,Production Technician - WC45,76,Chris,Preston
+163,Production Technician - WC45,77,Alex,Nayberg
+191,Production Technician - WC45,78,Lionel,Penuchot
+187,Production Technician - WC45,79,Yvonne,McKay
+188,Production Technician - WC45,80,Douglas,Hite
+189,Production Technician - WC45,81,Janeth,Esteves
+190,Production Technician - WC45,82,Robert,Rounthwaite
+210,Production Technician - WC45,83,Belinda,Newman
+206,Production Technician - WC45,84,Stuart,Munson
+207,Production Technician - WC45,85,Greg,Alderson
+208,Production Technician - WC45,86,Scott,Gode
+209,Production Technician - WC45,87,Kathie,Flood
+97,Production Technician - WC50,0,Mandar,Samant
+95,Production Technician - WC50,1,Jim,Scardelis
+99,Production Technician - WC50,2,Nuan,Yu
+101,Production Technician - WC50,3,Houman,Pournasseh
+98,Production Technician - WC50,4,Sameer,Tejani
+96,Production Technician - WC50,5,Elizabeth,Keyser
+94,Production Technician - WC50,6,Russell,Hunter
+100,Production Technician - WC50,7,Lolan,Song
+61,Production Technician - WC50,8,Diane,Tibbott
+56,Production Technician - WC50,9,Denise,Smith
+57,Production Technician - WC50,10,Frank,Miller
+58,Production Technician - WC50,11,Kendall,Keil
+59,Production Technician - WC50,12,Bob,Hohman
+60,Production Technician - WC50,13,Pete,Male
+118,Production Technician - WC50,88,Don,Hall
+120,Production Technician - WC50,89,Kitti,Lertpiriyasuwat
+110,Production Technician - WC50,90,Jun,Cao
+112,Production Technician - WC50,91,John,Evans
+115,Production Technician - WC50,92,Angela,Barbariol
+111,Production Technician - WC50,93,Suroor,Fatima
+119,Production Technician - WC50,94,Michael,Entin
+109,Production Technician - WC50,95,Alice,Ciccu
+113,Production Technician - WC50,96,Linda,Moschell
+114,Production Technician - WC50,97,Mindaugas,Krapauskas
+116,Production Technician - WC50,98,Michael,Patten
+117,Production Technician - WC50,99,Chad,Niswonger
+30,Production Technician - WC60,14,Britta,Simon
+34,Production Technician - WC60,15,Suchitra,Mohan
+37,Production Technician - WC60,16,Chris,Okelberry
+33,Production Technician - WC60,17,Annik,Stahl
+31,Production Technician - WC60,18,Margie,Shoop
+29,Production Technician - WC60,19,Mark,McArthur
+36,Production Technician - WC60,20,Jose,Lugo
+28,Production Technician - WC60,21,Guy,Gilbert
+35,Production Technician - WC60,22,Brandon,Heidepriem
+32,Production Technician - WC60,23,Rebecca,Laszlo
+38,Production Technician - WC60,24,Kim,Abercrombie
+39,Production Technician - WC60,25,Ed,Dudenhoefer
+64,Production Technician - WC60,26,Michael,Zwilling
+68,Production Technician - WC60,27,Charles,Fitzgerald
+66,Production Technician - WC60,28,Karan,Khanna
+65,Production Technician - WC60,29,Randy,Reeves
+63,Production Technician - WC60,30,Maciej,Dusza
+69,Production Technician - WC60,31,Steve,Masters
+67,Production Technician - WC60,32,Jay,Adams
+70,Production Technician - WC60,33,David,Ortiz
+43,Production Technician - WC60,34,Nancy,Anderson
+41,Production Technician - WC60,35,Bryan,Baker
+46,Production Technician - WC60,36,Eugene,Kogan
+45,Production Technician - WC60,37,Thomas,Michaels
+44,Production Technician - WC60,38,Simon,Rapier
+42,Production Technician - WC60,39,James,Kramer
+260,Purchasing Assistant,50,Annette,Hill
+261,Purchasing Assistant,51,Reinout,Hillmann
+250,Purchasing Manager,49,Sheela,Word
+211,Quality Assurance Manager,80,Hazem,Abolrous
+212,Quality Assurance Supervisor,81,Peng,Wu
+216,Quality Assurance Technician,82,Sean,Alexander
+215,Quality Assurance Technician,83,Mark,Harrington
+214,Quality Assurance Technician,84,Andreas,Berglund
+213,Quality Assurance Technician,85,Sootha,Charncherngkha
+240,Recruiter,49,Willis,Johnson
+238,Recruiter,50,Vidur,Luthra
+8,Research and Development Engineer,62,Diane,Margheim
+9,Research and Development Engineer,63,Gigi,Matthew
+10,Research and Development Manager,16,Michael,Raheem
+7,Research and Development Manager,61,Dylan,Miller
+280,Sales Representative,22,Pamela,Ansman-Wolfe
+283,Sales Representative,23,David,Campbell
+277,Sales Representative,24,Jillian,Carson
+281,Sales Representative,26,Shu,Ito
+276,Sales Representative,27,Linda,Mitchell
+279,Sales Representative,29,Tsvi,Reiter
+282,Sales Representative,31,José,Saraiva
+278,Sales Representative,33,Garrett,Vargas
+290,Sales Representative,34,Ranjit,Varkey Chudukatil
+288,Sales Representative,35,Rachel,Valdez
+286,Sales Representative,36,Lynn,Tsoflias
+289,Sales Representative,37,Jae,Pak
+275,Sales Representative,38,Michael,Blythe
+284,Sales Representative,39,Tete,Mensa-Annan
+224,Scheduling Assistant,45,William,Vong
+223,Scheduling Assistant,46,Sairaj,Uddin
+225,Scheduling Assistant,47,Alan,Brewer
+226,Scheduling Assistant,48,Brian,LaMee
+14,Senior Design Engineer,3,Michael,Sullivan
+11,Senior Tool Designer,7,Ovidiu,Cracium
+4,Senior Tool Designer,48,Rob,Walters
+125,Shipping and Receiving Clerk,94,Matthias,Berndt
+123,Shipping and Receiving Clerk,95,Vamsi,Kuppa
+121,Shipping and Receiving Supervisor,93,Pilar,Ackerman
+126,Stocker,96,Jimmy,Bischoff
+122,Stocker,97,Susan,Eaton
+124,Stocker,98,Kim,Ralls
+13,Tool Designer,8,Janice,Galvin
+12,Tool Designer,9,Thierry,D'Hers
+2,Vice President of Engineering,1,Terri,Duffy
+25,Vice President of Production,64,James,Hamilton
+273,Vice President of Sales,10,Brian,Welcker

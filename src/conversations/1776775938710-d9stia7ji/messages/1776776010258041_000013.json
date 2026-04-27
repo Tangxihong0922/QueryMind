@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T12:53:05.145646Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_k3pyzv0dbrhp_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT table_schema, table_name FROM information_schema.columns \nWHERE column_name IN ('productid', 'productnumber', 'name', 'sellstartdate', 'productline') \nGROUP BY table_schema, table_name \nHAVING COUNT(DISTINCT column_name) = 5;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

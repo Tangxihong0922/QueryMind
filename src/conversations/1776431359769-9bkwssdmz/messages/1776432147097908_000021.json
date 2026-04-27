@@ -1,0 +1,8 @@
+{
+  "role": "user",
+  "content": "you should only query production.product",
+  "timestamp": "2026-04-17T13:21:58.643741Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": null
+}

@@ -1,0 +1,4 @@
+table_schema,table_name
+production,product
+sales,salesorderheader
+sales,salesorderdetail

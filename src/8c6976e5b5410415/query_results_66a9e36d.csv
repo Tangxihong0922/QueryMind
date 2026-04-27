@@ -1,0 +1,6 @@
+column_name,data_type,is_nullable
+businessentityid,integer,NO
+ratechangedate,timestamp without time zone,NO
+rate,numeric,NO
+payfrequency,smallint,NO
+modifieddate,timestamp without time zone,NO

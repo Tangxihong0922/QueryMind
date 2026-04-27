@@ -1,0 +1,26 @@
+column_name,data_type,is_nullable,column_default
+productid,integer,NO,nextval('production.product_productid_seq'::regclass)
+name,character varying,NO,
+productnumber,character varying,NO,
+makeflag,boolean,NO,true
+finishedgoodsflag,boolean,NO,true
+color,character varying,YES,
+safetystocklevel,smallint,NO,
+reorderpoint,smallint,NO,
+standardcost,numeric,NO,
+listprice,numeric,NO,
+size,character varying,YES,
+sizeunitmeasurecode,character,YES,
+weightunitmeasurecode,character,YES,
+weight,numeric,YES,
+daystomanufacture,integer,NO,
+productline,character,YES,
+class,character,YES,
+style,character,YES,
+productsubcategoryid,integer,YES,
+productmodelid,integer,YES,
+sellstartdate,timestamp without time zone,NO,
+sellenddate,timestamp without time zone,YES,
+discontinueddate,timestamp without time zone,YES,
+rowguid,uuid,NO,uuid_generate_v1()
+modifieddate,timestamp without time zone,NO,now()

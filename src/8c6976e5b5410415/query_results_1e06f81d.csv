@@ -1,0 +1,31 @@
+column_name,data_type,is_nullable,column_default
+departmentid,integer,NO,nextval('humanresources.department_departmentid_seq'::regclass)
+name,character varying,NO,
+groupname,character varying,NO,
+modifieddate,timestamp without time zone,NO,now()
+businessentityid,integer,NO,
+nationalidnumber,character varying,NO,
+loginid,character varying,NO,
+jobtitle,character varying,NO,
+birthdate,date,NO,
+maritalstatus,character,NO,
+gender,character,NO,
+hiredate,date,NO,
+salariedflag,boolean,NO,true
+vacationhours,smallint,NO,0
+sickleavehours,smallint,NO,0
+currentflag,boolean,NO,true
+rowguid,uuid,NO,uuid_generate_v1()
+modifieddate,timestamp without time zone,NO,now()
+organizationnode,character varying,YES,'/'::character varying
+businessentityid,integer,NO,
+departmentid,smallint,NO,
+shiftid,smallint,NO,
+startdate,date,NO,
+enddate,date,YES,
+modifieddate,timestamp without time zone,NO,now()
+businessentityid,integer,NO,
+ratechangedate,timestamp without time zone,NO,
+rate,numeric,NO,
+payfrequency,smallint,NO,
+modifieddate,timestamp without time zone,NO,now()

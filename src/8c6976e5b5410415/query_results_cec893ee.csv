@@ -1,0 +1,20 @@
+column_name,data_type
+id,integer
+stateprovinceid,integer
+stateprovincecode,character
+countryregioncode,character varying
+isonlystateprovinceflag,boolean
+name,character varying
+territoryid,integer
+rowguid,uuid
+modifieddate,timestamp without time zone
+id,integer
+businessentityid,integer
+territoryid,integer
+salesquota,numeric
+bonus,numeric
+commissionpct,numeric
+salesytd,numeric
+saleslastyear,numeric
+rowguid,uuid
+modifieddate,timestamp without time zone

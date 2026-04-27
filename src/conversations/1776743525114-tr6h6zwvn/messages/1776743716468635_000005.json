@@ -1,0 +1,33 @@
+{
+  "role": "tool",
+  "content": "No table schemas found matching 'inventory location warehouse product quantity stock'",
+  "timestamp": "2026-04-21T03:53:18.235840Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "vector",
+    "graph_hint": "none",
+    "query": "inventory location warehouse product quantity stock",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 642.1399679966271
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "vector",
+    "graph_hint": "none",
+    "query": "inventory location warehouse product quantity stock",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 642.1399679966271
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_zgexiv8shxee_1"
+}

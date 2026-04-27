@@ -1,0 +1,6 @@
+column_name,data_type,is_nullable,column_default
+businessentityid,integer,NO,
+quotadate,timestamp without time zone,NO,
+salesquota,numeric,NO,
+rowguid,uuid,NO,uuid_generate_v1()
+modifieddate,timestamp without time zone,NO,now()

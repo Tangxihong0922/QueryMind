@@ -1,0 +1,8 @@
+{
+  "role": "tool",
+  "content": "relation \"employees\" does not exist\nLINE 1: SELECT * FROM employees LIMIT 1;\n                      ^\n",
+  "timestamp": "2026-04-16T15:42:42.624069Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": "call_function_tmo9ymc2g23g_1"
+}

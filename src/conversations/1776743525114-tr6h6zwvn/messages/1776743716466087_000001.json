@@ -1,0 +1,25 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T03:53:09.631079Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_g9shbc3z1y55_1",
+      "name": "search_saved_correct_tool_uses",
+      "arguments": {
+        "question": "\u67e5\u8be2\u5e93\u5b58\u4ea7\u54c1\u5e76\u6309\u5e93\u4f4d\u5206\u533a\u6392\u540d"
+      }
+    },
+    {
+      "id": "call_function_g9shbc3z1y55_2",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "\u5e93\u5b58\u4ea7\u54c1 \u5e93\u4f4d location \u6570\u91cf inventory",
+        "search_mode": "hybrid"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

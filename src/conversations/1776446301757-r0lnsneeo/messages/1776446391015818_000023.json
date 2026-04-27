@@ -1,0 +1,15 @@
+{
+  "role": "tool",
+  "content": "relation \"employee\" does not exist\nLINE 1: SELECT * FROM employee LIMIT 5;\n                      ^\n",
+  "timestamp": "2026-04-17T17:19:10.910314Z",
+  "metadata": {
+    "error_type": "sql_error",
+    "execution_time_ms": 23.062958847731352
+  },
+  "tool_result": {
+    "error_type": "sql_error",
+    "execution_time_ms": 23.062958847731352
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_f6lc8m90xfv6_1"
+}

@@ -1,0 +1,11 @@
+column_name,data_type,is_nullable
+territoryid,integer,NO
+name,character varying,NO
+countryregioncode,character varying,NO
+group,character varying,NO
+salesytd,numeric,NO
+saleslastyear,numeric,NO
+costytd,numeric,NO
+costlastyear,numeric,NO
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

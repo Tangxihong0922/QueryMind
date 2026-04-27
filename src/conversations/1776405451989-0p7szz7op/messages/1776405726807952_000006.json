@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T06:01:22.353351Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_43b5bb0a24e94b879babeef0",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "vacation hours hr human resources"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

@@ -1,0 +1,33 @@
+{
+  "role": "tool",
+  "content": "No table schemas found matching 'person table firstname lastname'",
+  "timestamp": "2026-04-21T06:12:26.039584Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "vector",
+    "graph_hint": "none",
+    "query": "person table firstname lastname",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 567.1839453279972
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "vector",
+    "graph_hint": "none",
+    "query": "person table firstname lastname",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 567.1839453279972
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_e7bc34482a94440999b33186"
+}

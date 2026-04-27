@@ -1,0 +1,14 @@
+table_name
+department
+employee
+employeedepartmenthistory
+employeenameview
+employeepayhistory
+jobcandidate
+shift
+vemployee
+vemployeedepartment
+vemployeedepartmenthistory
+vjobcandidate
+vjobcandidateeducation
+vjobcandidateemployment

@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T18:53:56.256590Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_qxeywtey02qe_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT table_name FROM information_schema.tables WHERE table_schema = 'humanresources'"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

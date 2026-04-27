@@ -1,0 +1,6 @@
+column_name,data_type,is_nullable
+productsubcategoryid,integer,NO
+productcategoryid,integer,NO
+name,character varying,NO
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

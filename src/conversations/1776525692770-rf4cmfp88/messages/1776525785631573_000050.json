@@ -1,0 +1,59 @@
+{
+  "role": "tool",
+  "content": "column_name\nid\naddresstypeid\nname\nrowguid\nmodifieddate\n\n\nResults saved to file: query_results_6d295d05.csv\n\n**IMPORTANT: FOR VISUALIZE_DATA USE FILENAME: query_results_6d295d05.csv**",
+  "timestamp": "2026-04-18T15:23:05.607418Z",
+  "metadata": {
+    "row_count": 5,
+    "columns": [
+      "column_name"
+    ],
+    "query_type": "SELECT",
+    "results": [
+      {
+        "column_name": "id"
+      },
+      {
+        "column_name": "addresstypeid"
+      },
+      {
+        "column_name": "name"
+      },
+      {
+        "column_name": "rowguid"
+      },
+      {
+        "column_name": "modifieddate"
+      }
+    ],
+    "output_file": "query_results_6d295d05.csv",
+    "execution_time_ms": 25.582259986549616
+  },
+  "tool_result": {
+    "row_count": 5,
+    "columns": [
+      "column_name"
+    ],
+    "query_type": "SELECT",
+    "results": [
+      {
+        "column_name": "id"
+      },
+      {
+        "column_name": "addresstypeid"
+      },
+      {
+        "column_name": "name"
+      },
+      {
+        "column_name": "rowguid"
+      },
+      {
+        "column_name": "modifieddate"
+      }
+    ],
+    "output_file": "query_results_6d295d05.csv",
+    "execution_time_ms": 25.582259986549616
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_0gubm2vp3bix_1"
+}

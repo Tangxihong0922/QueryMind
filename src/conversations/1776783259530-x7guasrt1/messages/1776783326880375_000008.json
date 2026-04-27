@@ -1,0 +1,177 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 10 related table(s):\n\n--- Table 1: adventureworks.purchasing.vendor ---\nDomain: Vendor\nDescription: Companies from whom Adventure Works Cycles purchases parts or other goods.\nFields:\n  - purchasingwebserviceurl (character varying(1024)): Web service endpoint URL used for electronic data interchange and automated purchasing transactions with the vendor\n  - name (character varying(50)): Official business name of the vendor or supplier company\n  - activeflag (boolean): Indicator of whether the vendor is currently operational and conducting business\n  - accountnumber (character varying(15)): Internal accounting code assigned to track and process financial transactions with the vendor\n  - businessentityid (integer(32,0)) [PK]: Unique identifier referencing the underlying business entity record for data consistency across the enterprise\n  - creditrating (smallint(16,0)): Numerical assessment of the vendor's creditworthiness and financial reliability, typically on a scale where lower values indicate better credit standing\n  - modifieddate (timestamp without time zone): Timestamp recording the most recent update to the vendor's master record for audit and synchronization purposes\n  - preferredvendorstatus (boolean): Flag designating whether the vendor is approved and prioritized as a preferred supplier for purchasing decisions\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.production.transactionhistory ---\nDomain: Inventory\nDescription: Record of each purchase order, sales order, or work order transaction year to date.\nFields:\n  - transactiontype (character(1)): Single-character code indicating the type of transaction (e.g., P for Purchase, S for Sales, W for Work Order)\n  - modifieddate (timestamp without time zone): Timestamp when the transaction record was last updated or modified in the system\n  - quantity (integer(32,0)): Number of units involved in the transaction for the associated product\n  - productid (integer(32,0)) [FK]: Unique identifier referencing the product being transacted in this record\n  - transactionid (integer(32,0)) [PK]: Primary key and unique identifier for each individual transaction record\n  - referenceorderid (integer(32,0)): Foreign key linking to the parent order (purchase, sales, or work order) that initiated this transaction\n  - transactiondate (timestamp without time zone): Date and time when the actual transaction occurred in the business process\n  - actualcost (numeric): Real monetary cost incurred for the transaction, used for financial reporting and cost analysis\n  - referenceorderlineid (integer(32,0)): Foreign key referencing the specific line item within the parent order, allowing granular transaction tracking\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.purchasing.shipmethod ---\nDomain: Shipping\nDescription: Shipping company lookup table.\nFields:\n  - modifieddate (timestamp without time zone): Date and time when the shipping method record was last modified\n  - shiprate (numeric): Additional per-unit or variable shipping rate charged for this method\n  - shipbase (numeric): Base or flat rate cost for using this shipping method\n  - rowguid (uuid): Globally unique identifier assigned to each shipping method for cross-system data synchronization\n  - shipmethodid (integer(32,0)) [PK]: Primary key identifier for the shipping method record\n  - name (character varying(50)): Name of the shipping company or method (e.g., UPS, FedEx, DHL, overnight, ground)\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.production.unitmeasure ---\nDomain: Product\nDescription: Unit of measure lookup table.\nFields:\n  - unitmeasurecode (character(3)) [PK]: The 3-character code that uniquely identifies the unit of measurement (e.g., 'CM' for centimeter, 'KG' for kilogram, 'EA' for each)\n  - modifieddate (timestamp without time zone): The timestamp indicating when this unit of measurement record was last modified or updated\n  - name (character varying(50)): The full descriptive name of the unit of measurement (e.g., 'Centimeter', 'Kilogram', 'Each')\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.production.document ---\nDomain: Document\nDescription: Product maintenance documents.\nFields:\n  - documentsummary (text): Brief text description summarizing the document content and purpose for quick reference and search\n  - status (smallint(16,0)): Workflow status indicating document approval state such as draft, under review, approved, or archived\n  - filename (character varying(400)): Original file name of the stored document including extension\n  - owner (integer(32,0)): Employee or user ID responsible for maintaining and approving this document\n  - document (bytea): Binary content of the actual document file stored in the database\n  - fileextension (character varying(8)): File type indicator such as PDF, DOCX, or DWG determining how the document can be opened\n  - documentnode (character varying) [PK]: Hierarchical location code within the document organization structure for navigation and categorization\n  - revision (character(5)): Version identifier tracking document iterations such as Rev A, Rev 1.0\n  - changenumber (integer(32,0)): Tracking number linking to the change request that triggered the document update\n  - modifieddate (timestamp without time zone): Timestamp recording when the document was last updated in the system\n  - rowguid (uuid): Unique system identifier for the document record used for data replication and integration\n  - folderflag (boolean): Boolean flag indicating whether the entry represents a folder container or an actual document file\n  - title (character varying(50)): Human-readable document title used for display in user interfaces and search results\nMatch reason: Source: vector\n\n--- Table 6: adventureworks.production.product ---\nDomain: Product\nDescription: Products sold or used in the manfacturing of sold products.\nFields:\n  - productid (integer(32,0)) [PK]: Unique identifier for each product in the catalog, serving as the primary key for product-related transactions and relationships\n  - sellstartdate (timestamp without time zone): Date when the product became available for sale, marking the beginning of the product's active sales lifecycle\n  - weight (numeric(8,2)): Physical weight of the product used for shipping calculations, inventory tracking, and freight cost estimation\n  - sellenddate (timestamp without time zone): Date when the product was removed from active sales, indicating the end of the product's market availability\n  - weightunitmeasurecode (character(3)) [FK]: Unit of measurement for the product weight, such as LB (pounds) or KG (kilograms), ensuring consistent weight interpretation\n  - standardcost (numeric): Baseline cost used for inventory valuation, margin calculation, and standard costing accounting purposes\n  - style (character(2)): Product style classification code that categorizes products by style variant for segmentation and reporting\n  - makeflag (boolean): Boolean indicator showing whether the product is manufactured in-house (true) or purchased from external vendors (false)\n  - modifieddate (timestamp without time zone): Date and time when the product record was last updated, used for change tracking and data synchronization\n  - finishedgoodsflag (boolean): Boolean flag indicating if the product is a finished good ready for customer sale versus a raw material or component\n  - productsubcategoryid (integer(32,0)) [FK]: Foreign key linking to the product subcategory classification, enabling hierarchical product categorization\n  - productmodelid (integer(32,0)): Foreign key to the product model specification, linking to detailed model and engineering information\n  - productline (character(2)): Product line code classifying products into product families such as R (Road), M (Mountain), or T (Touring) for marketing and reporting\n  - safetystocklevel (smallint(16,0)): Minimum inventory buffer quantity to prevent stockouts during lead times, protecting against demand variability\n  - size (character varying(5)): Product size attribute for items like clothing, footwear, or equipment where size is relevant to customer selection\nMatch reason: Source: vector\n\n--- Table 7: adventureworks.purchasing.productvendor ---\nDomain: Purchasing\nDescription: Cross-reference table mapping vendors with the products they supply.\nFields:\n  - productid (integer(32,0)) [PK]: Unique identifier linking to the product being sourced from this vendor\n  - minorderqty (integer(32,0)): Minimum quantity that must be ordered from this vendor per purchase order\n  - businessentityid (integer(32,0)) [PK] [FK]: Vendor (supplier) identifier from the business entity master\n  - maxorderqty (integer(32,0)): Maximum quantity allowed per purchase order from this vendor\n  - lastreceiptdate (timestamp without time zone): Date when the most recent shipment was received from this vendor\n  - lastreceiptcost (numeric): Unit cost paid for the product in the most recent receipt from this vendor\n  - unitmeasurecode (character(3)): Standard unit of measure for ordering this product from the vendor (e.g., EACH, CASE)\n  - onorderqty (integer(32,0)): Current quantity of this product that has been ordered but not yet received\n  - averageleadtime (integer(32,0)): Average number of days between placing an order and receiving the product from this vendor\n  - standardprice (numeric): Standard unit price charged by this vendor for the product\n  - modifieddate (timestamp without time zone): Date and time when this vendor-product relationship record was last updated\nMatch reason: Source: vector\n\n--- Table 8: adventureworks.sales.shoppingcartitem ---\nDomain: E-Commerce\nDescription: Contains online customer orders until the order is submitted or cancelled.\nFields:\n  - shoppingcartid (character varying(50)): Reference to the parent shopping cart session grouping all items for a customer\n  - productid (integer(32,0)): Reference to the specific product being added to the cart from the product catalog\n  - quantity (integer(32,0)): Number of units of the product the customer intends to purchase\n  - datecreated (timestamp without time zone): Timestamp when the item was first added to the shopping cart\n  - modifieddate (timestamp without time zone): Timestamp of the most recent update to this cart item such as quantity changes\n  - shoppingcartitemid (integer(32,0)) [PK]: Unique identifier for each item line in a shopping cart\nMatch reason: Source: vector\n\n--- Table 9: adventureworks.production.billofmaterials ---\nDomain: Manufacturing\nDescription: Items required to make bicycles and bicycle subassemblies. It identifies the heirarchical relationship between a parent product and its components.\nFields:\n  - modifieddate (timestamp without time zone): Timestamp of the most recent modification to this bill of materials record, indicating when the data was last updated\n  - perassemblyqty (numeric(8,2)): Quantity of the component required per one unit of the parent product assembly\n  - startdate (timestamp without time zone): Effective date when this bill of materials configuration becomes valid and can be used in production\n  - unitmeasurecode (character(3)) [FK]: Three-character code specifying the unit of measure for the component quantity (e.g., EA for each, LB for pounds)\n  - bomlevel (smallint(16,0)): Numeric level in the product hierarchy indicating the nesting depth (0 for top-level assemblies, increasing for sub-components)\n  - productassemblyid (integer(32,0)) [FK]: Reference to the parent product that will be assembled from components (the finished or intermediate product being manufactured)\n  - enddate (timestamp without time zone): Expiration date when this bill of materials configuration is no longer valid; null indicates it is currently active\n  - componentid (integer(32,0)) [FK]: Reference to the child part or component that goes into making the parent product assembly\n  - billofmaterialsid (integer(32,0)) [PK]: Unique identifier for each bill of materials record, serving as the primary key for this table\nMatch reason: Source: vector\n\n--- Table 10: adventureworks.sales.store ---\nDomain: Store\nDescription: Customers (resellers) of Adventure Works products.\nFields:\n  - salespersonid (integer(32,0)) [FK]: Identifier of the salesperson assigned to manage and support this store account\n  - demographics (xml): XML document containing store demographic information including location type, sales territory, and business characteristics\n  - rowguid (uuid): Globally unique identifier assigned to each store record for system-wide reference\n  - name (character varying(50)): Official business name of the store or reseller entity\n  - modifieddate (timestamp without time zone): Timestamp indicating when the store record was last updated in the system\n  - businessentityid (integer(32,0)) [PK]: Foreign key reference to the core business entity table containing foundational information about this store organization\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-21T14:54:46.213182Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "warehouse location stock",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.purchasing.vendor",
+      "adventureworks.production.transactionhistory",
+      "adventureworks.purchasing.shipmethod",
+      "adventureworks.production.unitmeasure",
+      "adventureworks.production.document",
+      "adventureworks.production.product",
+      "adventureworks.purchasing.productvendor",
+      "adventureworks.sales.shoppingcartitem",
+      "adventureworks.production.billofmaterials",
+      "adventureworks.sales.store"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.purchasing.vendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "vendor"
+      },
+      {
+        "full_name": "adventureworks.production.transactionhistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "transactionhistory"
+      },
+      {
+        "full_name": "adventureworks.purchasing.shipmethod",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "shipmethod"
+      },
+      {
+        "full_name": "adventureworks.production.unitmeasure",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "unitmeasure"
+      },
+      {
+        "full_name": "adventureworks.production.document",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "document"
+      },
+      {
+        "full_name": "adventureworks.production.product",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "product"
+      },
+      {
+        "full_name": "adventureworks.purchasing.productvendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "productvendor"
+      },
+      {
+        "full_name": "adventureworks.sales.shoppingcartitem",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "shoppingcartitem"
+      },
+      {
+        "full_name": "adventureworks.production.billofmaterials",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "billofmaterials"
+      },
+      {
+        "full_name": "adventureworks.sales.store",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "store"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 423.0100172571838
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "warehouse location stock",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.purchasing.vendor",
+      "adventureworks.production.transactionhistory",
+      "adventureworks.purchasing.shipmethod",
+      "adventureworks.production.unitmeasure",
+      "adventureworks.production.document",
+      "adventureworks.production.product",
+      "adventureworks.purchasing.productvendor",
+      "adventureworks.sales.shoppingcartitem",
+      "adventureworks.production.billofmaterials",
+      "adventureworks.sales.store"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.purchasing.vendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "vendor"
+      },
+      {
+        "full_name": "adventureworks.production.transactionhistory",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "transactionhistory"
+      },
+      {
+        "full_name": "adventureworks.purchasing.shipmethod",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "shipmethod"
+      },
+      {
+        "full_name": "adventureworks.production.unitmeasure",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "unitmeasure"
+      },
+      {
+        "full_name": "adventureworks.production.document",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "document"
+      },
+      {
+        "full_name": "adventureworks.production.product",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "product"
+      },
+      {
+        "full_name": "adventureworks.purchasing.productvendor",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "productvendor"
+      },
+      {
+        "full_name": "adventureworks.sales.shoppingcartitem",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "shoppingcartitem"
+      },
+      {
+        "full_name": "adventureworks.production.billofmaterials",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "billofmaterials"
+      },
+      {
+        "full_name": "adventureworks.sales.store",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "store"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 423.0100172571838
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_d0613e78xj96_1"
+}

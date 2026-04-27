@@ -1,0 +1,7 @@
+table_schema,table_name
+person,address
+person,businessentityaddress
+person,countryregion
+person,person
+person,stateprovince
+sales,store

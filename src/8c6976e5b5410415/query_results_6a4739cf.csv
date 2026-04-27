@@ -1,0 +1,3 @@
+column_name,data_type
+customerid,integer
+freight,numeric

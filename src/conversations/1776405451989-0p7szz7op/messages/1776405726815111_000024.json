@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T06:02:06.799077Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_99d729eb0cce491c88dde8d7",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' LIMIT 20;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T15:24:37.530394Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_voca1pphnvjc_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM pg_tables WHERE schemaname = 'public';"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

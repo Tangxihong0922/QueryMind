@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T06:02:03.481120Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_548aa6b4900d45cda6ddc935",
+      "name": "search_files",
+      "arguments": {
+        "query": "sql schema database"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

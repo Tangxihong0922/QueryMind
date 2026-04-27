@@ -1,0 +1,33 @@
+{
+  "role": "tool",
+  "content": "No table schemas found matching 'product inventory stock location warehouse'",
+  "timestamp": "2026-04-21T03:53:24.842956Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "graph",
+    "graph_hint": "none",
+    "query": "product inventory stock location warehouse",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 0.163358636200428
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "graph",
+    "graph_hint": "none",
+    "query": "product inventory stock location warehouse",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 0.163358636200428
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_736455ghmj3f_1"
+}

@@ -1,0 +1,9 @@
+column_name,data_type,is_nullable
+stateprovinceid,integer,NO
+stateprovincecode,character,NO
+countryregioncode,character varying,NO
+isonlystateprovinceflag,boolean,NO
+name,character varying,NO
+territoryid,integer,NO
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

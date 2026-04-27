@@ -1,0 +1,6 @@
+table_schema,table_name
+person,person
+humanresources,department
+humanresources,employee
+humanresources,employeedepartmenthistory
+humanresources,employeepayhistory

@@ -1,0 +1,15 @@
+table_schema,table_name
+person,address
+person,addresstype
+person,businessentity
+person,businessentityaddress
+person,businessentitycontact
+person,emailaddress
+purchasing,productvendor
+purchasing,vendor
+purchasing,vvendorwithaddresses
+purchasing,vvendorwithcontacts
+sales,store
+sales,vstorewithaddresses
+sales,vstorewithcontacts
+sales,vstorewithdemographics

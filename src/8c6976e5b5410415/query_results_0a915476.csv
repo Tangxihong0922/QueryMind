@@ -1,0 +1,20 @@
+column_name,data_type
+businessentityid,integer
+territoryid,integer
+salesquota,numeric
+bonus,numeric
+commissionpct,numeric
+salesytd,numeric
+saleslastyear,numeric
+rowguid,uuid
+modifieddate,timestamp without time zone
+territoryid,integer
+name,character varying
+countryregioncode,character varying
+group,character varying
+salesytd,numeric
+saleslastyear,numeric
+costytd,numeric
+costlastyear,numeric
+rowguid,uuid
+modifieddate,timestamp without time zone

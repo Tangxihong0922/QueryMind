@@ -1,0 +1,6 @@
+column_name,data_type
+productsubcategoryid,integer
+productcategoryid,integer
+name,character varying
+rowguid,uuid
+modifieddate,timestamp without time zone

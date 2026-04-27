@@ -1,0 +1,6 @@
+column_name,data_type
+id,integer
+departmentid,integer
+name,character varying
+groupname,character varying
+modifieddate,timestamp without time zone

@@ -1,0 +1,8 @@
+{
+  "role": "assistant",
+  "content": "## \u67e5\u8be2\u7ed3\u679c\n\n\u6210\u529f\u4ece AdventureWorks \u6570\u636e\u5e93\u7684 `humanresources.employee` \u8868\u4e2d\u67e5\u8be2\u5230 **67 \u4e2a\u552f\u4e00\u804c\u4f4d\u540d\u79f0**\uff08\u6309\u5347\u5e8f\u6392\u5217\uff09\uff1a\n\n| \u90e8\u5206\u804c\u4f4d\u540d\u79f0\u793a\u4f8b |\n|---|\n| Accountant |\n| Accounts Manager |\n| Accounts Payable Specialist |\n| Accounts Receivable Specialist |\n| Application Specialist |\n| Assistant to the Chief Financial Officer |\n| Benefits Specialist |\n| Buyer |\n| Chief Executive Officer |\n| Chief Financial Officer |\n| Control Specialist |\n| Database Administrator |\n| Design Engineer |\n| Document Control Assistant |\n| Document Control Manager |\n| Engineering Manager |\n| European Sales Manager |\n| Facilities Administrative Assistant |\n| Facilities Manager |\n| Finance Manager |\n| Human Resources Administrative Assistant |\n| Human Resources Manager |\n| ... |\n\n---\n\n### \u6267\u884c\u7684 SQL \u8bed\u53e5\uff1a\n\n```sql\nSELECT DISTINCT jobtitle\nFROM humanresources.employee\nORDER BY jobtitle ASC;\n```\n\n**\u8bf4\u660e\uff1a**\n- \u4f7f\u7528 `DISTINCT` \u83b7\u53d6\u552f\u4e00\u7684\u804c\u4f4d\u540d\u79f0\n- \u4f7f\u7528 `ORDER BY jobtitle ASC` \u6309\u5347\u5e8f\u6392\u5217\u7ed3\u679c",
+  "timestamp": "2026-04-16T15:42:53.429201Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": null
+}

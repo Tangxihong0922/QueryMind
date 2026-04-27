@@ -1,0 +1,25 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:12:38.400706Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_grug10j24a8w_1",
+      "name": "search_saved_correct_tool_uses",
+      "arguments": {
+        "question": "telephone numbers area code 415 first name last name phone number"
+      }
+    },
+    {
+      "id": "call_function_grug10j24a8w_2",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "phone number telephone person contact",
+        "search_mode": "hybrid"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

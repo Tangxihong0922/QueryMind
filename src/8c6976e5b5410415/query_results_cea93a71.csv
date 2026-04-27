@@ -1,0 +1,16 @@
+column_name,data_type,is_nullable,column_default
+businessentityid,integer,NO,
+nationalidnumber,character varying,NO,
+loginid,character varying,NO,
+jobtitle,character varying,NO,
+birthdate,date,NO,
+maritalstatus,character,NO,
+gender,character,NO,
+hiredate,date,NO,
+salariedflag,boolean,NO,true
+vacationhours,smallint,NO,0
+sickleavehours,smallint,NO,0
+currentflag,boolean,NO,true
+rowguid,uuid,NO,uuid_generate_v1()
+modifieddate,timestamp without time zone,NO,now()
+organizationnode,character varying,YES,'/'::character varying

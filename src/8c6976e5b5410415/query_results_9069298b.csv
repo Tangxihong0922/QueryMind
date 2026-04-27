@@ -1,0 +1,5 @@
+table_name,table_schema
+employee,humanresources
+product,production
+salesorderheader,sales
+salesorderdetail,sales

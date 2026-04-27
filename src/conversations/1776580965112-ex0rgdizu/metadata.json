@@ -1,0 +1,15 @@
+{
+  "id": "1776580965112-ex0rgdizu",
+  "user": {
+    "id": "admin",
+    "username": "Xihong",
+    "email": "admin@querymind",
+    "metadata": {},
+    "group_memberships": [
+      "admin",
+      "user"
+    ]
+  },
+  "created_at": "2026-04-19T06:42:46.123002+00:00",
+  "updated_at": "2026-04-19T06:42:46.129175+00:00"
+}

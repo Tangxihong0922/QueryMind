@@ -1,0 +1,11 @@
+table_schema,table_name,column_name,data_type
+sa,sp,salesquota,numeric
+sa,spqh,salesquota,numeric
+sa,spqh,quotadate,timestamp without time zone
+sales,salesperson,salesquota,numeric
+sales,salespersonquotahistory,modifieddate,timestamp without time zone
+sales,salespersonquotahistory,businessentityid,integer
+sales,salespersonquotahistory,rowguid,uuid
+sales,salespersonquotahistory,salesquota,numeric
+sales,salespersonquotahistory,quotadate,timestamp without time zone
+sales,vsalesperson,salesquota,numeric

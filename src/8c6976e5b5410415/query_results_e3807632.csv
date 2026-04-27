@@ -1,0 +1,39 @@
+table_schema,table_name,column_name,data_type
+sales,salesorderdetail,salesorderid,integer
+sales,salesorderdetail,salesorderdetailid,integer
+sales,salesorderdetail,carriertrackingnumber,character varying
+sales,salesorderdetail,orderqty,smallint
+sales,salesorderdetail,productid,integer
+sales,salesorderdetail,specialofferid,integer
+sales,salesorderdetail,unitprice,numeric
+sales,salesorderdetail,unitpricediscount,numeric
+sales,salesorderdetail,rowguid,uuid
+sales,salesorderdetail,modifieddate,timestamp without time zone
+sales,salesorderheader,salesorderid,integer
+sales,salesorderheader,revisionnumber,smallint
+sales,salesorderheader,orderdate,timestamp without time zone
+sales,salesorderheader,duedate,timestamp without time zone
+sales,salesorderheader,shipdate,timestamp without time zone
+sales,salesorderheader,status,smallint
+sales,salesorderheader,onlineorderflag,boolean
+sales,salesorderheader,purchaseordernumber,character varying
+sales,salesorderheader,accountnumber,character varying
+sales,salesorderheader,customerid,integer
+sales,salesorderheader,salespersonid,integer
+sales,salesorderheader,territoryid,integer
+sales,salesorderheader,billtoaddressid,integer
+sales,salesorderheader,shiptoaddressid,integer
+sales,salesorderheader,shipmethodid,integer
+sales,salesorderheader,creditcardid,integer
+sales,salesorderheader,creditcardapprovalcode,character varying
+sales,salesorderheader,currencyrateid,integer
+sales,salesorderheader,subtotal,numeric
+sales,salesorderheader,taxamt,numeric
+sales,salesorderheader,freight,numeric
+sales,salesorderheader,totaldue,numeric
+sales,salesorderheader,comment,character varying
+sales,salesorderheader,rowguid,uuid
+sales,salesorderheader,modifieddate,timestamp without time zone
+sales,salesorderheadersalesreason,salesorderid,integer
+sales,salesorderheadersalesreason,salesreasonid,integer
+sales,salesorderheadersalesreason,modifieddate,timestamp without time zone

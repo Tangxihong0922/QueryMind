@@ -1,0 +1,7 @@
+column_name,data_type,is_nullable
+productmodelid,integer,NO
+name,character varying,NO
+catalogdescription,xml,YES
+instructions,xml,YES
+rowguid,uuid,NO
+modifieddate,timestamp without time zone,NO

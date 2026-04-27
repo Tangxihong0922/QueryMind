@@ -1,0 +1,10 @@
+column_name,data_type,is_nullable,column_default
+businessentityid,integer,NO,
+territoryid,integer,YES,
+salesquota,numeric,YES,
+bonus,numeric,NO,0.00
+commissionpct,numeric,NO,0.00
+salesytd,numeric,NO,0.00
+saleslastyear,numeric,NO,0.00
+rowguid,uuid,NO,uuid_generate_v1()
+modifieddate,timestamp without time zone,NO,now()

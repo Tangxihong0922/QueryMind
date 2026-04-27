@@ -1,0 +1,177 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: hybrid\nFound 10 related table(s):\n\n--- Table 1: adventureworks.sales.salesreason ---\nDomain: Sales\nDescription: Lookup table of customer purchase reasons.\nFields:\n  - name (character varying(50)): Descriptive name of the sales reason (e.g., 'Price', 'Quality', 'Promotion', 'Recommendation')\n  - reasontype (character varying(50)): Category classification of the sales reason (e.g., 'Marketing', 'Product', 'Service', 'Competitive')\n  - salesreasonid (integer(32,0)) [PK]: Unique identifier for each sales reason record, serving as the primary key\n  - modifieddate (timestamp without time zone): Timestamp recording when the sales reason record was last updated\nMatch reason: Source: vector\n\n--- Table 2: adventureworks.sales.salesorderheader ---\nDomain: SalesOrder\nDescription: General sales order information.\nFields:\n  - accountnumber (character varying(15)): External customer account identifier used for billing and financial reconciliation\n  - orderdate (timestamp without time zone): Calendar date when the customer placed or the system recorded the sales order\n  - customerid (integer(32,0)) [FK]: Reference to the customer entity who initiated and is responsible for the order\n  - subtotal (numeric): Aggregate monetary value of all line items before applying taxes and freight charges\n  - totaldue (numeric): Final amount payable by the customer including subtotal, taxes, freight, and any additional charges\n  - shipdate (timestamp without time zone): Date when goods left the warehouse or fulfillment center for delivery to the customer\n  - salespersonid (integer(32,0)) [FK]: Identifier of the sales representative who facilitated or is credited with the order\n  - shiptoaddressid (integer(32,0)): Reference to the physical destination address where ordered goods will be delivered\n  - billtoaddressid (integer(32,0)): Reference to the address where the invoice will be sent and payment is expected\n  - rowguid (uuid): Unique identifier for database replication and synchronization purposes across systems\n  - shipmethodid (integer(32,0)): Carrier or shipping service level selected for delivering the order (e.g., ground, express, overnight)\n  - purchaseordernumber (character varying(25)): Optional customer-provided purchase order reference number for B2B transactions\n  - status (smallint(16,0)): Numeric code indicating the current stage in the order lifecycle such as pending, processing, shipped, or cancelled\n  - comment (character varying(128)): Free-form text field for special instructions, customer requests, or internal notes about the order\n  - creditcardid (integer(32,0)) [FK]: Reference to stored payment card information used for transaction processing\nMatch reason: Source: vector\n\n--- Table 3: adventureworks.person.person ---\nDomain: Person\nDescription: Human beings involved with AdventureWorks: employees, customer contacts, and vendor contacts.\nFields:\n  - businessentityid (integer(32,0)) [PK] [FK]: Unique sequential identifier serving as the primary key for each person record in the system\n  - additionalcontactinfo (xml): XML field storing miscellaneous contact information such as phone numbers and addresses beyond the primary contact methods\n  - firstname (character varying(50)): Person's given or first name used in business communications and identification\n  - namestyle (boolean): Boolean flag indicating whether the name follows Eastern name format (1) with family name first or Western format (0) with given name first\n  - persontype (character(2)): Two-character code identifying the person's role: IN for individual customer, EM for employee, SP for sales person, VC for vendor contact, SC for store contact\n  - suffix (character varying(10)): Optional name suffix such as Jr., Sr., PhD, or III used in formal name representation\n  - rowguid (uuid): Globally unique identifier assigned to each record for use in database replication and synchronization scenarios\n  - lastname (character varying(50)): Person's family or surname used in business communications and identification\n  - emailpromotion (integer(32,0)): Integer indicating the level of email marketing consent: 0 for no promotional emails, 1 for AdventureWorks catalog promotions, 2 for partner company promotions\n  - middlename (character varying(50)): Person's middle name or initial used in formal identification\n  - title (character varying(8)): Optional honorific prefix such as Mr., Ms., Mrs., or Dr. used in formal communications\n  - modifieddate (timestamp without time zone): Timestamp recording the most recent date and time when any field in this person record was modified\n  - demographics (xml): XML field containing customer demographic information including age range, occupation, number of children, and income level for marketing analysis\nMatch reason: Source: vector\n\n--- Table 4: adventureworks.humanresources.shift ---\nDomain: Human Resources\nDescription: Work shift lookup table.\nFields:\n  - endtime (time without time zone): Scheduled end time of the work shift\n  - shiftid (integer(32,0)) [PK]: Primary key and unique identifier for each work shift record\n  - name (character varying(50)): Descriptive name of the shift such as Day, Evening, or Night shift\n  - modifieddate (timestamp without time zone): Audit timestamp recording when the shift record was last updated\n  - starttime (time without time zone): Scheduled start time of the work shift\nMatch reason: Source: vector\n\n--- Table 5: adventureworks.sales.salesperson ---\nDomain: Sales\nDescription: Sales representative current information.\nFields:\n  - saleslastyear (numeric): Total sales amount the salesperson achieved during the previous fiscal year\n  - salesytd (numeric): Total sales amount the salesperson has achieved year-to-date in the current fiscal year\n  - rowguid (uuid): Globally unique identifier used for database replication and synchronization across systems\n  - territoryid (integer(32,0)) [FK]: Reference to the geographic sales territory assigned to and managed by the salesperson\n  - commissionpct (numeric): Commission rate percentage that the salesperson earns on each sale\n  - modifieddate (timestamp without time zone): Date and time when the salesperson record was last updated or modified\n  - businessentityid (integer(32,0)) [PK]: Primary key reference to the underlying business entity (person) in the employee system\n  - bonus (numeric): Monetary incentive awarded to the salesperson based on meeting or exceeding sales targets\n  - salesquota (numeric): Target sales amount that the salesperson is expected to achieve within a defined period\nMatch reason: Source: vector\n\n--- Table 6: adventureworks.sales.currency ---\nDomain: Finance\nDescription: Lookup table containing standard ISO currencies.\nFields:\n  - name (character varying(50)): The official full name of the currency (e.g., United States Dollar, Euro)\n  - modifieddate (timestamp without time zone): The timestamp indicating when the currency record was last modified or updated in the system\n  - currencycode (character(3)) [PK]: The unique 3-letter ISO 4217 alphabetic code identifying the currency (e.g., USD, EUR, GBP)\nMatch reason: Source: vector\n\n--- Table 7: adventureworks.sales.currencyrate ---\nDomain: Finance\nDescription: Currency exchange rates.\nFields:\n  - modifieddate (timestamp without time zone): Timestamp showing when the exchange rate record was last modified or updated\n  - currencyratedate (timestamp without time zone): The calendar date for which the exchange rate is effective\n  - endofdayrate (numeric): The official closing exchange rate at the end of the business day\n  - fromcurrencycode (character(3)) [FK]: The ISO 3-character currency code of the source currency being converted from\n  - averagerate (numeric): The average exchange rate between the two currencies for the day, used for reporting\n  - tocurrencycode (character(3)) [FK]: The ISO 3-character currency code of the target currency being converted to\n  - currencyrateid (integer(32,0)) [PK]: Primary key that uniquely identifies each currency exchange rate record\nMatch reason: Source: vector\n\n--- Table 8: adventureworks.sales.salesorderheadersalesreason ---\nDomain: Sales\nDescription: Cross-reference table mapping sales orders to sales reason codes.\nFields:\n  - salesreasonid (integer(32,0)) [PK] [FK]: Identifier for the sales reason or justification code associated with this order (e.g., promotion, competitive match, new purchase)\n  - modifieddate (timestamp without time zone): Date and time when this sales order-to-reason association was last updated\n  - salesorderid (integer(32,0)) [PK] [FK]: Reference to the specific sales order header this sales reason applies to\nMatch reason: Source: vector\n\n--- Table 9: adventureworks.person.address ---\nDomain: Address\nDescription: Street address information for customers, employees, and vendors.\nFields:\n  - addressline1 (character varying(60)): Primary street address component containing the house or building number and street name\n  - stateprovinceid (integer(32,0)) [FK]: Foreign key reference to the state or province entity defining the administrative region\n  - city (character varying(30)): Name of the city where the address is located\n  - modifieddate (timestamp without time zone): Timestamp indicating when the address record was last updated in the system\n  - spatiallocation (bytea): Binary geographic coordinate data used for mapping and spatial analysis purposes\n  - postalcode (character varying(15)): ZIP code or postal code identifying the geographic delivery area for the address\n  - rowguid (uuid): Globally unique identifier assigned to each address record for database replication and synchronization\n  - addressline2 (character varying(60)): Secondary street address component for additional routing information such as suite, unit, or floor numbers\n  - addressid (integer(32,0)) [PK]: Primary key identifier for each unique address record in the system\nMatch reason: Source: vector\n\n--- Table 10: adventureworks.sales.salesterritoryhistory ---\nDomain: Sales Territory\nDescription: Sales representative transfers to other sales territories.\nFields:\n  - startdate (timestamp without time zone) [PK]: Date when the sales representative began working in the sales territory\n  - rowguid (uuid): System-generated unique identifier for the record\n  - enddate (timestamp without time zone): Date when the sales representative stopped working in the sales territory; null if currently assigned\n  - territoryid (integer(32,0)) [PK] [FK]: Identifier of the sales territory the representative is/was assigned to\n  - businessentityid (integer(32,0)) [PK] [FK]: Identifier of the sales representative (employee) assigned to the territory\n  - modifieddate (timestamp without time zone): Date and time when the record was last modified\nMatch reason: Source: vector\n",
+  "timestamp": "2026-04-21T12:38:49.210830Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "location quantity product",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.sales.salesreason",
+      "adventureworks.sales.salesorderheader",
+      "adventureworks.person.person",
+      "adventureworks.humanresources.shift",
+      "adventureworks.sales.salesperson",
+      "adventureworks.sales.currency",
+      "adventureworks.sales.currencyrate",
+      "adventureworks.sales.salesorderheadersalesreason",
+      "adventureworks.person.address",
+      "adventureworks.sales.salesterritoryhistory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.sales.salesreason",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesreason"
+      },
+      {
+        "full_name": "adventureworks.sales.salesorderheader",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesorderheader"
+      },
+      {
+        "full_name": "adventureworks.person.person",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "person"
+      },
+      {
+        "full_name": "adventureworks.humanresources.shift",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "shift"
+      },
+      {
+        "full_name": "adventureworks.sales.salesperson",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesperson"
+      },
+      {
+        "full_name": "adventureworks.sales.currency",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "currency"
+      },
+      {
+        "full_name": "adventureworks.sales.currencyrate",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "currencyrate"
+      },
+      {
+        "full_name": "adventureworks.sales.salesorderheadersalesreason",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesorderheadersalesreason"
+      },
+      {
+        "full_name": "adventureworks.person.address",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "address"
+      },
+      {
+        "full_name": "adventureworks.sales.salesterritoryhistory",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesterritoryhistory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 835.6295567937195
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "hybrid",
+    "graph_hint": "none",
+    "query": "location quantity product",
+    "total_results": 10,
+    "selected_tables": [
+      "adventureworks.sales.salesreason",
+      "adventureworks.sales.salesorderheader",
+      "adventureworks.person.person",
+      "adventureworks.humanresources.shift",
+      "adventureworks.sales.salesperson",
+      "adventureworks.sales.currency",
+      "adventureworks.sales.currencyrate",
+      "adventureworks.sales.salesorderheadersalesreason",
+      "adventureworks.person.address",
+      "adventureworks.sales.salesterritoryhistory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.sales.salesreason",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesreason"
+      },
+      {
+        "full_name": "adventureworks.sales.salesorderheader",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesorderheader"
+      },
+      {
+        "full_name": "adventureworks.person.person",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "person"
+      },
+      {
+        "full_name": "adventureworks.humanresources.shift",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "shift"
+      },
+      {
+        "full_name": "adventureworks.sales.salesperson",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesperson"
+      },
+      {
+        "full_name": "adventureworks.sales.currency",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "currency"
+      },
+      {
+        "full_name": "adventureworks.sales.currencyrate",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "currencyrate"
+      },
+      {
+        "full_name": "adventureworks.sales.salesorderheadersalesreason",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesorderheadersalesreason"
+      },
+      {
+        "full_name": "adventureworks.person.address",
+        "database_name": "adventureworks",
+        "schema_name": "person",
+        "table_name": "address"
+      },
+      {
+        "full_name": "adventureworks.sales.salesterritoryhistory",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "salesterritoryhistory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 835.6295567937195
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_n6zozwv7j77v_1"
+}

@@ -1,0 +1,8 @@
+{
+  "role": "user",
+  "content": "write a query in SQL to return the quota date (Year), quarter, and sales quota for a specific salesperson. Additionally, calculate the population variance of the sales quota over the quarters for the year 2012 for this salesperson. Filter the results for the salesperson with businessentityid 277 and the year 2012. Order the results by quarter.\nYou may use the table: Sales.SalesPersonQuotaHistory",
+  "timestamp": "2026-04-17T06:45:50.500576Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": null
+}

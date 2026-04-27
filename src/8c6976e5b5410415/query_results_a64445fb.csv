@@ -1,0 +1,5 @@
+column_name,data_type
+id,integer
+scrapreasonid,integer
+name,character varying
+modifieddate,timestamp without time zone

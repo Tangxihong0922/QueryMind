@@ -1,0 +1,11 @@
+column_name,data_type,is_nullable
+businessentityid,integer,YES
+title,character varying,YES
+firstname,character varying,YES
+middlename,character varying,YES
+lastname,character varying,YES
+suffix,character varying,YES
+jobtitle,character varying,YES
+department,character varying,YES
+groupname,character varying,YES
+startdate,date,YES

@@ -1,0 +1,15 @@
+{
+  "role": "tool",
+  "content": "syntax error at or near \"WHERE\"\nLINE 1: ...ETCH ALL FROM \"humanresources.employeepayhistory\" WHERE busi...\n                                                             ^\n",
+  "timestamp": "2026-04-21T06:16:37.116355Z",
+  "metadata": {
+    "error_type": "sql_error",
+    "execution_time_ms": 13.461157213896513
+  },
+  "tool_result": {
+    "error_type": "sql_error",
+    "execution_time_ms": 13.461157213896513
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_fbf8ee7840ce4893b2d54a53"
+}

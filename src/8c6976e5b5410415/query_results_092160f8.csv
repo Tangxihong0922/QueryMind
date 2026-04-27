@@ -1,0 +1,7 @@
+column_name,data_type
+businessentityid,integer
+name,character varying
+salespersonid,integer
+demographics,xml
+rowguid,uuid
+modifieddate,timestamp without time zone

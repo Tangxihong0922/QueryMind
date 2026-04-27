@@ -1,0 +1,17 @@
+column_name,data_type,is_nullable
+id,integer,YES
+businessentityid,integer,YES
+nationalidnumber,character varying,YES
+loginid,character varying,YES
+jobtitle,character varying,YES
+birthdate,date,YES
+maritalstatus,character,YES
+gender,character,YES
+hiredate,date,YES
+salariedflag,boolean,NO
+vacationhours,smallint,YES
+sickleavehours,smallint,YES
+currentflag,boolean,NO
+rowguid,uuid,YES
+modifieddate,timestamp without time zone,YES
+organizationnode,character varying,YES

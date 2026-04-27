@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-16T15:13:50.937287Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_f05ko2wn2jim_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "\u5ba2\u6237 \u8fd0\u8d39 \u8ba2\u5355 \u652f\u4ed8 related to customer and freight/shipping cost",
+        "search_mode": null
+      }
+    }
+  ],
+  "tool_call_id": null
+}

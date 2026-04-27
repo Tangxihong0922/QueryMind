@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T18:55:21.519399Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_qqamtbhokg7e_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT schemaname, viewname FROM pg_catalog.pg_views WHERE schemaname NOT IN ('pg_catalog', 'information_schema')"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

@@ -1,0 +1,8 @@
+{
+  "role": "assistant",
+  "content": "Hello! \ud83d\udc4b I'm QueryMind, your AI data analyst assistant. I'm here to help you with:\n\n- **SQL queries** - I can run SQL queries against your database\n- **Schema exploration** - Find relevant tables for your analysis\n- **Data visualization** - Create charts from your data\n- **File operations** - Read, write, and manage data files\n\nJust let me know what you'd like to explore or analyze!",
+  "timestamp": "2026-04-15T16:40:22.423577Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": null
+}

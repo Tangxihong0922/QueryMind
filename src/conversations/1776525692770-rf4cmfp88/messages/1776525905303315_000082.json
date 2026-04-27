@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:24:37.756962Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_ld2gyx8k2vke_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT nspname FROM pg_namespace WHERE nspname IN ('hr', 'pe', 'pr', 'adventureworks', 'person', 'sales', 'purchasing', 'production', 'humanresources')"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

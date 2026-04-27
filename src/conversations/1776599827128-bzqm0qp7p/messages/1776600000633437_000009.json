@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-19T11:59:43.265515Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_p90k4vlq2kfz_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT table_schema, table_name \nFROM information_schema.tables \nWHERE table_schema NOT IN ('information_schema', 'pg_catalog') \nORDER BY table_schema, table_name"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

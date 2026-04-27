@@ -1,0 +1,10 @@
+column_name,data_type
+businessentityid,integer
+territoryid,integer
+salesquota,numeric
+bonus,numeric
+commissionpct,numeric
+salesytd,numeric
+saleslastyear,numeric
+rowguid,uuid
+modifieddate,timestamp without time zone

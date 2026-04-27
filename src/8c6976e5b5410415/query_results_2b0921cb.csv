@@ -1,0 +1,8 @@
+table_name,table_schema
+employeenameview,humanresources
+employee,humanresources
+employeedepartmenthistory,humanresources
+employeepayhistory,humanresources
+vemployee,humanresources
+vemployeedepartment,humanresources
+vemployeedepartmenthistory,humanresources

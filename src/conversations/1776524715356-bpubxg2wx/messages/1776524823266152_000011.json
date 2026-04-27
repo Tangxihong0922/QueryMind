@@ -1,0 +1,33 @@
+{
+  "role": "tool",
+  "content": "No table schemas found matching 'employee'",
+  "timestamp": "2026-04-18T15:05:40.132786Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "vector",
+    "graph_hint": "none",
+    "query": "employee",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 246.73239002004266
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "vector",
+    "graph_hint": "none",
+    "query": "employee",
+    "total_results": 0,
+    "selected_tables": [],
+    "selected_table_refs": [],
+    "domain_filter": null,
+    "required_fields": [],
+    "seed_tables": [],
+    "execution_time_ms": 246.73239002004266
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_6c9hokunkvi1_1"
+}

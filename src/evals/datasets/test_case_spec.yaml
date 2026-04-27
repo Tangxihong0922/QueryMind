@@ -1,0 +1,192 @@
+# QueryMind evaluation test case specification.
+# Use this file as the canonical writing guide for dataset YAML files.
+
+required_fields:
+  - id
+  - database_id
+  - dialect
+  - query
+  - ground_truth_sql
+
+test_case_fields:
+  id:
+    required: true
+    type: string
+    description: Unique test case identifier.
+    sample: "sql_001"
+
+  database_id:
+    required: true
+    type: string
+    description: Database profile name used by the evaluation runtime.
+    sample: "adventureworks"
+
+  dialect:
+    required: true
+    type: string
+    description: SQL dialect of the target database.
+    sample: "postgres"
+
+  conversation_id:
+    required: false
+    type: string
+    description: Optional conversation ID for trace isolation.
+    sample: "eval-sql_001"
+
+  user_id:
+    required: false
+    type: string
+    description: Optional user ID used to build the evaluation user.
+    sample: "eval_user"
+
+  username:
+    required: false
+    type: string
+    description: Optional username for the evaluation user.
+    sample: "evaluator"
+
+  email:
+    required: false
+    type: string
+    description: Optional email for the evaluation user.
+    sample: "eval@example.com"
+
+  user_groups:
+    required: false
+    type: list[string]
+    description: Optional list of group memberships for the evaluation user.
+    sample: ["user", "analyst"]
+
+  query:
+    required: true
+    type: string
+    description: Natural-language query given to the agent.
+    sample: "Show me total sales by region."
+
+  ground_truth_sql:
+    required: true
+    type: string
+    description: Reference SQL used for execution comparison and judge context.
+    sample: |
+      SELECT region, SUM(total_sales)
+      FROM sales
+      GROUP BY region;
+
+  tags:
+    required: false
+    type: list[string]
+    description: Optional secondary task tags for analysis and slicing.
+    sample: ["filtering", "ordering", "null_handling"]
+    allowed_values:
+      - filtering       # WHERE / condition-based selection
+      - aggregation     # GROUP BY, HAVING, SUM/COUNT/AVG
+      - join            # Multi-table join logic
+      - ranking         # Rank / row-number style problems
+      - comparison      # Compare values across groups or periods
+      - time_series     # Time-based trend analysis
+      - subquery        # Nested SELECT logic
+      - cte             # WITH / CTE-based queries
+      - window          # Window function problems
+      - distinct        # Deduplication / uniqueness
+      - ordering        # ORDER BY-centric tasks
+      - topk            # Top-N / limit-based retrieval
+      - set_operation   # UNION / INTERSECT / EXCEPT
+      - case_when       # CASE WHEN branching logic
+      - null_handling   # NULL checks and COALESCE-like logic
+      - date_filter     # Date/time condition filtering
+      - text_filter     # String / pattern-based filtering
+      - numeric_filter  # Numeric range or threshold filtering
+      - multi_condition # Multiple WHERE conditions are important
+      - multi_table     # Query touches multiple tables
+      - group_by        # GROUP BY is present or required
+      - having          # HAVING clause is present or required
+
+  difficulty:
+    required: false
+    type: string
+    description: Overall task difficulty.
+    sample: "easy"
+    allowed_values:
+      - easy   # Straightforward query pattern with limited complexity
+      - medium # Moderate complexity, may require multiple SQL concepts
+      - hard   # High complexity or multi-step reasoning required
+
+  metadata:
+    required: false
+    type: object
+    description: Free-form metadata for grouping and reporting.
+    sample:
+      category: "filtering"
+      source: "manual"
+      query_language: "en"
+    fields:
+      category:
+        required: false
+        type: string
+        description: Primary task type; use one value per test case.
+        sample: "filtering"
+        allowed_values:
+          - filtering
+          - aggregation
+          - join
+          - ranking
+          - comparison
+          - time_series
+          - subquery
+          - cte
+          - window
+          - distinct
+          - ordering
+          - topk
+          - set_operation
+          - case_when
+          - null_handling
+          - date_filter
+      source:
+        required: false
+        type: string
+        description: Dataset provenance for governance and traceability.
+        sample: "manual"
+        allowed_values:
+          - manual
+          - benchmark_import
+          - synthetic
+          - regression
+      query_language:
+        required: false
+        type: string
+        description: Language of the natural-language user query.
+        sample: "en"
+        allowed_values:
+          - zh
+          - en
+
+  expected_outcome:
+    required: false
+    type: object
+    description: Optional expected behavior hints for future validation layers.
+    sample:
+      tools_called: ["schema_retrieve", "run_sql"]
+      final_answer_contains: ["sales", "region"]
+      max_execution_time_ms: 5000
+    fields:
+      tools_called:
+        required: false
+        type: list[string]
+        description: Ordered tool-call path expected from the agent.
+        sample: ["schema_retrieve", "run_sql"]
+      final_answer_contains:
+        required: false
+        type: list[string]
+        description: Substrings that should appear in the agent final answer.
+        sample: ["sales", "region"]
+      max_execution_time_ms:
+        required: false
+        type: integer
+        description: Soft execution-time expectation in milliseconds.
+        sample: 5000
+
+notes:
+  - "The loader validates required_fields, allowed_values, and the presence of test_cases."
+  - "metadata and expected_outcome are optional for scoring, but their declared subfields are validated when present."
+  - "category should be treated as the primary label; tags are secondary labels."

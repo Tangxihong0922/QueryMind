@@ -1,0 +1,19 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-18T15:05:45.001938Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_lgbherbfet1s_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "employees",
+        "search_mode": "vector",
+        "limit": 25
+      }
+    }
+  ],
+  "tool_call_id": null
+}

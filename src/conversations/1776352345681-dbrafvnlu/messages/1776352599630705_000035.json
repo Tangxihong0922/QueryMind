@@ -1,0 +1,8 @@
+{
+  "role": "tool",
+  "content": "Agent memory is unavailable, so this usage pattern was not saved.",
+  "timestamp": "2026-04-16T15:16:36.478112Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": "call_function_x25vmwt73kd6_1"
+}

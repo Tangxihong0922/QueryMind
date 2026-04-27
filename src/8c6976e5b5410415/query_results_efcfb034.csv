@@ -1,0 +1,7 @@
+table_schema,table_name
+purchasing,purchaseorderheader
+sales,customer
+sales,salesorderheader
+sales,salesorderdetail
+sales,salesorderheadersalesreason
+sales,vindividualcustomer

@@ -1,0 +1,22 @@
+name,jobtitle,groupname,employeecount,grouping_level
+Finance,Accountant,Executive General and Administration,2,Detail
+Finance,Accountant,ALL GROUPS,2,Subtotal by Job Title
+Finance,Accounts Manager,Executive General and Administration,1,Detail
+Finance,Accounts Manager,ALL GROUPS,1,Subtotal by Job Title
+Finance,Accounts Payable Specialist,ALL GROUPS,2,Subtotal by Job Title
+Finance,Accounts Payable Specialist,Executive General and Administration,2,Detail
+Finance,Accounts Receivable Specialist,ALL GROUPS,3,Subtotal by Job Title
+Finance,Accounts Receivable Specialist,Executive General and Administration,3,Detail
+Finance,Assistant to the Chief Financial Officer,ALL GROUPS,1,Subtotal by Job Title
+Finance,Assistant to the Chief Financial Officer,Executive General and Administration,1,Detail
+Finance,Finance Manager,Executive General and Administration,1,Detail
+Finance,Finance Manager,ALL GROUPS,1,Subtotal by Job Title
+Finance,ALL JOB TITLES,ALL GROUPS,10,Subtotal by Department
+Production Control,Master Scheduler,ALL GROUPS,1,Subtotal by Job Title
+Production Control,Master Scheduler,Manufacturing,1,Detail
+Production Control,Production Control Manager,ALL GROUPS,1,Subtotal by Job Title
+Production Control,Production Control Manager,Manufacturing,1,Detail
+Production Control,Scheduling Assistant,ALL GROUPS,4,Subtotal by Job Title
+Production Control,Scheduling Assistant,Manufacturing,4,Detail
+Production Control,ALL JOB TITLES,ALL GROUPS,6,Subtotal by Department
+ALL DEPARTMENTS,ALL JOB TITLES,ALL GROUPS,16,Grand Total

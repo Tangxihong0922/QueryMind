@@ -1,0 +1,15 @@
+{
+  "role": "tool",
+  "content": "column reference \"table_schema\" is ambiguous\nLINE 1: SELECT table_schema, table_name, COUNT(*) as row_count\n               ^\n",
+  "timestamp": "2026-04-18T15:24:55.155636Z",
+  "metadata": {
+    "error_type": "sql_error",
+    "execution_time_ms": 13.862006831914186
+  },
+  "tool_result": {
+    "error_type": "sql_error",
+    "execution_time_ms": 13.862006831914186
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_pfq7hgheo5k6_1"
+}

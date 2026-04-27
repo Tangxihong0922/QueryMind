@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T06:13:02.694022Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_0f113678cd744de595632033",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'humanresources' AND table_name = 'employeenameview' ORDER BY ordinal_position;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

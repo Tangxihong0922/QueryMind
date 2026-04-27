@@ -1,0 +1,11 @@
+column_name,data_type,is_nullable,column_default
+territoryid,integer,NO,nextval('sales.salesterritory_territoryid_seq'::regclass)
+name,character varying,NO,
+countryregioncode,character varying,NO,
+group,character varying,NO,
+salesytd,numeric,NO,0.00
+saleslastyear,numeric,NO,0.00
+costytd,numeric,NO,0.00
+costlastyear,numeric,NO,0.00
+rowguid,uuid,NO,uuid_generate_v1()
+modifieddate,timestamp without time zone,NO,now()

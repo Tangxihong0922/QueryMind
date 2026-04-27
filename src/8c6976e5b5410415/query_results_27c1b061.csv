@@ -1,0 +1,51 @@
+businessentityid,jobtitle,vacationhours
+245,Accountant,58
+248,Accountant,59
+241,Accounts Manager,57
+246,Accounts Payable Specialist,63
+247,Accounts Payable Specialist,64
+242,Accounts Receivable Specialist,60
+243,Accounts Receivable Specialist,61
+244,Accounts Receivable Specialist,62
+272,Application Specialist,71
+269,Application Specialist,72
+268,Application Specialist,73
+267,Application Specialist,74
+262,Assistant to the Chief Financial Officer,56
+239,Benefits Specialist,51
+255,Buyer,52
+258,Buyer,53
+257,Buyer,54
+259,Buyer,55
+253,Buyer,56
+254,Buyer,57
+256,Buyer,58
+251,Buyer,59
+252,Buyer,60
+1,Chief Executive Officer,99
+234,Chief Financial Officer,0
+221,Control Specialist,75
+218,Control Specialist,76
+271,Database Administrator,66
+270,Database Administrator,67
+15,Design Engineer,4
+5,Design Engineer,5
+6,Design Engineer,6
+219,Document Control Assistant,78
+220,Document Control Assistant,79
+217,Document Control Manager,77
+3,Engineering Manager,2
+287,European Sales Manager,21
+233,Facilities Administrative Assistant,87
+227,Facilities Manager,86
+249,Finance Manager,55
+237,Human Resources Administrative Assistant,52
+236,Human Resources Administrative Assistant,53
+235,Human Resources Manager,54
+263,Information Services Manager,65
+230,Janitor,88
+232,Janitor,89
+229,Janitor,90
+231,Janitor,91
+228,Maintenance Supervisor,92
+20,Marketing Assistant,41

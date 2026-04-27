@@ -1,0 +1,15 @@
+table_schema,table_name
+person,address
+person,addresstype
+person,businessentity
+person,businessentityaddress
+person,businessentitycontact
+person,contacttype
+person,countryregion
+person,emailaddress
+person,password
+person,person
+person,personphone
+person,phonenumbertype
+person,stateprovince
+person,vadditionalcontactinfo

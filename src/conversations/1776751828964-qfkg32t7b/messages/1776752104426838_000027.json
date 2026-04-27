@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T06:12:47.503969Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_daad5c5c7c204e8b89b4bfb0",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'person' AND table_name = 'person' ORDER BY ordinal_position;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

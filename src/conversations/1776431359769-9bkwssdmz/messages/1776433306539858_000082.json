@@ -1,0 +1,8 @@
+{
+  "role": "user",
+  "content": "I want to get the business entity ID, sales year, current sales quota, and the next year's sales quota for a specific salesperson. You can use the LEAD window function to get the next year's sales quota, defaulting to 0 if not available. Filter the results for the salesperson with BusinessEntityID 277 for the years 2011 and 2012.",
+  "timestamp": "2026-04-17T13:41:08.854793Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": null
+}

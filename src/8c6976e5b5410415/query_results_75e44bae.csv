@@ -1,0 +1,5 @@
+column_name,data_type,is_nullable
+departmentid,integer,NO
+name,character varying,NO
+groupname,character varying,NO
+modifieddate,timestamp without time zone,NO

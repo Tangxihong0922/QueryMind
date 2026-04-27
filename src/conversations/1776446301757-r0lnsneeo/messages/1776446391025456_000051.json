@@ -1,0 +1,15 @@
+{
+  "role": "tool",
+  "content": "relation \"person\" does not exist\nLINE 1: SELECT * FROM person LIMIT 5;\n                      ^\n",
+  "timestamp": "2026-04-17T17:19:36.357266Z",
+  "metadata": {
+    "error_type": "sql_error",
+    "execution_time_ms": 11.198909021914005
+  },
+  "tool_result": {
+    "error_type": "sql_error",
+    "execution_time_ms": 11.198909021914005
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_gboi2qt1g520_2"
+}

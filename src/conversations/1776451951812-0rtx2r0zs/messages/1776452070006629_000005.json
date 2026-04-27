@@ -1,0 +1,155 @@
+{
+  "role": "tool",
+  "content": "\u3010Schema Retrieval Results\u3011Mode: graph\nFound 8 related table(s):\n\n--- Table 1: adventureworks.humanresources.employeepayhistory ---\nDomain: Payroll\nDescription: Employee pay history.\nFields:\nMatch reason: Source: graph\n\n--- Table 2: adventureworks.pg_catalog.pg_amop ---\nDomain: pg_catalog\nDescription: pg_amop table\nFields:\nMatch reason: Source: graph\n\n--- Table 3: adventureworks.pg_catalog.pg_attribute ---\nDomain: pg_catalog\nDescription: pg_attribute table\nFields:\nMatch reason: Source: graph\n\n--- Table 4: adventureworks.production.location ---\nDomain: ProductionFacility\nDescription: Product inventory and manufacturing locations.\nFields:\nMatch reason: Source: graph\n\n--- Table 5: adventureworks.purchasing.shipmethod ---\nDomain: purchasing\nDescription: Shipping company lookup table.\nFields:\nMatch reason: Source: graph\n\n--- Table 6: adventureworks.sales.currencyrate ---\nDomain: sales\nDescription: Currency exchange rates.\nFields:\nMatch reason: Source: graph\n\n--- Table 7: adventureworks.humanresources.department ---\nDomain: Organization\nDescription: Lookup table storing the official list of departments within Adventure Works Cycles, used as a reference to categorize employees, assign organizational responsibilities, and define company structure for HR and reporting purposes.\nFields:\nMatch reason: Source: graph\n\n--- Table 8: adventureworks.humanresources.employeedepartmenthistory ---\nDomain: Human Resources\nDescription: Employee department transfers.\nFields:\nMatch reason: Source: graph\n",
+  "timestamp": "2026-04-17T18:53:14.358675Z",
+  "metadata": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "graph",
+    "graph_hint": "fields",
+    "query": "employee hourly rate pay employee department history",
+    "total_results": 8,
+    "selected_tables": [
+      "adventureworks.humanresources.employeepayhistory",
+      "adventureworks.pg_catalog.pg_amop",
+      "adventureworks.pg_catalog.pg_attribute",
+      "adventureworks.production.location",
+      "adventureworks.purchasing.shipmethod",
+      "adventureworks.sales.currencyrate",
+      "adventureworks.humanresources.department",
+      "adventureworks.humanresources.employeedepartmenthistory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.humanresources.employeepayhistory",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employeepayhistory"
+      },
+      {
+        "full_name": "adventureworks.pg_catalog.pg_amop",
+        "database_name": "adventureworks",
+        "schema_name": "pg_catalog",
+        "table_name": "pg_amop"
+      },
+      {
+        "full_name": "adventureworks.pg_catalog.pg_attribute",
+        "database_name": "adventureworks",
+        "schema_name": "pg_catalog",
+        "table_name": "pg_attribute"
+      },
+      {
+        "full_name": "adventureworks.production.location",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "location"
+      },
+      {
+        "full_name": "adventureworks.purchasing.shipmethod",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "shipmethod"
+      },
+      {
+        "full_name": "adventureworks.sales.currencyrate",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "currencyrate"
+      },
+      {
+        "full_name": "adventureworks.humanresources.department",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "department"
+      },
+      {
+        "full_name": "adventureworks.humanresources.employeedepartmenthistory",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employeedepartmenthistory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [
+      "rate",
+      "department"
+    ],
+    "seed_tables": [],
+    "execution_time_ms": 101.50386299937963
+  },
+  "tool_result": {
+    "tool_name": "schema_retrieve",
+    "search_mode": "graph",
+    "graph_hint": "fields",
+    "query": "employee hourly rate pay employee department history",
+    "total_results": 8,
+    "selected_tables": [
+      "adventureworks.humanresources.employeepayhistory",
+      "adventureworks.pg_catalog.pg_amop",
+      "adventureworks.pg_catalog.pg_attribute",
+      "adventureworks.production.location",
+      "adventureworks.purchasing.shipmethod",
+      "adventureworks.sales.currencyrate",
+      "adventureworks.humanresources.department",
+      "adventureworks.humanresources.employeedepartmenthistory"
+    ],
+    "selected_table_refs": [
+      {
+        "full_name": "adventureworks.humanresources.employeepayhistory",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employeepayhistory"
+      },
+      {
+        "full_name": "adventureworks.pg_catalog.pg_amop",
+        "database_name": "adventureworks",
+        "schema_name": "pg_catalog",
+        "table_name": "pg_amop"
+      },
+      {
+        "full_name": "adventureworks.pg_catalog.pg_attribute",
+        "database_name": "adventureworks",
+        "schema_name": "pg_catalog",
+        "table_name": "pg_attribute"
+      },
+      {
+        "full_name": "adventureworks.production.location",
+        "database_name": "adventureworks",
+        "schema_name": "production",
+        "table_name": "location"
+      },
+      {
+        "full_name": "adventureworks.purchasing.shipmethod",
+        "database_name": "adventureworks",
+        "schema_name": "purchasing",
+        "table_name": "shipmethod"
+      },
+      {
+        "full_name": "adventureworks.sales.currencyrate",
+        "database_name": "adventureworks",
+        "schema_name": "sales",
+        "table_name": "currencyrate"
+      },
+      {
+        "full_name": "adventureworks.humanresources.department",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "department"
+      },
+      {
+        "full_name": "adventureworks.humanresources.employeedepartmenthistory",
+        "database_name": "adventureworks",
+        "schema_name": "humanresources",
+        "table_name": "employeedepartmenthistory"
+      }
+    ],
+    "domain_filter": null,
+    "required_fields": [
+      "rate",
+      "department"
+    ],
+    "seed_tables": [],
+    "execution_time_ms": 101.50386299937963
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_rxpcrwos8fuz_1"
+}

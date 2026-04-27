@@ -1,0 +1,9 @@
+column_name,data_type
+businessentityid,integer
+accountnumber,character varying
+name,character varying
+creditrating,smallint
+preferredvendorstatus,boolean
+activeflag,boolean
+purchasingwebserviceurl,character varying
+modifieddate,timestamp without time zone

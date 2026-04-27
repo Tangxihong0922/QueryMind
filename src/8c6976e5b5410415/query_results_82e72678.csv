@@ -1,0 +1,9 @@
+column_name,data_type
+id,integer
+productid,integer
+locationid,smallint
+shelf,character varying
+bin,smallint
+quantity,smallint
+rowguid,uuid
+modifieddate,timestamp without time zone

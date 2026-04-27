@@ -1,0 +1,18 @@
+{
+  "role": "assistant",
+  "content": "\n\nThe schema retrieval didn't find the employee tables. Let me search more specifically for employee and HR-related tables:\n",
+  "timestamp": "2026-04-21T06:11:17.282975Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_36f4e1f80ea7453991adf805",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "employee department salary rate human resources",
+        "search_mode": "vector"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

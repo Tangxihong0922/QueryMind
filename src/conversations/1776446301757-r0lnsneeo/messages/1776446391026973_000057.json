@@ -1,0 +1,31 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T17:19:44.957245Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_89uunq8hwkkx_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM empdepartmentrate LIMIT 5;"
+      }
+    },
+    {
+      "id": "call_function_89uunq8hwkkx_2",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM emp_dept_rate LIMIT 5;"
+      }
+    },
+    {
+      "id": "call_function_89uunq8hwkkx_3",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM dept_rate LIMIT 5;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

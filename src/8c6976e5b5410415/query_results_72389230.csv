@@ -1,0 +1,6 @@
+table_name,table_schema
+salesperson,sales
+salespersonquotahistory,sales
+vsalesperson,sales
+vsalespersonsalesbyfiscalyears,sales
+vsalespersonsalesbyfiscalyearsdata,sales

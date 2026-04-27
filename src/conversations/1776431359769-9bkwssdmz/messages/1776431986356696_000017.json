@@ -1,0 +1,16 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-17T13:19:44.576562Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_9n8da1otgliz_1",
+      "name": "run_sql",
+      "arguments": {
+        "sql": "SELECT * FROM \"Production.Product\" LIMIT 1;"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

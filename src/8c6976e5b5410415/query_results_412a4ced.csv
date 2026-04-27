@@ -1,0 +1,82 @@
+table_name,column_name,data_type
+customer,customerid,integer
+customer,personid,integer
+customer,storeid,integer
+customer,territoryid,integer
+customer,rowguid,uuid
+customer,modifieddate,timestamp without time zone
+employee,businessentityid,integer
+employee,nationalidnumber,character varying
+employee,loginid,character varying
+employee,jobtitle,character varying
+employee,birthdate,date
+employee,maritalstatus,character
+employee,gender,character
+employee,hiredate,date
+employee,salariedflag,boolean
+employee,vacationhours,smallint
+employee,sickleavehours,smallint
+employee,currentflag,boolean
+employee,rowguid,uuid
+employee,modifieddate,timestamp without time zone
+employee,organizationnode,character varying
+product,productid,integer
+product,name,character varying
+product,productnumber,character varying
+product,makeflag,boolean
+product,finishedgoodsflag,boolean
+product,color,character varying
+product,safetystocklevel,smallint
+product,reorderpoint,smallint
+product,standardcost,numeric
+product,listprice,numeric
+product,size,character varying
+product,sizeunitmeasurecode,character
+product,weightunitmeasurecode,character
+product,weight,numeric
+product,daystomanufacture,integer
+product,productline,character
+product,class,character
+product,style,character
+product,productsubcategoryid,integer
+product,productmodelid,integer
+product,sellstartdate,timestamp without time zone
+product,sellenddate,timestamp without time zone
+product,discontinueddate,timestamp without time zone
+product,rowguid,uuid
+product,modifieddate,timestamp without time zone
+salesorderdetail,salesorderid,integer
+salesorderdetail,salesorderdetailid,integer
+salesorderdetail,carriertrackingnumber,character varying
+salesorderdetail,orderqty,smallint
+salesorderdetail,productid,integer
+salesorderdetail,specialofferid,integer
+salesorderdetail,unitprice,numeric
+salesorderdetail,unitpricediscount,numeric
+salesorderdetail,rowguid,uuid
+salesorderdetail,modifieddate,timestamp without time zone
+salesorderheader,salesorderid,integer
+salesorderheader,revisionnumber,smallint
+salesorderheader,orderdate,timestamp without time zone
+salesorderheader,duedate,timestamp without time zone
+salesorderheader,shipdate,timestamp without time zone
+salesorderheader,status,smallint
+salesorderheader,onlineorderflag,boolean
+salesorderheader,purchaseordernumber,character varying
+salesorderheader,accountnumber,character varying
+salesorderheader,customerid,integer
+salesorderheader,salespersonid,integer
+salesorderheader,territoryid,integer
+salesorderheader,billtoaddressid,integer
+salesorderheader,shiptoaddressid,integer
+salesorderheader,shipmethodid,integer
+salesorderheader,creditcardid,integer
+salesorderheader,creditcardapprovalcode,character varying
+salesorderheader,currencyrateid,integer
+salesorderheader,subtotal,numeric
+salesorderheader,taxamt,numeric
+salesorderheader,freight,numeric
+salesorderheader,totaldue,numeric
+salesorderheader,comment,character varying
+salesorderheader,rowguid,uuid
+salesorderheader,modifieddate,timestamp without time zone

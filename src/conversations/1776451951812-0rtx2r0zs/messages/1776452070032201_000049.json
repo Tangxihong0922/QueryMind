@@ -1,0 +1,15 @@
+{
+  "role": "tool",
+  "content": "column \"table_name\" does not exist\nLINE 1: SELECT table_name FROM adventureworks.humanresources.employe...\n               ^\n",
+  "timestamp": "2026-04-17T18:54:18.602909Z",
+  "metadata": {
+    "error_type": "sql_error",
+    "execution_time_ms": 23.14916718751192
+  },
+  "tool_result": {
+    "error_type": "sql_error",
+    "execution_time_ms": 23.14916718751192
+  },
+  "tool_calls": null,
+  "tool_call_id": "call_function_zfbkvs4q6rir_1"
+}

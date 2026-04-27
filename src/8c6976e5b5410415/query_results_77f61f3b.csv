@@ -1,0 +1,10 @@
+column_name,data_type
+addressid,integer
+addressline1,character varying
+addressline2,character varying
+city,character varying
+stateprovinceid,integer
+postalcode,character varying
+spatiallocation,bytea
+rowguid,uuid
+modifieddate,timestamp without time zone

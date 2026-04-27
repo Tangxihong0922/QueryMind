@@ -1,0 +1,7 @@
+column_name,data_type
+businessentityid,integer
+departmentid,smallint
+shiftid,smallint
+startdate,date
+enddate,date
+modifieddate,timestamp without time zone

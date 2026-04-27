@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>QueryMind Workspace</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(21, 168, 168, 0.12), transparent 24%),
+        radial-gradient(circle at right center, rgba(2, 61, 96, 0.12), transparent 28%),
+        linear-gradient(180deg, #f5f2e8 0%, #eef2f7 100%);
+      color: rgb(2, 61, 96);
+      font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 24px 18px;
+      background: linear-gradient(180deg, rgba(2, 61, 96, 0.98), rgba(4, 79, 122, 0.94));
+      color: white;
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      min-height: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(21, 168, 168, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-weight: 700;
+    }
+
+    .brand-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title strong {
+      font-size: 1.05rem;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-title span {
+      font-size: 0.82rem;
+      opacity: 0.8;
+    }
+
+    .new-chat-btn {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgb(21, 168, 168), rgb(31, 191, 186));
+      color: white;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 18px 40px rgba(21, 168, 168, 0.35);
+      transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+    }
+
+    .new-chat-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow: 0 22px 44px rgba(21, 168, 168, 0.42);
+    }
+
+    .history-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 22px;
+      padding: 16px 12px 12px;
+      overflow: hidden;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 6px 2px;
+    }
+
+    .history-header h2 {
+      margin: 0;
+      font-size: 0.92rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.78;
+    }
+
+    .history-count {
+      font-size: 0.76rem;
+      opacity: 0.7;
+    }
+
+    .history-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+    }
+
+    .history-item {
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.06);
+      color: white;
+      border-radius: 18px;
+      padding: 14px 14px 12px;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .history-item:hover,
+    .history-item.active {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .history-item-title {
+      font-size: 0.94rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .history-item-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.74rem;
+      opacity: 0.7;
+      margin-top: 10px;
+    }
+
+    .history-empty {
+      padding: 24px 8px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      opacity: 0.72;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .history-action {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-width: 0;
+      min-height: 0;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.85)),
+        linear-gradient(180deg, #f4f0e5 0%, #eef3f8 100%);
+    }
+
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(2, 61, 96, 0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .main-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .main-title-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgb(21, 168, 168), rgb(2, 61, 96));
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 14px 30px rgba(2, 61, 96, 0.18);
+    }
+
+    .main-title-text {
+      min-width: 0;
+    }
+
+    .main-title-text h1 {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 700;
+    }
+
+    .main-title-text p {
+      margin: 3px 0 0;
+      font-size: 0.84rem;
+      color: rgba(2, 61, 96, 0.72);
+    }
+
+    .chat-shell {
+      min-height: 0;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    querymind-chat {
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      margin: 0;
+      border-radius: 24px;
+    }
+
+    @media (max-width: 980px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">QM</div>
+        <div class="brand-title">
+          <strong>QueryMind</strong>
+          <span>Chat Workspace</span>
+        </div>
+      </div>
+
+      <button class="new-chat-btn" id="newChatBtn">+ New Chat</button>
+
+      <section class="history-panel">
+        <div class="history-header">
+          <h2>Chat History</h2>
+          <span class="history-count" id="historyCount">0</span>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">Loading chat history...</div>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <div class="main-title">
+          <div class="main-title-mark">QC</div>
+          <div class="main-title-text">
+            <h1>QueryMind Chat</h1>
+            <p>Resume conversations or start a new thread from the left panel.</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="chat-shell">
+        <querymind-chat
+          id="chatComponent"
+          api-base="http://localhost:8000"
+          title="QueryMind Chat"
+          placeholder="Ask me anything..."
+          starting-state="normal"
+          workspace-mode>
+        </querymind-chat>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    const chat = document.getElementById('chatComponent');
+    const bundle = document.createElement('script');
+    bundle.type = 'module';
+    bundle.src = `/static/querymind-components.js?v=${Date.now()}`;
+    document.head.appendChild(bundle);
+
+    const historyList = document.getElementById('historyList');
+    const historyCount = document.getElementById('historyCount');
+    const newChatBtn = document.getElementById('newChatBtn');
+    let activeConversationId = '';
+
+    const formatRelativeTime = (iso) => {
+      if (!iso) return '';
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return '';
+      const diffMs = Date.now() - date.getTime();
+      const diffMinutes = Math.max(1, Math.round(diffMs / 60000));
+      if (diffMinutes < 60) return `${diffMinutes}m ago`;
+      const diffHours = Math.round(diffMinutes / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.round(diffHours / 24);
+      return `${diffDays}d ago`;
+    };
+
+    const escapeHtml = (value) => {
+      const div = document.createElement('div');
+      div.textContent = value || '';
+      return div.innerHTML;
+    };
+
+    const renderHistory = (items) => {
+      if (!historyList) return;
+      if (!items || items.length === 0) {
+        historyList.innerHTML = '<div class="history-empty">No conversations yet. Start a new chat to create one.</div>';
+        if (historyCount) historyCount.textContent = '0';
+        return;
+      }
+
+      if (historyCount) historyCount.textContent = String(items.length);
+
+      historyList.innerHTML = items.map((item) => `
+        <button class="history-item ${item.conversation_id === activeConversationId ? 'active' : ''}" data-conversation-id="${escapeHtml(item.conversation_id)}">
+          <div class="history-item-title">${escapeHtml(item.title || 'Untitled conversation')}</div>
+          <div class="history-item-meta">
+            <span>${item.message_count || 0} messages</span>
+            <span>${escapeHtml(formatRelativeTime(item.updated_at))}</span>
+          </div>
+        </button>
+      `).join('');
+
+      historyList.querySelectorAll('.history-item').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const conversationId = button.getAttribute('data-conversation-id');
+          if (!conversationId || !chat) return;
+          activeConversationId = conversationId;
+          historyList.querySelectorAll('.history-item').forEach((item) => item.classList.remove('active'));
+          button.classList.add('active');
+          await chat.loadConversation(conversationId);
+        });
+      });
+    };
+
+    const loadHistory = async () => {
+      if (!chat) return;
+      try {
+        const api = chat.getApiClient();
+        const response = await api.listConversations(50, 0);
+        renderHistory(response.conversations || []);
+      } catch (error) {
+        console.error('Failed to load history:', error);
+        if (historyList) {
+          historyList.innerHTML = `<div class="history-empty">Failed to load history.</div>`;
+        }
+      }
+    };
+
+    const startNewChat = async () => {
+      if (!chat) return;
+      activeConversationId = '';
+      await chat.startNewConversation();
+      await loadHistory();
+      historyList?.querySelectorAll('.history-item').forEach((item) => item.classList.remove('active'));
+    };
+
+    customElements.whenDefined('querymind-chat').then(async () => {
+      if (chat) {
+        chat.userGroups = ['admin'];
+      }
+      await loadHistory();
+    });
+
+    newChatBtn?.addEventListener('click', startNewChat);
+  </script>
+</body>
+</html>

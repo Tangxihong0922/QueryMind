@@ -1,0 +1,10 @@
+table_catalog,table_schema,table_name
+adventureworks,sales,salesorderdetail
+adventureworks,sales,salesorderheader
+adventureworks,sales,salesorderheadersalesreason
+adventureworks,sales,salesperson
+adventureworks,sales,salespersonquotahistory
+adventureworks,sales,salesreason
+adventureworks,sales,salestaxrate
+adventureworks,sales,salesterritory
+adventureworks,sales,salesterritoryhistory

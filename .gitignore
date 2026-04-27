@@ -1,0 +1,12 @@
+.venv/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+src/.env
+mem0_history.db
+src/evals/eval_results/
+src/evals/resume_points/
+.DS_Store

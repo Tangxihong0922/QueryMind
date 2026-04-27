@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "Let me search more broadly for relevant tables:\n",
+  "timestamp": "2026-04-17T15:24:09.460923Z",
+  "metadata": {},
+  "tool_calls": [
+    {
+      "id": "call_function_a6rjusxfsvjf_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "query": "employee department Information Services Document Control",
+        "search_mode": "hybrid"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

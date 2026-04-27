@@ -1,0 +1,7 @@
+table_schema,table_name,column_name,data_type
+hr,s,id,integer
+hr,s,shiftid,integer
+hr,s,name,character varying
+hr,s,starttime,time without time zone
+hr,s,endtime,time without time zone
+hr,s,modifieddate,timestamp without time zone

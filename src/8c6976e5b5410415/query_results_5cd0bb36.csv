@@ -1,0 +1,27 @@
+column_name,data_type
+id,integer
+productid,integer
+name,character varying
+productnumber,character varying
+makeflag,boolean
+finishedgoodsflag,boolean
+color,character varying
+safetystocklevel,smallint
+reorderpoint,smallint
+standardcost,numeric
+listprice,numeric
+size,character varying
+sizeunitmeasurecode,character
+weightunitmeasurecode,character
+weight,numeric
+daystomanufacture,integer
+productline,character
+class,character
+style,character
+productsubcategoryid,integer
+productmodelid,integer
+sellstartdate,timestamp without time zone
+sellenddate,timestamp without time zone
+discontinueddate,timestamp without time zone
+rowguid,uuid
+modifieddate,timestamp without time zone

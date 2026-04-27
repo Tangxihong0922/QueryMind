@@ -1,0 +1,7 @@
+column_name,data_type,is_nullable
+id,integer,YES
+businessentityid,integer,YES
+ratechangedate,timestamp without time zone,YES
+rate,numeric,YES
+payfrequency,smallint,YES
+modifieddate,timestamp without time zone,YES

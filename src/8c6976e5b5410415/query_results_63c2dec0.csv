@@ -1,0 +1,6 @@
+column_name,data_type,table_schema
+businessentityid,integer,sales
+quotadate,timestamp without time zone,sales
+salesquota,numeric,sales
+rowguid,uuid,sales
+modifieddate,timestamp without time zone,sales

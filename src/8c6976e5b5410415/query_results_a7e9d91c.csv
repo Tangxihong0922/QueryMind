@@ -1,0 +1,10 @@
+table_schema,table_name,column_name,data_type
+hr,d,departmentid,integer
+hr,edh,departmentid,smallint
+humanresources,department,departmentid,integer
+humanresources,employeedepartmenthistory,departmentid,smallint
+humanresources,vemployeedepartment,department,character varying
+humanresources,vemployeedepartmenthistory,department,character varying
+pu,poh,employeeid,integer
+purchasing,purchaseorderheader,employeeid,integer
+sales,vstorewithdemographics,NumberEmployees,integer

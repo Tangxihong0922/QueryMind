@@ -1,0 +1,17 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T12:57:24.667670Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_mqfe9lqgem0l_1",
+      "name": "search_saved_correct_tool_uses",
+      "arguments": {
+        "question": "fetch rows from product table where sellstartdate is not null and productline equals 'T', output productid, productnumber, name, sort by name ascending"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

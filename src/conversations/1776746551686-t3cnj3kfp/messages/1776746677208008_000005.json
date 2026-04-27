@@ -1,0 +1,19 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T04:42:59.957110Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_xundkrg4f32k_1",
+      "name": "schema_retrieve",
+      "arguments": {
+        "limit": 15,
+        "query": "inventory stock warehouse products location",
+        "search_mode": "hybrid"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

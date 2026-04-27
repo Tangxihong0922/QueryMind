@@ -1,0 +1,21 @@
+{
+  "role": "assistant",
+  "content": "",
+  "timestamp": "2026-04-21T12:53:20.355172Z",
+  "metadata": {},
+  "tool_result": null,
+  "tool_calls": [
+    {
+      "id": "call_function_ib690hghs3xf_1",
+      "name": "save_question_tool_args",
+      "arguments": {
+        "args": {
+          "sql": "SELECT productid, productnumber, name \nFROM production.product \nWHERE sellstartdate IS NOT NULL \nAND productline = 'T' \nORDER BY name ASC;"
+        },
+        "question": "query product sellstartdate productline",
+        "tool_name": "run_sql"
+      }
+    }
+  ],
+  "tool_call_id": null
+}

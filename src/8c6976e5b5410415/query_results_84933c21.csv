@@ -1,0 +1,26 @@
+column_name,data_type,is_nullable,column_default
+salesorderid,integer,NO,nextval('sales.salesorderheader_salesorderid_seq'::regclass)
+revisionnumber,smallint,NO,0
+orderdate,timestamp without time zone,NO,now()
+duedate,timestamp without time zone,NO,
+shipdate,timestamp without time zone,YES,
+status,smallint,NO,1
+onlineorderflag,boolean,NO,true
+purchaseordernumber,character varying,YES,
+accountnumber,character varying,YES,
+customerid,integer,NO,
+salespersonid,integer,YES,
+territoryid,integer,YES,
+billtoaddressid,integer,NO,
+shiptoaddressid,integer,NO,
+shipmethodid,integer,NO,
+creditcardid,integer,YES,
+creditcardapprovalcode,character varying,YES,
+currencyrateid,integer,YES,
+subtotal,numeric,NO,0.00
+taxamt,numeric,NO,0.00
+freight,numeric,NO,0.00
+totaldue,numeric,YES,
+comment,character varying,YES,
+rowguid,uuid,NO,uuid_generate_v1()
+modifieddate,timestamp without time zone,NO,now()

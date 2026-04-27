@@ -1,0 +1,8 @@
+{
+  "role": "tool",
+  "content": "Content of 'query_results_81d352be.csv':\n\nmindate,maxdate\n2022-05-30,2025-02-28\n",
+  "timestamp": "2026-04-17T15:24:56.969847Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": "call_function_pt3ot68gw3sa_1"
+}

@@ -1,0 +1,5 @@
+table_schema,table_name
+purchasing,productvendor
+purchasing,vendor
+purchasing,vvendorwithaddresses
+purchasing,vvendorwithcontacts

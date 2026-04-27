@@ -1,0 +1,157 @@
+table_catalog,table_schema,table_name,table_type
+adventureworks,hr,d,VIEW
+adventureworks,hr,e,VIEW
+adventureworks,hr,edh,VIEW
+adventureworks,hr,eph,VIEW
+adventureworks,hr,jc,VIEW
+adventureworks,hr,s,VIEW
+adventureworks,humanresources,department,BASE TABLE
+adventureworks,humanresources,employee,BASE TABLE
+adventureworks,humanresources,employeedepartmenthistory,BASE TABLE
+adventureworks,humanresources,employeenameview,VIEW
+adventureworks,humanresources,employeepayhistory,BASE TABLE
+adventureworks,humanresources,jobcandidate,BASE TABLE
+adventureworks,humanresources,shift,BASE TABLE
+adventureworks,humanresources,vemployee,VIEW
+adventureworks,humanresources,vemployeedepartment,VIEW
+adventureworks,humanresources,vemployeedepartmenthistory,VIEW
+adventureworks,humanresources,vjobcandidate,VIEW
+adventureworks,humanresources,vjobcandidateeducation,VIEW
+adventureworks,humanresources,vjobcandidateemployment,VIEW
+adventureworks,pe,a,VIEW
+adventureworks,pe,at,VIEW
+adventureworks,pe,be,VIEW
+adventureworks,pe,bea,VIEW
+adventureworks,pe,bec,VIEW
+adventureworks,pe,cr,VIEW
+adventureworks,pe,ct,VIEW
+adventureworks,pe,e,VIEW
+adventureworks,pe,p,VIEW
+adventureworks,pe,pa,VIEW
+adventureworks,pe,pnt,VIEW
+adventureworks,pe,pp,VIEW
+adventureworks,pe,sp,VIEW
+adventureworks,person,address,BASE TABLE
+adventureworks,person,addresstype,BASE TABLE
+adventureworks,person,businessentity,BASE TABLE
+adventureworks,person,businessentityaddress,BASE TABLE
+adventureworks,person,businessentitycontact,BASE TABLE
+adventureworks,person,contacttype,BASE TABLE
+adventureworks,person,countryregion,BASE TABLE
+adventureworks,person,emailaddress,BASE TABLE
+adventureworks,person,password,BASE TABLE
+adventureworks,person,person,BASE TABLE
+adventureworks,person,personphone,BASE TABLE
+adventureworks,person,phonenumbertype,BASE TABLE
+adventureworks,person,stateprovince,BASE TABLE
+adventureworks,person,vadditionalcontactinfo,VIEW
+adventureworks,pr,bom,VIEW
+adventureworks,pr,c,VIEW
+adventureworks,pr,d,VIEW
+adventureworks,pr,i,VIEW
+adventureworks,pr,l,VIEW
+adventureworks,pr,p,VIEW
+adventureworks,pr,pc,VIEW
+adventureworks,pr,pch,VIEW
+adventureworks,pr,pd,VIEW
+adventureworks,pr,pdoc,VIEW
+adventureworks,pr,pi,VIEW
+adventureworks,pr,plph,VIEW
+adventureworks,pr,pm,VIEW
+adventureworks,pr,pmi,VIEW
+adventureworks,pr,pmpdc,VIEW
+adventureworks,pr,pp,VIEW
+adventureworks,pr,ppp,VIEW
+adventureworks,pr,pr,VIEW
+adventureworks,pr,psc,VIEW
+adventureworks,pr,sr,VIEW
+adventureworks,pr,th,VIEW
+adventureworks,pr,tha,VIEW
+adventureworks,pr,um,VIEW
+adventureworks,pr,w,VIEW
+adventureworks,pr,wr,VIEW
+adventureworks,production,billofmaterials,BASE TABLE
+adventureworks,production,culture,BASE TABLE
+adventureworks,production,document,BASE TABLE
+adventureworks,production,illustration,BASE TABLE
+adventureworks,production,location,BASE TABLE
+adventureworks,production,product,BASE TABLE
+adventureworks,production,productcategory,BASE TABLE
+adventureworks,production,productcosthistory,BASE TABLE
+adventureworks,production,productdescription,BASE TABLE
+adventureworks,production,productdocument,BASE TABLE
+adventureworks,production,productinventory,BASE TABLE
+adventureworks,production,productlistpricehistory,BASE TABLE
+adventureworks,production,productmodel,BASE TABLE
+adventureworks,production,productmodelillustration,BASE TABLE
+adventureworks,production,productmodelproductdescriptionculture,BASE TABLE
+adventureworks,production,productphoto,BASE TABLE
+adventureworks,production,productproductphoto,BASE TABLE
+adventureworks,production,productreview,BASE TABLE
+adventureworks,production,productsubcategory,BASE TABLE
+adventureworks,production,scrapreason,BASE TABLE
+adventureworks,production,transactionhistory,BASE TABLE
+adventureworks,production,transactionhistoryarchive,BASE TABLE
+adventureworks,production,unitmeasure,BASE TABLE
+adventureworks,production,vproductmodelcatalogdescription,VIEW
+adventureworks,production,vproductmodelinstructions,VIEW
+adventureworks,production,workorder,BASE TABLE
+adventureworks,production,workorderrouting,BASE TABLE
+adventureworks,pu,pod,VIEW
+adventureworks,pu,poh,VIEW
+adventureworks,pu,pv,VIEW
+adventureworks,pu,sm,VIEW
+adventureworks,pu,v,VIEW
+adventureworks,purchasing,productvendor,BASE TABLE
+adventureworks,purchasing,purchaseorderdetail,BASE TABLE
+adventureworks,purchasing,purchaseorderheader,BASE TABLE
+adventureworks,purchasing,shipmethod,BASE TABLE
+adventureworks,purchasing,vendor,BASE TABLE
+adventureworks,purchasing,vvendorwithaddresses,VIEW
+adventureworks,purchasing,vvendorwithcontacts,VIEW
+adventureworks,sa,c,VIEW
+adventureworks,sa,cc,VIEW
+adventureworks,sa,cr,VIEW
+adventureworks,sa,crc,VIEW
+adventureworks,sa,cu,VIEW
+adventureworks,sa,pcc,VIEW
+adventureworks,sa,s,VIEW
+adventureworks,sa,sci,VIEW
+adventureworks,sa,so,VIEW
+adventureworks,sa,sod,VIEW
+adventureworks,sa,soh,VIEW
+adventureworks,sa,sohsr,VIEW
+adventureworks,sa,sop,VIEW
+adventureworks,sa,sp,VIEW
+adventureworks,sa,spqh,VIEW
+adventureworks,sa,sr,VIEW
+adventureworks,sa,st,VIEW
+adventureworks,sa,sth,VIEW
+adventureworks,sa,tr,VIEW
+adventureworks,sales,countryregioncurrency,BASE TABLE
+adventureworks,sales,creditcard,BASE TABLE
+adventureworks,sales,currency,BASE TABLE
+adventureworks,sales,currencyrate,BASE TABLE
+adventureworks,sales,customer,BASE TABLE
+adventureworks,sales,personcreditcard,BASE TABLE
+adventureworks,sales,salesorderdetail,BASE TABLE
+adventureworks,sales,salesorderheader,BASE TABLE
+adventureworks,sales,salesorderheadersalesreason,BASE TABLE
+adventureworks,sales,salesperson,BASE TABLE
+adventureworks,sales,salespersonquotahistory,BASE TABLE
+adventureworks,sales,salesreason,BASE TABLE
+adventureworks,sales,salestaxrate,BASE TABLE
+adventureworks,sales,salesterritory,BASE TABLE
+adventureworks,sales,salesterritoryhistory,BASE TABLE
+adventureworks,sales,shoppingcartitem,BASE TABLE
+adventureworks,sales,specialoffer,BASE TABLE
+adventureworks,sales,specialofferproduct,BASE TABLE
+adventureworks,sales,store,BASE TABLE
+adventureworks,sales,vindividualcustomer,VIEW
+adventureworks,sales,vpersondemographics,VIEW
+adventureworks,sales,vsalesperson,VIEW
+adventureworks,sales,vsalespersonsalesbyfiscalyears,VIEW
+adventureworks,sales,vsalespersonsalesbyfiscalyearsdata,VIEW
+adventureworks,sales,vstorewithaddresses,VIEW
+adventureworks,sales,vstorewithcontacts,VIEW
+adventureworks,sales,vstorewithdemographics,VIEW

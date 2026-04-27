@@ -1,0 +1,8 @@
+{
+  "role": "user",
+  "content": "\u67e5\u8be2 AdventureWorks \u6570\u636e\u5e93\u4e2d employee \u8868\u4e2d\u7684\u6240\u6709\u4e0d\u91cd\u590d\u7684\u804c\u4f4d\u540d\u79f0\u3002\u8fd4\u56de jobtitle \u5217\uff0c\u5e76\u6309\u5347\u5e8f\u6392\u5217\u7ed3\u679c\u96c6\u3002",
+  "timestamp": "2026-04-16T15:16:10.958883Z",
+  "metadata": {},
+  "tool_calls": null,
+  "tool_call_id": null
+}

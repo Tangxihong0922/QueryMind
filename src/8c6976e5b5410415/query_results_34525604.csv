@@ -1,0 +1,7 @@
+column_name,data_type,is_nullable
+businessentityid,integer,NO
+departmentid,smallint,NO
+shiftid,smallint,NO
+startdate,date,NO
+enddate,date,YES
+modifieddate,timestamp without time zone,NO

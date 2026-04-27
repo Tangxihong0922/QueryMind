@@ -1,0 +1,7 @@
+column_name,data_type
+salespersonid,integer
+fullname,text
+jobtitle,character varying
+salesterritory,character varying
+salestotal,numeric
+fiscalyear,numeric

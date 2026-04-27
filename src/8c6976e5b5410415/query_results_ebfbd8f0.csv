@@ -1,0 +1,6 @@
+table_schema,table_name
+production,productmodel
+production,productmodelproductdescriptionculture
+production,productmodelillustration
+production,vproductmodelcatalogdescription
+production,vproductmodelinstructions

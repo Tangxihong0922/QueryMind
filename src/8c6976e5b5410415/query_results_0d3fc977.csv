@@ -1,0 +1,8 @@
+column_name,data_type
+id,integer
+productmodelid,integer
+name,character varying
+catalogdescription,xml
+instructions,xml
+rowguid,uuid
+modifieddate,timestamp without time zone
