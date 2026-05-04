@@ -1,6 +1,0 @@
-column_name,data_type,is_nullable
-productid,integer,NO
-startdate,timestamp without time zone,NO
-enddate,timestamp without time zone,YES
-listprice,numeric,NO
-modifieddate,timestamp without time zone,NO

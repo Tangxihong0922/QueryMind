@@ -7,10 +7,10 @@ interface that persists conversations to disk as a directory structure.
 
 import json
 import os
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
-from datetime import datetime, timezone
-import time
 
 from QueryMind.core.storage import ConversationStore, Conversation, Message
 from QueryMind.core.user import User
@@ -259,8 +259,8 @@ class FileSystemConversationStore(ConversationStore):
 
         # Apply pagination
         return conversations[offset : offset + limit]
-    
-    async def get_recent(self, conversation_id: str, limit: int = 10) -> List:
+
+    async def get_recent(self, conversation_id: str, limit: int = 10) -> List[Message]:
         """Get recent messages from a conversation.
 
         Args:
@@ -271,7 +271,7 @@ class FileSystemConversationStore(ConversationStore):
             List of recent conversation messages (most recent last)
         """
         messages = self._load_messages(conversation_id)
-        if not messages:
+        if not messages or limit <= 0:
             return []
         # Return the most recent 'limit' messages
         return messages[-limit:]

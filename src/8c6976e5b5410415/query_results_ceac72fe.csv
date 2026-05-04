@@ -1,6 +1,0 @@
-column_name,data_type,is_nullable
-locationid,integer,NO
-name,character varying,NO
-costrate,numeric,NO
-availability,numeric,NO
-modifieddate,timestamp without time zone,NO

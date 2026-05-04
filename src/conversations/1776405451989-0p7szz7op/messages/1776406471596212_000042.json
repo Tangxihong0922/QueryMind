@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "syntax error at or near \"DESCRIBE\"\nLINE 1: DESCRIBE HumanResources.vemployeedepartmenthistory;\n        ^\n",
-  "timestamp": "2026-04-17T06:14:25.956313Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_4a8x27gxftnv_1"
-}

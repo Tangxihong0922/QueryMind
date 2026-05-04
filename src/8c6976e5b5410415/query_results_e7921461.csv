@@ -1,5 +1,0 @@
-column_name,data_type
-businessentityid,integer
-phonenumber,character varying
-phonenumbertypeid,integer
-modifieddate,timestamp without time zone

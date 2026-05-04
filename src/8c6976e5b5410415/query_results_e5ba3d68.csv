@@ -1,6 +1,0 @@
-table_name,table_type
-employee,BASE TABLE
-person,BASE TABLE
-product,BASE TABLE
-salesorderdetail,BASE TABLE
-salesorderheader,BASE TABLE

@@ -2,7 +2,8 @@
 
 Security in QueryMind is layered, not monolithic. Identity is resolved at the request boundary, authorization is enforced on tools and UI features, and SQL safety is pushed into a registry-level policy layer before any database call is made. That separation keeps the system reusable across deployments and easier to explain in interviews.
 
-This page is the policy reference for [Tool Registry Use Case: RLS Protection](./tools.md#tool-registry-use-case-rls-protection).
+This page is the policy reference for the registry-level SQL safety and access
+control behavior described in [Tool Systems](./tools.md).
 
 ## User Resolver & Authentication^
 
@@ -98,34 +99,53 @@ Sensitive tool parameters are sanitized before logging by name-based redaction. 
 ## RLS Protection Module^*
 
 ```text
-┌────────────────────────────────────────────────────────────────────┐
-│                    RLSToolRegistry.transform_args()                │
-├────────────────────────────────────────────────────────────────────┤
-│  tool is run_sql?                                                  │
-│     ├─ no  → pass through unchanged                                │
-│     └─ yes                                                         │
-│            ▼                                                       │
-│      RunSqlToolArgs (typed)                                         │
-│            ▼                                                       │
-│  1) SQL injection detection                                        │
-│            ├─ reject → ToolRejection                               │
-│            ▼                                                       │
-│  2) Query complexity validation                                    │
-│            ├─ reject → ToolRejection                               │
-│            ▼                                                       │
-│  3) Territory-based rewrite                                         │
-│            ▼                                                       │
-│      RunSqlTool.execute()                                           │
-└────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 1) ToolRegistry.execute()                                                                                │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ input: ToolCall(name="run_sql", arguments={sql: ...}) + ToolContext(user, metadata, request_id, ...)    │
+│ logic: lookup tool -> check access groups -> model_validate(args) -> attach base metadata                │
+│ output: validated tool + RunSqlToolArgs, or ToolResult(success=False, error=...)                        │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+                                                │
+                                                v
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 2) RLSToolRegistry.transform_args()                                                                      │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ input: validated RunSqlToolArgs + user.group_memberships + context.raw_user_message + context.metadata   │
+│ logic: only run_sql / RunSqlToolArgs; then run policy gates in order:                                    │
+│   - _detect_sql_injection(sql) -> sql_injection.allowed_metadata_patterns / forbidden_patterns           │
+│   - _validate_query_complexity(sql) -> length, subqueries, CTEs, JOINs                                   │
+│   - sql_semantics_rejection_reason(...) -> windows, aggregation, ROLLUP, navigation, row grain          │
+│   - _apply_territory_rls(sql, user) -> map groups to territory ids and rewrite protected tables          │
+│   - sql_governance_rejection_reason(...) -> context.metadata snapshot + SqlGovernancePolicy.from_env()   │
+│   - sql_skeleton_freeze_rejection_reason(...) -> keep the validated skeleton stable                      │
+│ output: rewritten RunSqlToolArgs or ToolRejection(reason=...)                                            │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+                                                │
+                                                v
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 3) RunSqlTool.execute()                                                                                  │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ input: policy-cleared RunSqlToolArgs + ToolContext                                                       │
+│ logic: self.sql_runner.run_sql(args, context)                                                            │
+│   - query branch: write CSV, build DataFrameComponent + SimpleTextComponent                              │
+│   - rows_affected branch: build NotificationComponent                                                    │
+│ sql_126 snapshot: row_count=290, columns=["businessentityid", "salariedflag"],                          │
+│                   output_file=query_results_<id>.csv                                                     │
+│ output: ToolResult(success=True, result_for_llm=CSV preview + file pointer, metadata=...)               │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-`RLSToolRegistry` is the clearest example of why QueryMind keeps policy in the registry layer. Row-level security is cross-cutting behavior, so it belongs above the SQL tool, not inside it. That keeps `RunSqlTool` reusable while letting deployments swap in different security rules by changing `rls_config.yaml`.
+`RLSToolRegistry` is the clearest example of why QueryMind keeps policy in the registry layer. It does more than territory rewriting: it pulls the pre-execution safety gates for `run_sql` into one place, starting with tool-name filtering, then typed-arg validation, and then the ordered chain of injection, complexity, SQL semantics, territory RLS, SQL governance, and skeleton freeze.
 
-The YAML config is organized into four policy blocks:
+The YAML config is organized into these policy blocks:
 - `territory_rls` for group-to-territory mapping and protected tables
 - `sql_injection` for rejection patterns and metadata allowlists
+- `sql_semantics` for window, aggregation, ROLLUP, navigation-function, and row-grain constraints
 - `query_limits` for query length and structural complexity caps
 - `audit` for logging SQL rewrites and rejected queries
+
+`sql_governance` and `sql_skeleton_freeze` do not live in `rls_config.yaml`. They read the governance snapshot in `context.metadata` together with `SqlGovernancePolicy`. In other words, this chain is not just SQL rewriting; it is a front-door gate that ties safety, governance, and freeze behavior together.
 
 Only `run_sql` is transformed. The registry checks the tool name, validates the typed `RunSqlToolArgs`, then applies policy before execution. Because the hook runs after Pydantic validation and before the database call, the policy layer sees structured arguments, not raw strings.
 
@@ -213,7 +233,7 @@ The audit flags in the same config let operators record rewrites and rejected qu
 
 ## Related
 
-See also [Tool Registry Use Case: RLS Protection](./tools.md#tool-registry-use-case-rls-protection).
+See also [Tool Systems](./tools.md) for the registry and execution boundary.
 
 
 <details open>
@@ -235,7 +255,7 @@ See also [Tool Registry Use Case: RLS Protection](./tools.md#tool-registry-use-c
 - [`src/QueryMind/core/recovery/default.py`](../../../src/QueryMind/core/recovery/default.py) - default retry/backoff strategy
 - [`src/QueryMind/integrations/local/audit.py`](../../../src/QueryMind/integrations/local/audit.py) - local audit logger implementation
 - [`src/QueryMind/integrations/auditlogger/postgres_logger.py`](../../../src/QueryMind/integrations/auditlogger/postgres_logger.py) - Postgres audit logger implementation
-- [`src/rls_registry.py`](../../../src/rls_registry.py) - RLS-aware registry with SQL transformation and rejection logic
-- [`src/rls_config.yaml`](../../../src/rls_config.yaml) - territory RLS policy configuration
+- [`src/QueryMind/rls_registry.py`](../../../src/QueryMind/rls_registry.py) - RLS-aware registry with SQL transformation and rejection logic
+- [`src/QueryMind/rls_config.yaml`](../../../src/QueryMind/rls_config.yaml) - territory RLS policy configuration
 
 </details>

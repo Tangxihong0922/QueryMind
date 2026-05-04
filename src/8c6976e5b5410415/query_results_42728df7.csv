@@ -1,8 +1,0 @@
-column_name,data_type
-id,integer
-businessentityid,integer
-departmentid,smallint
-shiftid,smallint
-startdate,date
-enddate,date
-modifieddate,timestamp without time zone

@@ -61,6 +61,8 @@ def _profile_category_hints(category: str) -> List[str]:
         "distinct": "Use DISTINCT only if the result must be deduplicated.",
         "subquery": "A nested form is acceptable when it keeps the main path stable.",
         "filtering": "Keep the predicate set tight and avoid widening the projection.",
+        "set_operation": "Keep UNION / INTERSECT / EXCEPT semantics intact; do not collapse them into plain filtering.",
+        "time_series": "Keep the time grain and time ordering explicit; do not reduce it to a generic date filter.",
     }
     hint = hints.get(category)
     return [hint] if hint else []
@@ -99,6 +101,10 @@ def build_sql_governance_profile(
         inferred.append("subquery")
     if any(tag in tag_pool for tag in {"filtering", "date_filter", "numeric_filter", "text_filter", "null_handling", "comparison"}):
         inferred.append("filtering")
+    if "set_operation" in tag_pool:
+        inferred.append("set_operation")
+    if "time_series" in tag_pool:
+        inferred.append("time_series")
 
     query_text = _normalize_text(query)
     if query_text:
@@ -114,6 +120,13 @@ def build_sql_governance_profile(
             inferred.append("distinct")
         if re.search(r"\b(subquery|nested query|in\s*\()\b", query_text):
             inferred.append("subquery")
+        if re.search(r"\b(union(?:\s+all)?|intersect|except)\b", query_text):
+            inferred.append("set_operation")
+        if re.search(
+            r"\b(time series|time-series|trend|trends|over time|by date|by day|by week|by month|by quarter|by year|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
+            query_text,
+        ):
+            inferred.append("time_series")
 
     categories = _dedupe_preserve_order(inferred)
     notes = _dedupe_preserve_order(raw_tags)
@@ -185,6 +198,10 @@ def _profile_gap_categories(profile: Optional[SqlGovernanceProfile], features: D
         gaps.append("filtering")
     if "grouping" in categories and not features.get("has_group_by") and not features.get("has_over"):
         gaps.append("grouping")
+    if "set_operation" in categories and not features.get("has_set_operation"):
+        gaps.append("set_operation")
+    if "time_series" in categories and not features.get("has_time_series"):
+        gaps.append("time_series")
 
     return _dedupe_preserve_order(gaps)
 
@@ -696,6 +713,24 @@ def build_sql_governance_prompt_block(
         "- Avoid metadata introspection queries unless they are explicitly allowed.",
         "- Keep the current row grain stable and call `run_sql` once the table path is clear.",
     ]
+    guidance_categories = _dedupe_preserve_order(
+        [
+            *[
+                category
+                for category in (profile.categories if profile else [])
+                if category in {"set_operation", "time_series"}
+            ],
+            *[
+                category
+                for category in (missing_categories or [])
+                if category in {"set_operation", "time_series"}
+            ],
+        ]
+    )
+    for category in guidance_categories:
+        hints = _profile_category_hints(category)
+        if hints:
+            prompt_parts.extend(["", f"- {hints[0]}"])
     if anchor_tier in {"candidate", "validated"}:
         anchor_preview = _collapse_sql(best_sql_text or "")
         if len(anchor_preview) > 160:
@@ -751,6 +786,8 @@ def _build_sql_governance_positive_recap(
     has_grouping = bool(shape.get("has_grouping"))
     has_order_by = bool(shape.get("has_order_by"))
     has_where = bool(shape.get("has_where"))
+    has_set_operation = bool(shape.get("has_set_operation"))
+    has_time_series = bool(shape.get("has_time_series"))
     date_filter_cue = bool(
         re.search(
             r"\b(date|date_part|year|month|quarter|current_date|now|interval|today|yesterday)\b",
@@ -821,6 +858,10 @@ def _build_sql_governance_positive_recap(
             family_sentence = "Then keep the current join path stable."
     elif family == "subquery" or has_subquery or categories & {"subquery"}:
         family_sentence = "Then keep the main path stable and use nesting only if it preserves coverage better."
+    elif family == "set_operation" or has_set_operation or categories & {"set_operation"}:
+        family_sentence = "Then keep the set operation semantics stable and preserve the UNION / INTERSECT / EXCEPT structure."
+    elif family == "time_series" or has_time_series or categories & {"time_series"}:
+        family_sentence = "Then keep the time grain stable and preserve the temporal ordering or grouping."
     elif family == "ordering" or has_order_by or categories & {"ordering"}:
         family_sentence = "Then keep the current projection stable and add only the requested ordering."
     elif family == "filtering" or has_where or categories & {"filtering"}:

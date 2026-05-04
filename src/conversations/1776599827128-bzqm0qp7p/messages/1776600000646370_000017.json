@@ -1,9 +1,0 @@
-{
-  "role": "assistant",
-  "content": "## Schema: `purchasing.vendor`\n\n| Column | Type | Nullable | Key | Description |\n|--------|------|----------|-----|-------------|\n| `businessentityid` | integer | NO | **PK** | Primary key reference to the business entity |\n| `accountnumber` | varchar(15) | NO | | Vendor account identifier |\n| `name` | varchar(50) | NO | | Vendor name |\n| `creditrating` | smallint | NO | | Credit rating score |\n| `preferredvendorstatus` | boolean | NO | | Whether vendor is preferred |\n| `activeflag` | boolean | NO | | Whether vendor is active |\n| `purchasingwebserviceurl` | varchar(1024) | YES | | Web service URL for purchasing |\n| `modifieddate` | timestamp | NO | | Last modification date |\n\n---\n\n### Related Tables in `purchasing` Schema:\n- `productvendor` - Product-vendor relationships\n- `purchaseorderdetail` - Purchase order line items\n- `purchaseorderheader` - Purchase order headers\n- `shipmethod` - Shipping methods\n- `vvendorwithaddresses` - Vendor with address info (view)\n- `vvendorwithcontacts` - Vendor with contact info (view)",
-  "timestamp": "2026-04-19T12:00:00.623490Z",
-  "metadata": {},
-  "tool_result": null,
-  "tool_calls": null,
-  "tool_call_id": null
-}

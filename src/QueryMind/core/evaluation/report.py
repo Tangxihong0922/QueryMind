@@ -118,6 +118,30 @@ class EvaluationReport(BaseModel):
     def get_failures(self) -> List[EvaluationResult]:
         return [item for item in self.results if not item.passed]
 
+    def _config_snapshot(self) -> Dict[str, Any]:
+        snapshot = self.metadata.get("config_snapshot")
+        return snapshot if isinstance(snapshot, dict) else {}
+
+    def _metadata_value(self, key: str) -> Any:
+        snapshot = self._config_snapshot()
+        if key in snapshot and snapshot[key] not in (None, ""):
+            return snapshot[key]
+
+        value = self.metadata.get(key)
+        if value not in (None, ""):
+            return value
+        return None
+
+    def _evaluation_model_info(self) -> List[tuple[str, str]]:
+        return [
+            ("Agent Model", str(self._metadata_value("agent_model") or "n/a")),
+            ("Judge Model", str(self._metadata_value("judge_model") or "n/a")),
+        ]
+
+    def _sql_execution_status(self, result: EvaluationResult) -> str:
+        artifact = result.agent_artifact
+        return "SUCCESS" if artifact is not None and artifact.success else "FAIL"
+
     def print_summary(self) -> None:
         self.enrich_metadata()
         print(f"\n{'=' * 80}")
@@ -131,9 +155,9 @@ class EvaluationReport(BaseModel):
         print(f"Test Cases: {len(self.results)}")
         if self.evaluator_names:
             print(f"Evaluators: {', '.join(self.evaluator_names)}")
-        print(f"Pass Rate: {self.pass_rate():.1%}")
+        print(f"Pass Rate: {self.pass_rate():.2%}")
         print(f"Average Score: {self.average_score():.2f}")
-        print(f"Execution Success Rate: {self.execution_success_rate():.1%}")
+        print(f"Execution Success Rate: {self.execution_success_rate():.2%}")
         print(f"Average Time: {self.average_execution_time():.0f}ms")
         print(f"{'=' * 80}\n")
 
@@ -196,7 +220,7 @@ class EvaluationReport(BaseModel):
             f"- Run status: {self.run_status()}",
             f"- Test cases: {len(self.results)}",
             f"- Evaluators: {', '.join(self.evaluator_names) if self.evaluator_names else 'n/a'}",
-            f"- Pass rate: {self.pass_rate():.1%}",
+            f"- Pass rate: {self.pass_rate():.2%}",
             f"- Average score: {self.average_score():.2f}",
             "",
             "## Evaluator Summary",
@@ -206,7 +230,7 @@ class EvaluationReport(BaseModel):
         for summary in self.evaluator_summaries():
             lines.append(
                 f"| {summary['evaluator_name']} | {summary['count']} | "
-                f"{summary['pass_rate']:.1%} | {summary['average_score']:.2f} | "
+                f"{summary['pass_rate']:.2%} | {summary['average_score']:.2f} | "
                 f"{summary['average_execution_time_ms']:.0f} |"
             )
 
@@ -221,7 +245,7 @@ class EvaluationReport(BaseModel):
             )
             for row in rows:
                 lines.append(
-                    f"| {row['value']} | {row['count']} | {row['pass_rate']:.1%} | "
+                    f"| {row['value']} | {row['count']} | {row['pass_rate']:.2%} | "
                     f"{row['average_score']:.2f} | {row['average_execution_time_ms']:.0f} |"
                 )
 
@@ -249,12 +273,16 @@ class EvaluationReport(BaseModel):
         rows = []
         for result in self.results:
             classifications = result.test_case.classification_dimensions()
+            pass_label = "PASS" if result.passed else "FAIL"
+            sql_execution_status = self._sql_execution_status(result)
             rows.append(
                 "<tr"
                 f' data-difficulty="{html.escape(classifications["difficulty"], quote=True)}"'
                 f' data-category="{html.escape(classifications["category"], quote=True)}"'
                 f' data-source="{html.escape(classifications["source"], quote=True)}"'
                 f' data-query-language="{html.escape(classifications["query_language"], quote=True)}"'
+                f' data-passed="{pass_label}"'
+                f' data-sql-execution="{sql_execution_status}"'
                 ">"
                 f"<td>{html.escape(result.test_case.id)}</td>"
                 f"<td>{html.escape(result.test_case.database_id)}</td>"
@@ -262,7 +290,8 @@ class EvaluationReport(BaseModel):
                 f"<td>{html.escape(classifications['category'])}</td>"
                 f"<td>{html.escape(classifications['source'])}</td>"
                 f"<td>{html.escape(classifications['query_language'])}</td>"
-                f"<td>{'PASS' if result.passed else 'FAIL'}</td>"
+                f"<td>{pass_label}</td>"
+                f"<td>{sql_execution_status}</td>"
                 f"<td>{result.score:.2f}</td>"
                 f"<td>{html.escape(self._format_evaluator_breakdown(result))}</td>"
                 f"<td>{html.escape(result.reason)}</td>"
@@ -277,7 +306,7 @@ class EvaluationReport(BaseModel):
                     "<tr>"
                     f"<td>{html.escape(str(row['value']))}</td>"
                     f"<td>{row['count']}</td>"
-                    f"<td>{row['pass_rate']:.1%}</td>"
+                    f"<td>{row['pass_rate']:.2%}</td>"
                     f"<td>{row['average_score']:.2f}</td>"
                     f"<td>{row['average_execution_time_ms']:.0f}</td>"
                     "</tr>"
@@ -296,7 +325,7 @@ class EvaluationReport(BaseModel):
                 "<tr>"
                 f"<td>{html.escape(summary['evaluator_name'])}</td>"
                 f"<td>{summary['count']}</td>"
-                f"<td>{summary['pass_rate']:.1%}</td>"
+                f"<td>{summary['pass_rate']:.2%}</td>"
                 f"<td>{summary['average_score']:.2f}</td>"
                 f"<td>{summary['average_execution_time_ms']:.0f}</td>"
                 "</tr>"
@@ -306,6 +335,11 @@ class EvaluationReport(BaseModel):
         category_options = self._classification_options("category")
         source_options = self._classification_options("source")
         language_options = self._classification_options("query_language")
+        model_info_rows = "".join(
+            f"<div class='model-row'><span>{html.escape(label)}</span>"
+            f"<strong>{html.escape(value)}</strong></div>"
+            for label, value in self._evaluation_model_info()
+        )
         run_status = self.run_status()
         progress = self.run_progress()
         banner = ""
@@ -323,10 +357,18 @@ class EvaluationReport(BaseModel):
 <meta charset="utf-8" />
 <title>QueryMind Evaluation Report</title>
 <style>
-body {{ font-family: Arial, sans-serif; margin: 24px; color: #1f1f1f; }}
+body {{ font-family: Arial, sans-serif; margin: 24px; color: #1f1f1f; background: #fff; }}
 section {{ margin-bottom: 24px; }}
 .banner {{ padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; }}
 .banner.warning {{ background: #fff8e1; border: 1px solid #f2c94c; color: #6b4f00; }}
+.report-header {{ display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 8px; flex-wrap: wrap; }}
+.report-title {{ min-width: 0; flex: 1 1 320px; }}
+.model-card {{ flex: 0 1 360px; padding: 14px 16px; border: 1px solid #d7dde5; border-radius: 14px; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06); }}
+.model-card .card-label {{ font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }}
+.model-row {{ display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-top: 1px solid #e8edf3; }}
+.model-row:first-of-type {{ border-top: 0; padding-top: 0; }}
+.model-row span {{ color: #475569; }}
+.model-row strong {{ color: #0f172a; text-align: right; word-break: break-word; }}
 .metrics {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }}
 .metric {{ padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; background: #fafafa; }}
 .metric .label {{ font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }}
@@ -344,15 +386,23 @@ tbody tr:nth-child(even) {{ background: #fcfcfc; }}
 </style>
 </head>
 <body>
-<h1>{html.escape(self.dataset_name)}</h1>
-<p class="muted">Timestamp: {self.timestamp.isoformat()}</p>
+<div class="report-header">
+  <div class="report-title">
+    <h1>{html.escape(self.dataset_name)}</h1>
+    <p class="muted">Timestamp: {self.timestamp.isoformat()}</p>
+  </div>
+  <aside class="model-card">
+    <div class="card-label">Batch Models</div>
+    {model_info_rows}
+  </aside>
+</div>
 {banner}
 <div class="metrics">
   <div class="metric"><div class="label">Test Cases</div><div class="value">{len(self.results)}</div></div>
   <div class="metric"><div class="label">Run Status</div><div class="value">{html.escape(run_status)}</div></div>
-  <div class="metric"><div class="label">Pass Rate</div><div class="value">{self.pass_rate():.1%}</div></div>
+  <div class="metric"><div class="label">Pass Rate</div><div class="value">{self.pass_rate():.2%}</div></div>
   <div class="metric"><div class="label">Average Score</div><div class="value">{self.average_score():.2f}</div></div>
-  <div class="metric"><div class="label">Execution Success</div><div class="value">{self.execution_success_rate():.1%}</div></div>
+  <div class="metric"><div class="label">Execution Success Rate</div><div class="value">{self.execution_success_rate():.2%}</div></div>
 </div>
 <section>
 <h2>Evaluator Summary</h2>
@@ -369,6 +419,8 @@ tbody tr:nth-child(even) {{ background: #fcfcfc; }}
 <section>
 <h2>Result Filters</h2>
 <div class="filters">
+  <div><label for="pass-filter">Pass / Fail</label><select id="pass-filter" onchange="applyFilters()"><option value="all">All</option><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+  <div><label for="sql-execution-filter">SQL Execution</label><select id="sql-execution-filter" onchange="applyFilters()"><option value="all">All</option><option value="SUCCESS">SUCCESS</option><option value="FAIL">FAIL</option></select></div>
   <div><label for="difficulty-filter">Difficulty</label><select id="difficulty-filter" onchange="applyFilters()">{self._render_select_options(difficulty_options)}</select></div>
   <div><label for="category-filter">Category</label><select id="category-filter" onchange="applyFilters()">{self._render_select_options(category_options)}</select></div>
   <div><label for="source-filter">Source</label><select id="source-filter" onchange="applyFilters()">{self._render_select_options(source_options)}</select></div>
@@ -380,7 +432,7 @@ tbody tr:nth-child(even) {{ background: #fcfcfc; }}
 <h2>Results</h2>
 <table>
 <thead>
-<tr><th>Test Case</th><th>Database</th><th>Difficulty</th><th>Category</th><th>Source</th><th>Language</th><th>Pass</th><th>Score</th><th>Evaluators</th><th>Reason</th></tr>
+<tr><th>Test Case</th><th>Database</th><th>Difficulty</th><th>Category</th><th>Source</th><th>Language</th><th>Pass</th><th>SQL Execution</th><th>Score</th><th>Evaluators</th><th>Reason</th></tr>
 </thead>
 <tbody id="results-body">
 {''.join(rows)}
@@ -389,6 +441,8 @@ tbody tr:nth-child(even) {{ background: #fcfcfc; }}
 </section>
 <script>
 function applyFilters() {{
+  const passStatus = document.getElementById('pass-filter').value;
+  const sqlExecution = document.getElementById('sql-execution-filter').value;
   const difficulty = document.getElementById('difficulty-filter').value;
   const category = document.getElementById('category-filter').value;
   const source = document.getElementById('source-filter').value;
@@ -396,7 +450,9 @@ function applyFilters() {{
   const rows = document.querySelectorAll('#results-body tr');
   let visible = 0;
   rows.forEach((row) => {{
-    const matches = (!difficulty || difficulty === 'all' || row.dataset.difficulty === difficulty)
+    const matches = (!passStatus || passStatus === 'all' || row.dataset.passed === passStatus)
+      && (!sqlExecution || sqlExecution === 'all' || row.dataset.sqlExecution === sqlExecution)
+      && (!difficulty || difficulty === 'all' || row.dataset.difficulty === difficulty)
       && (!category || category === 'all' || row.dataset.category === category)
       && (!source || source === 'all' || row.dataset.source === source)
       && (!language || language === 'all' || row.dataset.queryLanguage === language);

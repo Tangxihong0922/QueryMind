@@ -4,7 +4,7 @@
 
 QueryMind 的 evaluation 模块用于评估 SQL Agent 在多步推理、工具调用和 Schema Memory 检索增强下的表现。当前实现分成两层：
 
-- 入口脚本：[`src/evals/my_evaluation.py`](../../src/evals/my_evaluation.py) 和独立报告脚本 [`src/evals/generate_report.py`](../../src/evals/generate_report.py)
+- 入口脚本：[`my_evaluation.py`](../../my_evaluation.py) 和独立报告脚本 [`src/evals/generate_report.py`](../../src/evals/generate_report.py)
 - 核心评估库：[`src/QueryMind/core/evaluation/`](../../src/QueryMind/core/evaluation/)
 
 这套链路关注的是：
@@ -34,24 +34,21 @@ LLM_BASE_URL=https://api.minimaxi.com/anthropic
 常用启动方式：
 
 ```bash
-cd QueryMind/src
-python evals/my_evaluation.py \
-  --dataset-path evals/datasets/basic.yaml \
-  --resume-root evals/resume_points \
-  --report-output-dir evals/eval_results
+my-evaluation \
+  --dataset-path src/evals/datasets/basic.yaml \
+  --resume-root eval_output/resume_points \
+  --report-output-dir eval_output
 ```
 
 继续上次未完成的评测：
 
 ```bash
-cd src
-python evals/my_evaluation.py --resume-latest
+my-evaluation --resume-latest
 ```
 
 只生成报告：
 
 ```bash
-cd src
 python evals/generate_report.py --latest --resume-root evals/resume_points
 ```
 
@@ -189,7 +186,7 @@ EvaluationReport
 - `sql_accuracy`
 - `expected_outcome`（源码名；文档里也可理解为 `expected_accuracy` 行为契约层）
 
-评估顺序在 [`src/evals/my_evaluation.py`](../../src/evals/my_evaluation.py) 中固定为：
+评估顺序在 [`my_evaluation.py`](../../my_evaluation.py) 中固定为：
 
 ```text
 sql_accuracy -> expected_outcome
@@ -354,7 +351,7 @@ HTML 报告支持按这四个维度做筛选，表格行也带有对应的 `data
 <details open>
 <summary>相关源码文件</summary>
 
-- [`src/evals/my_evaluation.py`](../../src/evals/my_evaluation.py) - 评估入口、resume、report 生成、双 evaluator 编排
+- [`my_evaluation.py`](../../my_evaluation.py) - 评估入口、resume、report 生成、双 evaluator 编排
 - [`src/evals/generate_report.py`](../../src/evals/generate_report.py) - 独立报告生成脚本
 - [`src/evals/bootstrap.py`](../../src/evals/bootstrap.py) - 环境变量加载、LLM 构建、runtime 构建、日志与进度条
 - [`src/evals/reporting.py`](../../src/evals/reporting.py) - 报告产物落盘

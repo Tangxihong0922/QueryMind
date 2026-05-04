@@ -1,9 +1,0 @@
-table_schema,table_name
-person,address
-person,addresstype
-person,businessentity
-person,businessentityaddress
-person,businessentitycontact
-person,emailaddress
-sales,vstorewithaddresses
-purchasing,vvendorwithaddresses

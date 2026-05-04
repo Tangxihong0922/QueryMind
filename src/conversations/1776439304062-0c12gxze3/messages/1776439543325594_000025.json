@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "Content of 'query_results_14ab3f05.csv':\n\nbusinessentityid,departmentid,shiftid,startdate,enddate,modifieddate\n1,16,1,2009-01-14,,2009-01-13\n2,1,1,2008-01-31,,2008-01-30\n3,1,1,2007-11-11,,2007-11-10\n4,1,1,2007-12-05,2010-05-30,2010-05-28\n4,2,1,2010-05-31,,2010-05-30\n",
-  "timestamp": "2026-04-17T15:24:48.243084Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_puomvpbo57hy_2"
-}

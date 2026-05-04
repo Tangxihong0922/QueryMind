@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "relation \"shipping\" does not exist\nLINE 1: SELECT * FROM shipping LIMIT 1;\n                      ^\n",
-  "timestamp": "2026-04-16T15:41:20.312575Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_z2kf2tud9zbb_1"
-}

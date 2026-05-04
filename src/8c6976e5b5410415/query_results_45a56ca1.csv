@@ -1,4 +1,0 @@
-productid,name,productnumber,makeflag,finishedgoodsflag,color,safetystocklevel,reorderpoint,standardcost,listprice,size,sizeunitmeasurecode,weightunitmeasurecode,weight,daystomanufacture,productline,class,style,productsubcategoryid,productmodelid,sellstartdate,sellenddate,discontinueddate,rowguid,modifieddate
-1,Adjustable Race,AR-5381,False,False,,1000,750,0.0000,0.0000,,,,,0,,,,,,2019-04-30,,,694215b7-08f7-4c0d-acb1-d734ba44c0c8,2025-02-07 10:01:36.827
-2,Bearing Ball,BA-8327,False,False,,1000,750,0.0000,0.0000,,,,,0,,,,,,2019-04-30,,,58ae3c20-4f3a-4749-a7d4-d568806cc537,2025-02-07 10:01:36.827
-3,BB Ball Bearing,BE-2349,True,False,,800,600,0.0000,0.0000,,,,,1,,,,,,2019-04-30,,,9c21aed2-5bfa-4f18-bcb8-f11638dc2e4e,2025-02-07 10:01:36.827

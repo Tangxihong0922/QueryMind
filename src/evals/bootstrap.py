@@ -1,4 +1,4 @@
-"""Shared bootstrap helpers for standalone evaluation scripts."""
+"""Shared bootstrap helpers for evaluation entry points."""
 
 from __future__ import annotations
 
@@ -8,7 +8,18 @@ import os
 import sys
 import threading
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parents[1]
+SRC_DIR = REPO_ROOT / "src"
+DEFAULT_OUTPUT_ROOT = REPO_ROOT / "eval_output"
+DEFAULT_DATASET_PATH = SRC_DIR / "evals" / "datasets" / "basic.yaml"
+DEFAULT_RESUME_ROOT = DEFAULT_OUTPUT_ROOT / "resume_points"
+DEFAULT_REPORT_ROOT = DEFAULT_OUTPUT_ROOT
+
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -18,16 +29,10 @@ from QueryMind.core.llm import LlmService
 from QueryMind.core.recovery import ExponentialBackoffStrategy
 from QueryMind.integrations.llmservice import AnthropicLlmService, OpenAILlmService
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-SRC_DIR = SCRIPT_DIR.parent
-DEFAULT_DATASET_PATH = SCRIPT_DIR / "datasets" / "basic.yaml"
-DEFAULT_RESUME_ROOT = SCRIPT_DIR / "resume_points"
-DEFAULT_REPORT_ROOT = SCRIPT_DIR / "eval_results"
-
 
 def load_environment() -> None:
     """Load the repo-local .env file."""
-    load_dotenv(SRC_DIR / ".env", override=True)
+    load_dotenv(REPO_ROOT / ".env", override=True)
 
 
 def resolve_env_path(name: str, default: Path) -> Path:
@@ -38,7 +43,7 @@ def resolve_env_path(name: str, default: Path) -> Path:
     path = Path(raw_value).expanduser()
     if path.is_absolute():
         return path
-    return (SRC_DIR / path).resolve()
+    return (REPO_ROOT / path).resolve()
 
 
 def should_show_progress() -> bool:
@@ -203,7 +208,6 @@ def build_recovery_strategy() -> ExponentialBackoffStrategy:
 
 def build_llm_service(
     prefix: str,
-    default_model: str,
     recovery_strategy: ExponentialBackoffStrategy | None = None,
     provider: str | None = None,
 ) -> LlmService:
@@ -221,11 +225,11 @@ def build_llm_service(
 
     if provider in {"minimax", "anthropic"}:
         if not model:
-            model = os.getenv("MINIMAX_LLM_MODEL", "Minimax-M2.7") 
+            model = os.getenv("MINIMAX_LLM_MODEL", "Minimax-M2.7")
         if not api_key:
             api_key = os.getenv("MINIMAX_API_KEY", "")
         if not base_url:
-            base_url = os.getenv("MINIMAX_BASE_URL", "https://api.minimaxi.com/anthropic") 
+            base_url = os.getenv("MINIMAX_BASE_URL", "https://api.minimaxi.com/anthropic")
         if not base_url:
             base_url = "https://api.minimaxi.com/anthropic"
         return AnthropicLlmService(
@@ -242,7 +246,7 @@ def build_llm_service(
             api_key = os.getenv("DEEPSEEK_API_KEY", "")
         if not base_url:
             base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
-        
+
         return OpenAILlmService(
             model=model,
             api_key=api_key,
@@ -250,7 +254,7 @@ def build_llm_service(
             error_recovery_strategy=recovery_strategy,
             extra_body={"thinking": {"type": "disabled"}},
         )
-    
+
     if provider == "openai":
         if not model:
             model = os.getenv("OPENAI_LLM_MODEL", "gpt-5.4-mini")
@@ -258,7 +262,7 @@ def build_llm_service(
             api_key = os.getenv("OPENAI_API_KEY", "")
         if not base_url:
             base_url = os.getenv("OPENAI_BASE_URL", "https://api.ikuncode.cc/v1")
-        
+
         return OpenAILlmService(
             model=model,
             api_key=api_key,
@@ -316,8 +320,7 @@ def build_runtime_from_env(provider: str | None = None) -> EvaluationRuntime:
     recovery_strategy = build_recovery_strategy()
     agent_llm = build_llm_service(
         "EVAL_AGENT",
-        "Minimax-M2.7",
-        recovery_strategy,
+        recovery_strategy=recovery_strategy,
         provider=provider,
     )
     max_tool_iterations = int(os.getenv("EVAL_MAX_TOOL_ITERATIONS", "25"))
@@ -340,7 +343,7 @@ def build_runtime_from_env(provider: str | None = None) -> EvaluationRuntime:
             raise ValueError("EVAL_SQLITE_DATABASE_PATH is required for sqlite")
         database_path = resolve_env_path(
             "EVAL_SQLITE_DATABASE_PATH",
-            SRC_DIR / "evaluation.sqlite",
+            REPO_ROOT / "evaluation.sqlite",
         )
         sql_runner = SqliteRunner(database_path=database_path)
         if schema_sync_mode == "sync":

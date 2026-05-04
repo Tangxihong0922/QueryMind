@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "Content of 'query_results_ac8757a6.csv':\n\nbusinessentityid,quotadate,salesquota,rowguid,modifieddate\n274,2022-05-30,28000.0000,99109bbf-8693-4587-bc23-6036ec89e1be,2022-04-15\n274,2022-08-30,7000.0000,dfd01444-8900-461c-8d6f-04598dae01d4,2022-07-16\n274,2022-11-30,91000.0000,0a69f453-9689-4ccf-a08c-c644670f5668,2022-10-16\n274,2023-02-28,140000.0000,da8d1458-5fb9-4c3e-9ead-8f5ce1393047,2023-01-14\n274,2023-05-30,70000.0000,760cef84-b980-417b-a667-7358c38857f0,2023-04-15\n",
-  "timestamp": "2026-04-17T15:25:08.446827Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_nr689zw5sjvo_1"
-}

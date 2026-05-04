@@ -1,5 +1,0 @@
-column_name,data_type
-id,character
-cultureid,character
-name,character varying
-modifieddate,timestamp without time zone

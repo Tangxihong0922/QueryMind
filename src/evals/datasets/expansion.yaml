@@ -1,0 +1,1740 @@
+﻿# QueryMind SQL Eval - Expansion 50 skeleton
+# Source: w3resource AdventureWorks exercises 121-200
+# This file intentionally fills only the base fields requested by the user.
+dataset:
+  name: "QueryMind SQL Eval - Expansion 50"
+  description: "50 non-overlapping AdventureWorks questions from w3resource for agent generalization validation."
+
+  test_cases:
+    - id: "sql_124"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to order the result set by the column TerritoryName when the column CountryRegionName is equal to 'United States' and by CountryRegionName for all other rows. Return BusinessEntityID, LastName, TerritoryName, CountryRegionName."
+      ground_truth_sql: |
+        SELECT 
+            BusinessEntityID, 
+            LastName, 
+            TerritoryName, 
+            CountryRegionName  
+        FROM 
+            Sales.vSalesPerson  
+        WHERE 
+            TerritoryName IS NOT NULL  
+        ORDER BY 
+            CASE 
+                WHEN CountryRegionName = 'United States' THEN TerritoryName  
+                ELSE CountryRegionName 
+            END;        
+      tags: ["ordering", "case_when"]
+      difficulty: "easy"
+
+      metadata:
+        category: "ordering"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["BusinessEntityID", "LastName", "TerritoryName", "CountryRegionName"]
+        max_execution_time_ms: 90000
+    - id: "sql_126"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to sort the BusinessEntityID in descending order for those employees that have the SalariedFlag set to 'true' and in ascending order that have the SalariedFlag set to 'false'. Return BusinessEntityID, and SalariedFlag."
+      ground_truth_sql: |
+        SELECT 
+            BusinessEntityID, 
+            SalariedFlag  
+        FROM 
+            HumanResources.Employee  
+        ORDER BY 
+            CASE 
+                WHEN SalariedFlag = 'true' THEN BusinessEntityID 
+            END DESC,  
+            CASE 
+                WHEN SalariedFlag = 'false' THEN BusinessEntityID 
+            END;
+      tags: ["ordering", "case_when"]
+      difficulty: "easy"
+
+      metadata:
+        category: "ordering"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["BusinessEntityID", "SalariedFlag"]
+        max_execution_time_ms: 90000
+    - id: "sql_128"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to change the display of product line categories to make them more understandable. Return ProductNumber, category, and name of the product. Sort the result set in ascending order on ProductNumber."
+      ground_truth_sql: |
+        SELECT   
+            ProductNumber,   
+            CASE ProductLine  
+                WHEN 'R' THEN 'Road'  
+                WHEN 'M' THEN 'Mountain'  
+                WHEN 'T' THEN 'Touring'  
+                WHEN 'S' THEN 'Other sale items'  
+                ELSE 'Not for sale'  
+            END "Category",  
+            Name  
+        FROM Production.Product  
+        ORDER BY ProductNumber;
+      tags: ["case_when"]
+      difficulty: "easy"
+
+      metadata:
+        category: "case_when"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductNumber", "Category", "Name"]
+        max_execution_time_ms: 90000
+    - id: "sql_129"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to evaluate whether the values in the MakeFlag and FinishedGoodsFlag columns are the same for products with ProductID less than 10. If the values in MakeFlag and FinishedGoodsFlag are the same, return NULL; otherwise, return the value of MakeFlag. Return the columns ProductID, MakeFlag, FinishedGoodsFlag, and the evaluated result."
+      ground_truth_sql: |
+        SELECT 
+            ProductID, 
+            MakeFlag, 
+            FinishedGoodsFlag, 
+            CASE  
+                WHEN MakeFlag = FinishedGoodsFlag THEN NULL  
+                ELSE MakeFlag  
+            END  
+        FROM 
+            Production.Product  
+        WHERE 
+            ProductID < 10;
+      tags: ["null_handling"]
+      difficulty: "easy"
+
+      metadata:
+        category: "null_handling"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductID", "MakeFlag", "FinishedGoodsFlag", "evaluated result"]
+        max_execution_time_ms: 90000
+    - id: "sql_130"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to select the data from the first column that has a nonnull value. Retrun Name, Class, Color, ProductNumber, and FirstNotNull."
+      ground_truth_sql: |
+        SELECT 
+            Name, 
+            Class, 
+            Color, 
+            ProductNumber,  
+            COALESCE(Class, Color, ProductNumber) AS FirstNotNull  
+        FROM 
+            Production.Product;
+      tags: ["null_handling"]
+      difficulty: "easy"
+
+      metadata:
+        category: "null_handling"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["Name", "Class", "Color", "ProductNumber", "FirstNotNull"]
+        max_execution_time_ms: 90000
+    - id: "sql_131"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to check the values of MakeFlag and FinishedGoodsFlag columns and return whether they are the same or not. Return NULL if MakeFlag is equal to FinishedGoodsFlag, otherwise return the value of MakeFlag. Return the columns ProductID, MakeFlag, FinishedGoodsFlag, and a column indicating NULL if they are equal. Filter the results for products where ProductID is less than 10."
+      ground_truth_sql: |
+        SELECT 
+            ProductID, 
+            MakeFlag, 
+            FinishedGoodsFlag,   
+            NULLIF(MakeFlag, FinishedGoodsFlag) AS "Null if Equal"
+        FROM 
+            Production.Product  
+        WHERE 
+            ProductID < 10;
+      tags: ["null_handling"]
+      difficulty: "easy"
+
+      metadata:
+        category: "null_handling"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductID", "MakeFlag", "FinishedGoodsFlag", "Null if Equal"]
+        max_execution_time_ms: 90000
+    - id: "sql_141"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return the ID number, unit price, and the modulus (remainder) of dividing product prices. Convert the modulo to an integer value."
+      ground_truth_sql: |
+        SELECT 
+            ProductID, 
+            UnitPrice, 
+            OrderQty,  
+            CAST(UnitPrice AS INT) % OrderQty AS Modulo 
+        FROM 
+            Sales.SalesOrderDetail;
+      tags: ["comparison"]
+      difficulty: "medium"
+
+      metadata:
+        category: "comparison"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductID", "UnitPrice", "OrderQty", "Modulo"]
+        max_execution_time_ms: 120000
+    - id: "sql_142"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to select employees who have the title of Marketing Assistant and more than 41 vacation hours."
+      ground_truth_sql: |
+        SELECT  
+            BusinessEntityID, 
+            LoginID, 
+            JobTitle, 
+            VacationHours   
+        FROM 
+            HumanResources.Employee  
+        WHERE 
+            JobTitle = 'Marketing Assistant'  
+        AND 
+            VacationHours > 41 ;
+      tags: ["filtering", "numeric_filter", "multi_condition"]
+      difficulty: "easy"
+
+      metadata:
+        category: "filtering"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["BusinessEntityID", "LoginID", "JobTitle", "VacationHours"]
+        max_execution_time_ms: 90000
+    - id: "sql_144"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "From the follwing table write a query in SQL to retrieve rows whose datetime values are between '20111212' and '20120105'."
+      ground_truth_sql: |
+        SELECT 
+
+            BusinessEntityID, 
+            RateChangeDate  
+        FROM 
+            HumanResources.EmployeePayHistory  
+        WHERE 
+            RateChangeDate BETWEEN '20111212' AND '20120105';
+      tags: ["time_series", "date_filter"]
+      difficulty: "easy"
+
+      metadata:
+        category: "time_series"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["BusinessEntityID", "RateChangeDate"]
+        max_execution_time_ms: 90000
+    - id: "sql_146"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to get employees with Johnson last names. Return first name and last name."
+      ground_truth_sql: |
+        SELECT 
+            a.FirstName, 
+            a.LastName  
+        FROM 
+            Person.Person AS a  
+        WHERE 
+            EXISTS  
+            (
+                SELECT *   
+                FROM 
+                    HumanResources.Employee AS b  
+                WHERE 
+                    a.BusinessEntityID = b.BusinessEntityID  
+                    AND 
+                    a.LastName = 'Johnson'
+            ) ;
+      tags: ["filtering", "multi_condition"]
+      difficulty: "medium"
+
+      metadata:
+        category: "filtering"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName"]
+        max_execution_time_ms: 120000
+    - id: "sql_154"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find all telephone numbers that have area code 415. Returns the first name, last name, and phonenumber. Sort the result set in ascending order by lastname."
+      ground_truth_sql: |
+        SELECT 
+            p.FirstName, 
+            p.LastName, 
+            ph.PhoneNumber  
+        FROM 
+            Person.PersonPhone AS ph  
+        INNER JOIN 
+            Person.Person AS p  
+            ON ph.BusinessEntityID = p.BusinessEntityID  
+        WHERE 
+            ph.PhoneNumber LIKE '415%'  
+        ORDER by 
+            p.LastName;
+      tags: ["join", "multi_table"]
+      difficulty: "easy"
+
+      metadata:
+        category: "join"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName", "PhoneNumber"]
+        max_execution_time_ms: 90000
+    - id: "sql_157"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to retrieve the names of Quality Assurance personnel working the evening or night shifts. Return first name, last name, shift."
+      ground_truth_sql: |
+        SELECT 
+            FirstName, 
+            LastName, 
+            Shift   
+        FROM 
+            HumanResources.vEmployeeDepartmentHistory  
+        WHERE 
+            Department = 'Quality Assurance'  
+            AND (Shift = 'Evening' OR Shift = 'Night');
+      tags: ["filtering", "multi_condition"]
+      difficulty: "medium"
+
+      metadata:
+        category: "filtering"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName", "Shift"]
+        max_execution_time_ms: 120000
+    - id: "sql_165"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return the cross product of BusinessEntityID and Department columns."
+      ground_truth_sql: |
+        SELECT e.BusinessEntityID, 
+              d.Name AS Department  
+        FROM HumanResources.Employee AS e  
+        CROSS JOIN HumanResources.Department AS d  
+        ORDER BY e.BusinessEntityID, d.Name ;
+      tags: ["join", "multi_table"]
+      difficulty: "medium"
+
+      metadata:
+        category: "join"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["BusinessEntityID", "Department"]
+        max_execution_time_ms: 120000
+    - id: "sql_172"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return the rows with different firstname values from Adam. Return businessentityid, persontype, firstname, middlename,and lastname. Sort the result set in ascending order on firstname."
+      ground_truth_sql: |
+        SELECT businessentityid, persontype, firstname, middlename, lastname
+        FROM person.person
+        WHERE firstname IS DISTINCT FROM 'Adam'
+        ORDER BY firstname;
+      tags: ["comparison"]
+      difficulty: "medium"
+
+      metadata:
+        category: "comparison"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["businessentityid", "persontype", "firstname", "middlename", "lastname"]
+        max_execution_time_ms: 120000
+    - id: "sql_175"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to identify the rows with a middlename that is not NULL. Return businessentityid, persontype, firstname, middlename,and lastname. Sort the result set in ascending order on firstname."
+      ground_truth_sql: |
+        SELECT DISTINCT businessentityid, persontype, firstname, middlename, lastname
+        FROM person.person
+        WHERE middlename IS NOT NULL
+        ORDER BY firstname;
+      tags: ["distinct", "null_handling"]
+      difficulty: "medium"
+
+      metadata:
+        category: "distinct"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["businessentityid", "persontype", "firstname", "middlename", "lastname"]
+        max_execution_time_ms: 120000
+    - id: "sql_121"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to calculate a row number for the salespeople based on their year-to-date sales ranking. Return row number, first name, last name, and year-to-date sales."
+      ground_truth_sql: |
+        SELECT 
+            ROW_NUMBER() OVER(ORDER BY SalesYTD DESC) AS Row,   
+            FirstName, 
+            LastName, 
+            ROUND(SalesYTD, 2) AS "Sales YTD"   
+        FROM 
+            Sales.vSalesPerson  
+        WHERE 
+            TerritoryName IS NOT NULL 
+            AND SalesYTD <> 0;
+      tags: ["ranking", "window"]
+      difficulty: "medium"
+
+      metadata:
+        category: "ranking"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["Row", "FirstName", "LastName", "Sales YTD"]
+        max_execution_time_ms: 120000
+    - id: "sql_122"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to calculate row numbers for all rows between 50 to 60 inclusive. Sort the result set on orderdate."
+      ground_truth_sql: |
+        WITH OrderedOrders AS  
+        (  
+            SELECT 
+                SalesOrderID, 
+                OrderDate,  
+                ROW_NUMBER() OVER (ORDER BY OrderDate) AS RowNumber  
+            FROM 
+                Sales.SalesOrderHeader   
+        )   
+        SELECT 
+            SalesOrderID, 
+            OrderDate, 
+            RowNumber    
+        FROM 
+            OrderedOrders   
+        WHERE 
+            RowNumber BETWEEN 50 AND 60;
+      tags: ["cte", "window"]
+      difficulty: "medium"
+
+      metadata:
+        category: "cte"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["SalesOrderID", "OrderDate", "RowNumber"]
+        max_execution_time_ms: 120000
+    - id: "sql_123"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return first name, last name, territoryname, salesytd, and row number. Partition the query result set by the TerritoryName. Orders the rows in each partition by SalesYTD. Sort the result set on territoryname in ascending order."
+      ground_truth_sql: |
+        SELECT 
+            FirstName, 
+            LastName, 
+            TerritoryName, 
+            ROUND(SalesYTD, 2) AS SalesYTD,  
+            ROW_NUMBER() OVER(PARTITION BY TerritoryName ORDER BY SalesYTD DESC) AS Row  
+        FROM 
+            Sales.vSalesPerson  
+        WHERE 
+            TerritoryName IS NOT NULL 
+            AND SalesYTD <> 0  
+        ORDER BY 
+            TerritoryName;
+      tags: ["ranking", "window"]
+      difficulty: "medium"
+
+      metadata:
+        category: "ranking"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName", "TerritoryName", "SalesYTD", "Row"]
+        max_execution_time_ms: 120000
+    - id: "sql_125"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return the highest hourly wage for each job title. Restricts the titles to those that are held by men with a maximum pay rate greater than 40 dollars or women with a maximum pay rate greater than 42 dollars."
+      ground_truth_sql: |
+        SELECT 
+            JobTitle, 
+            MAX(ph1.Rate) AS MaximumRate  
+        FROM 
+            HumanResources.Employee AS e  
+            JOIN HumanResources.EmployeePayHistory AS ph1 ON e.BusinessEntityID = ph1.BusinessEntityID  
+        GROUP BY 
+            JobTitle  
+        HAVING 
+            (
+                MAX(CASE WHEN Gender = 'M' THEN ph1.Rate ELSE NULL END) > 40.00  
+                OR 
+                MAX(CASE WHEN Gender = 'F' THEN ph1.Rate ELSE NULL END) > 42.00
+            )  
+        ORDER BY 
+            MaximumRate DESC;
+      tags: ["topk", "aggregation", "having"]
+      difficulty: "hard"
+
+      metadata:
+        category: "topk"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["JobTitle", "MaximumRate"]
+        max_execution_time_ms: 150000
+    - id: "sql_127"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to display the list price as a text comment based on the price range for a product. Return ProductNumber, Name, and listprice. Sort the result set on ProductNumber in ascending order."
+      ground_truth_sql: |
+        SELECT   
+            ProductNumber, 
+            Name, 
+            listprice, 
+            CASE 
+                WHEN ListPrice =  0 THEN 'Mfg item - not for resale'  
+                WHEN ListPrice < 50 THEN 'Under $50'  
+                WHEN ListPrice >= 50 and ListPrice < 250 THEN 'Under $250'  
+                WHEN ListPrice >= 250 and ListPrice < 1000 THEN 'Under $1000'  
+                ELSE 'Over $1000'  
+            END "Price Range" 
+        FROM Production.Product  
+        ORDER BY ProductNumber ;
+      tags: ["case_when"]
+      difficulty: "easy"
+
+      metadata:
+        category: "case_when"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductNumber", "Name", "listprice", "Price Range"]
+        max_execution_time_ms: 90000
+    - id: "sql_132"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return any distinct values that are returned by both the query."
+      ground_truth_sql: |
+        SELECT 
+            ProductID   
+        FROM 
+            Production.Product  
+        INTERSECT  
+        SELECT 
+            ProductID   
+        FROM 
+            Production.WorkOrder ;
+      tags: ["set_operation"]
+      difficulty: "medium"
+
+      metadata:
+        category: "set_operation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductID"]
+        max_execution_time_ms: 120000
+    - id: "sql_133"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return any distinct values from first query that aren't also found on the 2nd query."
+      ground_truth_sql: |
+        SELECT 
+            ProductID   
+        FROM 
+            Production.Product  
+        EXCEPT  
+        SELECT 
+            ProductID   
+        FROM 
+            Production.WorkOrder ;
+      tags: ["set_operation"]
+      difficulty: "medium"
+
+      metadata:
+        category: "set_operation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductID"]
+        max_execution_time_ms: 120000
+    - id: "sql_134"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to fetch any distinct values from the left query that aren't also present in the query to the right."
+      ground_truth_sql: |
+        SELECT 
+            ProductID   
+        FROM 
+            Production.WorkOrder  
+        EXCEPT  
+        SELECT 
+            ProductID   
+        FROM 
+            Production.Product ;
+      tags: ["set_operation"]
+      difficulty: "medium"
+
+      metadata:
+        category: "set_operation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductID"]
+        max_execution_time_ms: 120000
+    - id: "sql_135"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to fetch distinct businessentityid that are returned by both the specified query. Sort the result set by ascending order on businessentityid."
+      ground_truth_sql: |
+        SELECT 
+            businessentityid   
+        FROM 
+            person.businessentity    
+        INTERSECT  
+        SELECT 
+            businessentityid   
+        FROM 
+            person.person
+        WHERE 
+            person.persontype = 'IN'  
+        ORDER BY 
+            businessentityid;
+      tags: ["set_operation"]
+      difficulty: "medium"
+
+      metadata:
+        category: "set_operation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["businessentityid"]
+        max_execution_time_ms: 120000
+    - id: "sql_136"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query which is the combination of two queries. Return any distinct businessentityid from the 1st query that aren't also found in the 2nd query. Sort the result set in ascending order on businessentityid."
+      ground_truth_sql: |
+        SELECT 
+            businessentityid   
+        FROM 
+            person.businessentity    
+        EXCEPT  
+        SELECT 
+            businessentityid   
+        FROM 
+            person.person
+        WHERE 
+            person.persontype = 'IN'  
+        ORDER BY 
+            businessentityid;
+      tags: ["set_operation"]
+      difficulty: "medium"
+
+      metadata:
+        category: "set_operation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["businessentityid"]
+        max_execution_time_ms: 120000
+    - id: "sql_137"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to combine the ProductModelID and Name columns. A result set excludes columns for productid 3 and 4. Sort the results by name ascending."
+      ground_truth_sql: |
+        SELECT 
+            ProductID, 
+            Name  
+        FROM 
+            Production.Product  
+        WHERE 
+            ProductID NOT IN (3, 4)  
+        UNION  
+        SELECT 
+            ProductModelID, 
+            Name  
+        FROM 
+            Production.ProductModel   
+        ORDER BY 
+            Name ASC;
+      tags: ["set_operation"]
+      difficulty: "medium"
+
+      metadata:
+        category: "set_operation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductID", "Name"]
+        max_execution_time_ms: 120000
+    - id: "sql_138"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find a total number of hours away from work can be calculated by adding vacation time and sick leave. Sort results ascending by Total Hours Away."
+      ground_truth_sql: |
+        SELECT 
+            p.FirstName, 
+            p.LastName, 
+            VacationHours, 
+            SickLeaveHours,   
+            VacationHours + SickLeaveHours AS "Total Hours Away"  
+        FROM 
+            HumanResources.Employee AS e  
+        JOIN 
+            Person.Person AS p ON e.BusinessEntityID = p.BusinessEntityID  
+        ORDER BY 
+            "Total Hours Away" ASC;
+      tags: ["join", "multi_table"]
+      difficulty: "easy"
+
+      metadata:
+        category: "join"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName", "VacationHours", "SickLeaveHours", "Total Hours Away"]
+        max_execution_time_ms: 90000
+    - id: "sql_139"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to calculate the tax difference between the highest and lowest tax-rate state or province."
+      ground_truth_sql: |
+        SELECT 
+            MAX(TaxRate) - MIN(TaxRate) AS "Tax Rate Difference"  
+        FROM 
+            Sales.SalesTaxRate  
+        WHERE 
+            StateProvinceID IS NOT NULL;
+      tags: ["comparison", "null_handling"]
+      difficulty: "medium"
+
+      metadata:
+        category: "comparison"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["Tax Rate Difference"]
+        max_execution_time_ms: 120000
+    - id: "sql_145"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return TRUE even if NULL is specified in the subquery. Return DepartmentID, Name and sort the result set in ascending order."
+      ground_truth_sql: |
+        SELECT 
+            DepartmentID, 
+            Name   
+        FROM 
+            HumanResources.Department   
+        WHERE 
+            EXISTS (SELECT NULL)  
+        ORDER BY 
+            Name ASC ;
+      tags: ["subquery"]
+      difficulty: "medium"
+
+      metadata:
+        category: "subquery"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["DepartmentID", "Name"]
+        max_execution_time_ms: 120000
+    - id: "sql_147"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find stores whose name is the same name as a vendor."
+      ground_truth_sql: |
+        SELECT DISTINCT 
+            s.Name  
+        FROM 
+            Sales.Store AS s   
+        WHERE 
+            EXISTS  
+            (
+                SELECT *  
+                FROM 
+                    Purchasing.Vendor AS v  
+                WHERE 
+                    s.Name = v.Name
+            ) ;
+      tags: ["join", "multi_table", "subquery"]
+      difficulty: "medium"
+
+      metadata:
+        category: "join"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["Name"]
+        max_execution_time_ms: 120000
+    - id: "sql_148"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find employees of departments that start with P. Return first name, last name, job title."
+      ground_truth_sql: |
+        SELECT 
+            p.FirstName, 
+            p.LastName, 
+            e.JobTitle  
+        FROM 
+            Person.Person AS p   
+        JOIN 
+            HumanResources.Employee AS e  
+            ON e.BusinessEntityID = p.BusinessEntityID   
+        WHERE 
+            EXISTS  
+            (
+                SELECT *  
+                FROM 
+                    HumanResources.Department AS d  
+                JOIN 
+                    HumanResources.EmployeeDepartmentHistory AS edh  
+                    ON d.DepartmentID = edh.DepartmentID  
+                WHERE 
+                    e.BusinessEntityID = edh.BusinessEntityID  
+                    AND 
+                    d.Name LIKE 'P%'
+            ) ;
+      tags: ["join", "multi_table", "subquery"]
+      difficulty: "medium"
+
+      metadata:
+        category: "join"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName", "JobTitle"]
+        max_execution_time_ms: 120000
+    - id: "sql_149"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find all employees that do not belong to departments whose names begin with P."
+      ground_truth_sql: |
+        SELECT 
+            p.FirstName, 
+            p.LastName, 
+            e.JobTitle  
+        FROM 
+            Person.Person AS p   
+        JOIN 
+            HumanResources.Employee AS e  
+            ON e.BusinessEntityID = p.BusinessEntityID   
+        WHERE 
+            NOT EXISTS  
+            (
+                SELECT *  
+                FROM 
+                    HumanResources.Department AS d  
+                JOIN 
+                    HumanResources.EmployeeDepartmentHistory AS edh  
+                    ON d.DepartmentID = edh.DepartmentID  
+                WHERE 
+                    e.BusinessEntityID = edh.BusinessEntityID  
+                    AND 
+                    d.Name LIKE 'P%'
+            )  
+        ORDER BY 
+            LastName, 
+            FirstName  ;
+      tags: ["subquery"]
+      difficulty: "medium"
+
+      metadata:
+        category: "subquery"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName", "JobTitle"]
+        max_execution_time_ms: 120000
+    - id: "sql_150"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to select employees who work as design engineers, tool designers, or marketing assistants."
+      ground_truth_sql: |
+        SELECT p.FirstName, p.LastName, e.JobTitle  
+        FROM Person.Person AS p  
+        JOIN HumanResources.Employee AS e  
+            ON p.BusinessEntityID = e.BusinessEntityID  
+        WHERE e.JobTitle = 'Design Engineer'   
+          OR e.JobTitle = 'Tool Designer'   
+          OR e.JobTitle = 'Marketing Assistant';
+      tags: ["filtering", "multi_condition"]
+      difficulty: "easy"
+
+      metadata:
+        category: "filtering"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName", "JobTitle"]
+        max_execution_time_ms: 90000
+    - id: "sql_151"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to identify all SalesPerson IDs for employees with sales quotas over $250,000. Return first name, last name of the sales persons."
+      ground_truth_sql: |
+        SELECT 
+            p.FirstName, 
+            p.LastName  
+        FROM 
+            Person.Person AS p  
+        JOIN 
+            Sales.SalesPerson AS sp  
+            ON p.BusinessEntityID = sp.BusinessEntityID  
+        WHERE 
+            p.BusinessEntityID IN  
+            (
+                SELECT 
+                    BusinessEntityID  
+                FROM 
+                    Sales.SalesPerson  
+                WHERE 
+                    SalesQuota > 250000
+            );
+      tags: ["subquery"]
+      difficulty: "medium"
+
+      metadata:
+        category: "subquery"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName"]
+        max_execution_time_ms: 120000
+    - id: "sql_152"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find the salespersons who do not have a quota greater than $250,000. Return first name and last name."
+      ground_truth_sql: |
+        SELECT 
+            p.FirstName, 
+            p.LastName  
+        FROM 
+            Person.Person AS p  
+        JOIN 
+            Sales.SalesPerson AS sp  
+            ON p.BusinessEntityID = sp.BusinessEntityID  
+        WHERE 
+            p.BusinessEntityID NOT IN  
+            (
+                SELECT 
+                    BusinessEntityID  
+                FROM 
+                    Sales.SalesPerson  
+                WHERE 
+                    SalesQuota > 250000
+            );
+      tags: ["subquery"]
+      difficulty: "medium"
+
+      metadata:
+        category: "subquery"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName"]
+        max_execution_time_ms: 120000
+    - id: "sql_153"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to identify salesorderheadersalesreason and SalesReason tables with the same salesreasonid."
+      ground_truth_sql: |
+        SELECT * 
+        FROM sales.salesorderheadersalesreason  
+        WHERE salesreasonid   
+        IN 
+        (
+            SELECT salesreasonid  
+            -- From the SalesReason table
+            FROM sales.SalesReason
+        );
+      tags: ["join", "multi_table"]
+      difficulty: "medium"
+
+      metadata:
+        category: "join"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["salesreasonid"]
+        max_execution_time_ms: 120000
+    - id: "sql_155"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to identify all people with the first name 'Gail' with area codes other than 415. Return first name, last name, telephone number. Sort the result set in ascending order on lastname."
+      ground_truth_sql: |
+        SELECT 
+            p.FirstName, 
+            p.LastName, 
+            ph.PhoneNumber  
+        FROM 
+            Person.PersonPhone AS ph  
+        INNER JOIN 
+            Person.Person AS p  
+            ON ph.BusinessEntityID = p.BusinessEntityID  
+        WHERE 
+            ph.PhoneNumber NOT LIKE '415%' 
+            AND p.FirstName = 'Gail'  
+        ORDER BY 
+            p.LastName;
+      tags: ["join", "multi_table"]
+      difficulty: "easy"
+
+      metadata:
+        category: "join"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName", "PhoneNumber"]
+        max_execution_time_ms: 90000
+    - id: "sql_156"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find all silver-colored bicycles with a standard cost not greater than $400. Return the columns ProductID, Name, Color, and StandardCost. Filter the results to include only those products where the ProductNumber starts with 'BK-'."
+      ground_truth_sql: |
+        SELECT 
+            ProductID, 
+            Name, 
+            Color, 
+            StandardCost  
+        FROM 
+            Production.Product  
+        WHERE 
+            ProductNumber LIKE 'BK-%' 
+            AND Color = 'Silver' 
+            AND NOT StandardCost > 400;
+      tags: ["filtering", "text_filter", "numeric_filter", "multi_condition"]
+      difficulty: "easy"
+
+      metadata:
+        category: "filtering"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductID", "Name", "Color", "StandardCost"]
+        max_execution_time_ms: 90000
+    - id: "sql_158"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to list all people with three-letter first names ending in 'an'. Sort the result set in ascending order on first name. Return first name and last name."
+      ground_truth_sql: |
+        SELECT 
+            FirstName, 
+            LastName  
+        FROM 
+            Person.Person  
+        WHERE 
+            FirstName LIKE '_an'  
+        ORDER BY 
+            FirstName;
+      tags: ["filtering", "text_filter", "multi_condition"]
+      difficulty: "easy"
+
+      metadata:
+        category: "filtering"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["FirstName", "LastName"]
+        max_execution_time_ms: 90000
+    - id: "sql_159"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to convert the order date in the 'America/Denver' time zone. Return salesorderid, order date, and orderdate_timezoneade."
+      ground_truth_sql: |
+        SELECT 
+            SalesOrderID, 
+            OrderDate,
+            OrderDate ::timestamp AT TIME ZONE 'America/Denver' AS OrderDate_TimeZonePST  
+        FROM 
+            Sales.SalesOrderHeader;
+      tags: ["time_series", "date_filter"]
+      difficulty: "medium"
+
+      metadata:
+        category: "time_series"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["SalesOrderID", "OrderDate", "OrderDate_TimeZonePST"]
+        max_execution_time_ms: 120000
+    - id: "sql_160"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to convert order date in the 'America/Denver' time zone and also convert from 'America/Denver' time zone to 'America/Chicago' time zone."
+      ground_truth_sql: |
+        SELECT 
+            SalesOrderID, 
+            OrderDate,
+            OrderDate ::timestamp AT TIME ZONE 'America/Denver' AS OrderDate_TimeZoneAMDEN,
+            OrderDate ::timestamp AT TIME ZONE 'America/Denver' AT TIME ZONE 'America/Chicago' AS OrderDate_TimeZoneAMCHI
+        FROM 
+            Sales.SalesOrderHeader;
+      tags: ["time_series", "date_filter"]
+      difficulty: "medium"
+
+      metadata:
+        category: "time_series"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["SalesOrderID", "OrderDate", "OrderDate_TimeZoneAMDEN", "OrderDate_TimeZoneAMCHI"]
+        max_execution_time_ms: 120000
+    - id: "sql_164"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find the SalesPersonID, salesyear, totalsales, salesquotayear, salesquota, and amt_above_or_below_quota columns. Sort the result set in ascending order on SalesPersonID, and SalesYear columns."
+      ground_truth_sql: |
+        WITH Sales_CTE AS (
+            SELECT 
+                SalesPersonID,
+                SUM(TotalDue) AS TotalSales,
+                EXTRACT(YEAR FROM OrderDate) AS SalesYear
+            FROM Sales.SalesOrderHeader
+            WHERE SalesPersonID IS NOT NULL
+            GROUP BY SalesPersonID, EXTRACT(YEAR FROM OrderDate)
+        ),
+        Sales_Quota_CTE AS (
+            SELECT 
+                BusinessEntityID,
+                SUM(SalesQuota) AS SalesQuota,
+                EXTRACT(YEAR FROM QuotaDate) AS SalesQuotaYear
+            FROM Sales.SalesPersonQuotaHistory
+            GROUP BY BusinessEntityID, EXTRACT(YEAR FROM QuotaDate)
+        )
+        SELECT 
+            s.SalesPersonID,
+            s.SalesYear,
+            s.TotalSales,
+            q.SalesQuotaYear,
+            q.SalesQuota,
+            s.TotalSales - q.SalesQuota AS Amt_Above_or_Below_Quota
+        FROM Sales_CTE s
+        JOIN Sales_Quota_CTE q 
+            ON s.SalesPersonID = q.BusinessEntityID 
+            AND s.SalesYear = q.SalesQuotaYear
+        ORDER BY s.SalesPersonID, s.SalesYear;
+      tags: ["cte"]
+      difficulty: "hard"
+
+      metadata:
+        category: "cte"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["SalesPersonID", "TotalSales", "YEAR"]
+        max_execution_time_ms: 150000
+    - id: "sql_178"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return the count of employees by Name and Title, Name, and company total. Filter the results by department ID 12 or 14. For each row, identify its aggregation level in the Title column."
+      ground_truth_sql: |
+        SELECT D.Name  -- Selecting the department name.
+            ,CASE   
+            WHEN GROUPING(D.Name, E.JobTitle) = 0 THEN E.JobTitle  
+            WHEN GROUPING(D.Name, E.JobTitle) = 1 THEN CONCAT('Total :', D.Name)  
+            WHEN GROUPING(D.Name, E.JobTitle) = 3 THEN 'Company Total:'  
+            ELSE 'Unknown'  
+            END AS "Job Title"  
+            ,COUNT(E.BusinessEntityID) AS "Employee Count" 
+        FROM HumanResources.Employee E  
+            INNER JOIN HumanResources.EmployeeDepartmentHistory DH  
+                ON E.BusinessEntityID = DH.BusinessEntityID  
+            INNER JOIN HumanResources.Department D  
+                ON D.DepartmentID = DH.DepartmentID       
+        WHERE DH.EndDate IS NULL  
+            AND D.DepartmentID IN (12,14)  
+        GROUP BY ROLLUP(D.Name, E.JobTitle); 
+      tags: ["aggregation", "group_by"]
+      difficulty: "hard"
+
+      metadata:
+        category: "aggregation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["name", "Job Title", "Employee Count"]
+        max_execution_time_ms: 150000
+    - id: "sql_179"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return only rows with a count of employees by department. Filter the results by department ID 12 or 14. Return name, jobtitle, grouping level and employee count."
+      ground_truth_sql: |
+        SELECT D.Name  
+            ,E.JobTitle  
+            ,GROUPING(D.Name, E.JobTitle) AS "Grouping Level"  
+            ,COUNT(E.BusinessEntityID) AS "Employee Count"  
+        FROM HumanResources.Employee AS E  
+            INNER JOIN HumanResources.EmployeeDepartmentHistory AS DH  
+                ON E.BusinessEntityID = DH.BusinessEntityID  
+            INNER JOIN HumanResources.Department AS D  
+                ON D.DepartmentID = DH.DepartmentID       
+        WHERE DH.EndDate IS NULL  
+            AND D.DepartmentID IN (12,14)  
+        GROUP BY ROLLUP(D.Name, E.JobTitle)
+        HAVING GROUPING(D.Name, E.JobTitle) = 1;
+      tags: ["aggregation", "group_by", "having"]
+      difficulty: "hard"
+
+      metadata:
+        category: "aggregation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["Name", "JobTitle", "Grouping Level", "Employee Count"]
+        max_execution_time_ms: 150000
+    - id: "sql_180"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return only the rows that have a count of employees by title. Filter the results by department ID 12 or 14. Return name, jobtitle, grouping level and employee count."
+      ground_truth_sql: |
+        SELECT D.Name  
+            ,E.JobTitle  
+            ,GROUPING(D.Name, E.JobTitle) AS "Grouping Level"  
+            ,COUNT(E.BusinessEntityID) AS "Employee Count"  
+        FROM HumanResources.Employee AS E  
+            INNER JOIN HumanResources.EmployeeDepartmentHistory AS DH  
+                ON E.BusinessEntityID = DH.BusinessEntityID  
+            INNER JOIN HumanResources.Department AS D  
+                ON D.DepartmentID = DH.DepartmentID       
+        WHERE DH.EndDate IS NULL  
+            AND D.DepartmentID IN (12,14)  
+        GROUP BY ROLLUP(D.Name, E.JobTitle)
+        HAVING GROUPING(D.Name, E.JobTitle) = 0;
+      tags: ["aggregation", "group_by", "having"]
+      difficulty: "hard"
+
+      metadata:
+        category: "aggregation"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["Name", "JobTitle", "Grouping Level", "Employee Count"]
+        max_execution_time_ms: 150000
+    - id: "sql_181"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return the difference in sales quotas for a specific employee over previous calendar quarters. Sort the results by salesperson with businessentity id 277 and quotadate year 2022 or 2023."
+      ground_truth_sql: |
+        SELECT quotadate AS Year, date_part('quarter',quotadate) AS Quarter, SalesQuota AS SalesQuota,  
+              LAG(SalesQuota) OVER (ORDER BY date_part('year',quotadate), date_part('quarter',quotadate)) AS PrevQuota,  
+              SalesQuota - LAG(SalesQuota) OVER (ORDER BY date_part('year',quotadate), date_part('quarter',quotadate)) AS Diff  
+        FROM sales.salespersonquotahistory  
+        WHERE businessentityid = 277 AND date_part('year',quotadate) IN (2022, 2023)  
+        ORDER BY date_part('year',quotadate), date_part('quarter',quotadate);
+      tags: ["window", "ranking", "time_series"]
+      difficulty: "hard"
+
+      metadata:
+        category: "window"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["Year", "Quarter", "SalesQuota", "PrevQuota", "Diff"]
+        max_execution_time_ms: 150000
+    - id: "sql_183"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return the orders that have sales on or after December 2022. Return salesorderid, MonthOrderOccurred, salespersonid, customerid, subtotal, Running Total, and actual order date."
+      ground_truth_sql: |
+        SELECT salesorderid,
+              DATE_TRUNC('month', orderdate) AS MonthOrderOccurred,
+              salespersonid,
+              customerid,
+              subtotal,
+              SUM(subtotal) OVER (ORDER BY orderdate, salesorderid ROWS UNBOUNDED PRECEDING) AS RunningTotal,
+              orderdate AS ActualOrderDate
+        FROM Sales.salesorderheader
+        WHERE DATE_TRUNC('month', orderdate) >= '2022-12-01';
+      tags: ["window", "ranking", "time_series"]
+      difficulty: "hard"
+
+      metadata:
+        category: "window"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["salesorderid", "MonthOrderOccurred", "salespersonid", "customerid", "subtotal"]
+        max_execution_time_ms: 150000
+    - id: "sql_189"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to return rows except both the productid and startdate values in the two tables matches."
+      ground_truth_sql: |
+        SELECT a.productid, a.startdate 
+        FROM production.workorder AS a  
+        WHERE NOT EXISTS  
+
+        (SELECT *   
+            FROM production.workorderrouting  AS b  
+            WHERE (a.productid = b.productid and a.startdate=b.actualstartdate)) ;
+      tags: ["comparison", "subquery"]
+      difficulty: "hard"
+
+      metadata:
+        category: "comparison"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["productid", "startdate"]
+        max_execution_time_ms: 150000
+    - id: "sql_198"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find product models where the maximum list price is no more than twice the average."
+      ground_truth_sql: |
+        SELECT p1.ProductModelID
+        FROM Production.Product AS p1
+        GROUP BY p1.ProductModelID
+        HAVING MAX(p1.ListPrice) <= 
+            (SELECT AVG(p2.ListPrice) * 2
+            FROM Production.Product AS p2
+            WHERE p1.ProductModelID = p2.ProductModelID);
+      tags: ["comparison"]
+      difficulty: "hard"
+
+      metadata:
+        category: "comparison"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["ProductModelID"]
+        max_execution_time_ms: 150000
+    - id: "sql_199"
+      database_id: "adventureworks"
+      dialect: "postgres"
+
+      user_id: "admin"
+      username: "Xihong"
+      email: "admin@querymind"
+      user_groups: ["admin", "user"]
+
+      query: "write a query in SQL to find the first and last names of employees who have sold a product with the ProductNumber 'BK-M68B-42'. Return the distinct columns LastName and FirstName."
+      ground_truth_sql: |
+        SELECT DISTINCT pp.LastName, pp.FirstName 
+        FROM Person.Person pp JOIN HumanResources.Employee e
+        ON e.BusinessEntityID = pp.BusinessEntityID 
+        WHERE pp.BusinessEntityID IN 
+        (SELECT SalesPersonID 
+        FROM Sales.SalesOrderHeader
+        WHERE SalesOrderID IN 
+            (SELECT SalesOrderID 
+            FROM Sales.SalesOrderDetail
+            WHERE ProductID IN 
+                (SELECT ProductID 
+                FROM Production.Product p 
+                WHERE ProductNumber = 'BK-M68B-42')));
+      tags: ["subquery"]
+      difficulty: "hard"
+
+      metadata:
+        category: "subquery"
+        source: "benchmark_import"
+        query_language: "en"
+
+      expected_outcome:
+        tools_called: ["schema_retrieve", "run_sql"]
+        final_answer_contains: ["LastName", "FirstName"]
+        max_execution_time_ms: 150000

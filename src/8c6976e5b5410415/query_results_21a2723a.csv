@@ -1,8 +1,0 @@
-column_name,data_type,is_nullable
-SalesPersonID,integer,YES
-FullName,text,YES
-JobTitle,text,YES
-SalesTerritory,text,YES
-2012,numeric,YES
-2013,numeric,YES
-2014,numeric,YES

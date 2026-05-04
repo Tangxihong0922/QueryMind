@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "No table schemas found matching 'employee department Information Services Document Control'",
-  "timestamp": "2026-04-17T15:24:09.808419Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_a6rjusxfsvjf_1"
-}

@@ -64,6 +64,16 @@ ordering, then execute `run_sql`.
 """
 
 
+def _schema_lock_guidance(lock_reason: Optional[str]) -> list[str]:
+    """Return lock-specific guidance for the current schema state."""
+    if lock_reason == "schema_retrieve_empty_results":
+        return [
+            "Empty-result lock: read-only metadata discovery is allowed for this turn.",
+            "Use metadata discovery to find candidate tables and join paths, then call `run_sql`.",
+        ]
+    return []
+
+
 @dataclass(slots=True)
 class SchemaGovernancePolicy:
     """Policy knobs for schema-retrieval governance."""
@@ -309,6 +319,9 @@ class SchemaGovernanceManager:
                 },
                 "last_schema_summary": dict(current.last_schema_summary),
             }
+            if current.schema_locked and current.lock_reason == "schema_retrieve_empty_results":
+                snapshot["allow_metadata_query"] = True
+                snapshot["schema_governance"]["allow_metadata_query"] = True
             return snapshot
 
     async def build_prompt_block(self, *, conversation_id: str) -> str:
@@ -331,6 +344,10 @@ class SchemaGovernanceManager:
                 lines.extend(["", "Latest schema snapshot:", f"- {summary_text}"])
             elif current.schema_locked and current.lock_reason:
                 lines.extend(["", f"Lock reason: {current.lock_reason}"])
+
+            lock_guidance = _schema_lock_guidance(current.lock_reason if current.schema_locked else None)
+            if lock_guidance:
+                lines.extend(["", *lock_guidance])
 
             return "\n".join(line for line in lines if line).strip()
 

@@ -1,8 +1,0 @@
-table_schema,table_name
-purchasing,purchaseorderheader
-purchasing,productvendor
-purchasing,purchaseorderdetail
-purchasing,shipmethod
-purchasing,vendor
-purchasing,vvendorwithcontacts
-purchasing,vvendorwithaddresses

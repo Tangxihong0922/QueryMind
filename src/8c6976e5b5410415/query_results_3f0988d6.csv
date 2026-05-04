@@ -1,6 +1,0 @@
-column_name,data_type,is_nullable
-id,integer,YES
-departmentid,integer,YES
-name,character varying,YES
-groupname,character varying,YES
-modifieddate,timestamp without time zone,YES

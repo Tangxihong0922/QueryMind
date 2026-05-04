@@ -1,7 +1,0 @@
-column_name,data_type
-id,integer
-businessentityid,integer
-ratechangedate,timestamp without time zone
-rate,numeric
-payfrequency,smallint
-modifieddate,timestamp without time zone

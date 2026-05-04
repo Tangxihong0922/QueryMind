@@ -1,5 +1,0 @@
-column_name,data_type
-addresstypeid,integer
-name,character varying
-rowguid,uuid
-modifieddate,timestamp without time zone

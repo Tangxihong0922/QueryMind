@@ -811,6 +811,8 @@ class SqlGovernanceManager:
         async with self._lock:
             current = self._states[state.conversation_id]
             return build_sql_governance_prompt_block(
+                profile=current.profile,
+                missing_categories=current.last_gap_categories,
                 sql_exploration_frozen=current.sql_exploration_frozen,
                 freeze_reason=current.freeze_reason,
                 frozen_sql_signature=current.frozen_sql_signature,

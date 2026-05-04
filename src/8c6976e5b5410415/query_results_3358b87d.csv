@@ -1,7 +1,0 @@
-column_name,data_type,is_nullable,column_default
-productmodelid,integer,NO,nextval('production.productmodel_productmodelid_seq'::regclass)
-name,character varying,NO,
-catalogdescription,xml,YES,
-instructions,xml,YES,
-rowguid,uuid,NO,uuid_generate_v1()
-modifieddate,timestamp without time zone,NO,now()

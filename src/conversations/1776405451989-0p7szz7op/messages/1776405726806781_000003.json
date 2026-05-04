@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "No table schemas found matching 'employee vacation hours job title'",
-  "timestamp": "2026-04-17T06:01:15.546740Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_cde61e63c0054794b95e0e39"
-}

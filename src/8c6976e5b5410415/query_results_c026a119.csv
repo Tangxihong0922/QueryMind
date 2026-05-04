@@ -1,9 +1,0 @@
-table_schema,table_name,row_count
-humanresources,vemployee,1
-pe,pp,1
-person,personphone,1
-person,vadditionalcontactinfo,1
-purchasing,vvendorwithcontacts,1
-sales,vindividualcustomer,1
-sales,vsalesperson,1
-sales,vstorewithcontacts,1

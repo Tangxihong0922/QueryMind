@@ -7,7 +7,7 @@ This module contains the abstract base class for conversation storage.
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from .models import Conversation
+from .models import Conversation, Message
 from ..user.models import User
 
 
@@ -43,4 +43,11 @@ class ConversationStore(ABC):
         self, user: User, limit: int = 50, offset: int = 0
     ) -> List[Conversation]:
         """List conversations for user."""
+        pass
+
+    @abstractmethod
+    async def get_recent(
+        self, conversation_id: str, limit: int = 10
+    ) -> List[Message]:
+        """Get the most recent messages for a conversation."""
         pass

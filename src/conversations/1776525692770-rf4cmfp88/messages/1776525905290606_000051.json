@@ -1,9 +1,0 @@
-{
-  "role": "user",
-  "content": "continue",
-  "timestamp": "2026-04-18T15:23:50.928558Z",
-  "metadata": {},
-  "tool_result": null,
-  "tool_calls": null,
-  "tool_call_id": null
-}

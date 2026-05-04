@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "businessentityid,salesyear,currentsalesquota,nextyearsalesquota\n277,2022,565000.0000,872000.0000\n277,2022,872000.0000,846000.0000\n277,2022,846000.0000,952000.0000\n277,2023,952000.0000,1600000.0000\n277,2023,1600000.0000,1352000.0000\n277,2023,1352000.0000,839000.0000\n277,2023,839000.0000,0\n\n\nResults saved to file: query_results_23194a1a.csv\n\n**IMPORTANT: FOR VISUALIZE_DATA USE FILENAME: query_results_23194a1a.csv**",
-  "timestamp": "2026-04-17T13:41:31.190810Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_msgfd9pp3mkr_1"
-}

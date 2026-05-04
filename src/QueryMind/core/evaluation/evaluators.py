@@ -170,15 +170,46 @@ def _normalize_scalar(value: Any) -> Any:
     return value
 
 
-def _normalize_rows(df: pd.DataFrame, preview_rows: int) -> tuple[List[Dict[str, Any]], int, bool]:
+def _make_unique_preview_column_names(column_names: List[Any]) -> List[str]:
+    """Return stable, unique preview column names without dropping duplicates."""
+    seen: set[str] = set()
+    counts: Dict[str, int] = {}
+    unique_names: List[str] = []
+
+    for raw_name in column_names:
+        base_name = str(raw_name)
+        counts[base_name] = counts.get(base_name, 0) + 1
+
+        candidate = base_name if counts[base_name] == 1 else f"{base_name}__{counts[base_name]}"
+        while candidate in seen:
+            counts[base_name] += 1
+            candidate = f"{base_name}__{counts[base_name]}"
+
+        seen.add(candidate)
+        unique_names.append(candidate)
+
+    return unique_names
+
+
+def _normalize_rows(
+    df: pd.DataFrame, preview_rows: int
+) -> tuple[List[Dict[str, Any]], List[str], int, bool]:
     row_count = len(df)
     truncated = row_count > preview_rows
-    records = df.head(preview_rows).to_dict("records") if row_count else []
-    preview = [
-        {key: _normalize_scalar(value) for key, value in row.items()}
-        for row in records
-    ]
-    return preview, row_count, truncated
+    preview_df = df.head(preview_rows) if row_count else df.head(0)
+    preview_column_names = _make_unique_preview_column_names(list(preview_df.columns))
+    preview: List[Dict[str, Any]] = []
+
+    if row_count:
+        for row in preview_df.itertuples(index=False, name=None):
+            preview.append(
+                {
+                    column_name: _normalize_scalar(value)
+                    for column_name, value in zip(preview_column_names, row)
+                }
+            )
+
+    return preview, preview_column_names, row_count, truncated
 
 
 def _sql_features(sql: str) -> List[str]:
@@ -255,12 +286,15 @@ async def _execute_sql(
 
     try:
         df = await runtime.sql_runner.run_sql(RunSqlToolArgs(sql=sql_text), context)
-        preview, row_count, truncated = _normalize_rows(df, preview_rows)
+        preview, preview_column_names, row_count, truncated = _normalize_rows(
+            df, preview_rows
+        )
         return SqlExecutionArtifact(
             sql_text=sql_text,
             success=True,
             row_count=row_count,
             column_names=list(df.columns),
+            preview_column_names=preview_column_names,
             preview_rows=preview,
             truncated=truncated,
             execution_time_ms=(time.perf_counter() - start) * 1000,
@@ -297,6 +331,42 @@ class SqlAccuracyEvaluator(Evaluator):
         self.preview_rows = preview_rows
         self.allow_write_sql = allow_write_sql
         self.issue_tag_penalties = issue_tag_penalties or DEFAULT_ISSUE_TAG_PENALTIES
+
+    def _normalize_issue_tags(self, issue_tags: List[str]) -> List[str]:
+        """Collapse overlapping judge tags to a single primary issue tag.
+
+        The judge can sometimes emit multiple labels for the same underlying
+        issue, e.g. ``wrong_result_preview`` plus ``wrong_columns``. Scoring
+        should be driven by the strongest issue, not by stacking overlapping
+        penalties.
+        """
+        deduped: List[str] = []
+        seen: set[str] = set()
+        for raw_tag in issue_tags:
+            tag = str(raw_tag).strip()
+            if not tag or tag in seen:
+                continue
+            seen.add(tag)
+            deduped.append(tag)
+
+        if not deduped:
+            return []
+
+        priority_groups = [
+            {"missing_sql", "execution_error", "ground_truth_failure", "dataset_error", "judge_parse_failure"},
+            {"wrong_semantics"},
+            {"wrong_result_preview"},
+            {"wrong_columns"},
+            {"wrong_order_by"},
+            {"formatting_only"},
+        ]
+
+        for group in priority_groups:
+            for tag in deduped:
+                if tag in group:
+                    return [tag]
+
+        return [deduped[0]]
 
     @property
     def name(self) -> str:
@@ -379,11 +449,13 @@ class SqlAccuracyEvaluator(Evaluator):
             database_id=test_case.database_id,
             dialect=test_case.dialect,
             ground_truth_sql=test_case.ground_truth_sql,
+            ground_truth_preview_column_names=ground_truth_artifact.preview_column_names,
             ground_truth_result_preview=ground_truth_artifact.preview_rows,
             ground_truth_row_count=ground_truth_artifact.row_count,
             ground_truth_truncated=ground_truth_artifact.truncated,
             ground_truth_error=ground_truth_artifact.error_message,
             agent_sql=agent_sql,
+            agent_preview_column_names=agent_artifact.preview_column_names,
             agent_result_preview=agent_artifact.preview_rows,
             agent_row_count=agent_artifact.row_count,
             agent_truncated=agent_artifact.truncated,
@@ -491,9 +563,9 @@ class SqlAccuracyEvaluator(Evaluator):
                 parse_source="failed",
             )
 
-        issue_tags = [
-            str(tag) for tag in parsed.get("issue_tags", []) if str(tag).strip()
-        ]
+        issue_tags = self._normalize_issue_tags(
+            [str(tag) for tag in parsed.get("issue_tags", []) if str(tag).strip()]
+        )
         if not issue_tags and not parsed.get("passed", False):
             issue_tags = ["wrong_semantics"]
 
@@ -561,6 +633,7 @@ class SqlAccuracyEvaluator(Evaluator):
         )
 
     def _score_from_tags(self, issue_tags: List[str]) -> float:
+        issue_tags = self._normalize_issue_tags(issue_tags)
         score = 1.0
         for tag in dict.fromkeys(issue_tags):
             score -= self.issue_tag_penalties.get(tag, 0.1)
@@ -570,7 +643,12 @@ class SqlAccuracyEvaluator(Evaluator):
         return f"""You are judging SQL generation quality for an agent.
 
 Decide based ONLY on the supplied query, SQL, execution previews, row counts, and errors.
+The preview column name arrays are already disambiguated for duplicate labels using
+stable suffixes like `__2`. Treat those preview names as positional labels for the
+result preview, not as semantic changes to the query result.
 Ignore formatting-only differences when the results are the same.
+Return at most one primary issue tag. If several tags seem applicable, choose the
+single strongest tag that still explains the evidence.
 If the execution previews match but aliases/whitespace differ, use formatting_only.
 If the first 10 rows differ materially, use wrong_result_preview.
 If the columns differ materially, use wrong_columns.
@@ -599,5 +677,5 @@ Issue tag options:
 - formatting_only
 
 Evaluation input:
-{judge_input.model_dump_json(indent=2, ensure_ascii=False)}
+{judge_input.model_dump_json(indent=2, ensure_ascii=False, exclude={"trace_summary"})}
 """

@@ -29,7 +29,7 @@ from QueryMind.core.registry import ToolRegistry
 from QueryMind.core.storage import Conversation, ConversationStore, Message
 from QueryMind.core.user import RequestContext, User, UserResolver
 from QueryMind.tools import RunSqlTool, SchemaRetrieveTool
-from rls_registry import RLSToolRegistry
+from QueryMind.rls_registry import RLSToolRegistry
 
 from .base import SqlTestCase
 from .sql_policy import is_read_only_sql

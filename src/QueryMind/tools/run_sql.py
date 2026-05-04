@@ -63,84 +63,63 @@ class RunSqlTool(Tool[RunSqlToolArgs]):
             # Use the injected SqlRunner to execute the query
             df = await self.sql_runner.run_sql(args, context)
 
-            # Determine query type
-            query_type = args.sql.strip().upper().split()[0]
+            is_rows_affected_result = list(df.columns) == ["rows_affected"]
 
-            if query_type == "SELECT":
-                # Handle SELECT queries with results
-                if df.empty:
-                    result = "Query executed successfully. No rows returned."
-                    ui_component = UiComponent(
-                        rich_component=DataFrameComponent(
-                            rows=[],
-                            columns=[],
-                            title="Query Results",
-                            description="No rows returned",
-                        ),
-                        simple_component=SimpleTextComponent(text=result),
-                    )
-                    metadata = {
-                        "row_count": 0,
-                        "columns": [],
-                        "query_type": query_type,
-                        "results": [],
-                        "executed_sql": args.sql.strip(),
-                    }
-                else:
-                    # Convert DataFrame to records
-                    results_data = df.to_dict("records")
-                    columns = df.columns.tolist()
-                    row_count = len(df)
+            if not is_rows_affected_result:
+                # Handle read-style queries that return rows, including CTEs
+                # that begin with WITH but still produce a result set.
+                results_data = df.to_dict("records")
+                columns = df.columns.tolist()
+                row_count = len(df)
 
-                    # Write DataFrame to CSV file for downstream tools
-                    file_id = str(uuid.uuid4())[:8]
-                    filename = f"query_results_{file_id}.csv"
-                    csv_content = df.to_csv(index=False)
-                    await self.file_system.write_file(
-                        filename, csv_content, context, overwrite=True
+                # Write DataFrame to CSV file for downstream tools
+                file_id = str(uuid.uuid4())[:8]
+                filename = f"query_results_{file_id}.csv"
+                csv_content = df.to_csv(index=False)
+                await self.file_system.write_file(
+                    filename, csv_content, context, overwrite=True
+                )
+
+                # Create result text for LLM with truncated results
+                results_preview = csv_content
+                if len(results_preview) > 1000:
+                    results_preview = (
+                        results_preview[:1000]
+                        + "\n(Results truncated to 1000 characters. FOR LARGE RESULTS YOU DO NOT NEED TO SUMMARIZE THESE RESULTS OR PROVIDE OBSERVATIONS. THE NEXT STEP SHOULD BE A VISUALIZE_DATA CALL)"
                     )
 
-                    # Create result text for LLM with truncated results
-                    results_preview = csv_content
-                    if len(results_preview) > 1000:
-                        results_preview = (
-                            results_preview[:1000]
-                            + "\n(Results truncated to 1000 characters. FOR LARGE RESULTS YOU DO NOT NEED TO SUMMARIZE THESE RESULTS OR PROVIDE OBSERVATIONS. THE NEXT STEP SHOULD BE A VISUALIZE_DATA CALL)"
-                        )
+                result = f"{results_preview}\n\nResults saved to file: {filename}\n\n**IMPORTANT: FOR VISUALIZE_DATA USE FILENAME: {filename}**"
 
-                    result = f"{results_preview}\n\nResults saved to file: {filename}\n\n**IMPORTANT: FOR VISUALIZE_DATA USE FILENAME: {filename}**"
+                # Create DataFrame component for UI
+                dataframe_component = DataFrameComponent.from_records(
+                    records=cast(List[Dict[str, Any]], results_data),
+                    title="Query Results",
+                    description=f"SQL query returned {row_count} rows with {len(columns)} columns",
+                )
 
-                    # Create DataFrame component for UI
-                    dataframe_component = DataFrameComponent.from_records(
-                        records=cast(List[Dict[str, Any]], results_data),
-                        title="Query Results",
-                        description=f"SQL query returned {row_count} rows with {len(columns)} columns",
-                    )
+                ui_component = UiComponent(
+                    rich_component=dataframe_component,
+                    simple_component=SimpleTextComponent(text=result),
+                )
 
-                    ui_component = UiComponent(
-                        rich_component=dataframe_component,
-                        simple_component=SimpleTextComponent(text=result),
-                    )
-
-                    metadata = {
-                        "row_count": row_count,
-                        "columns": columns,
-                        "query_type": query_type,
-                        "results": results_data,
-                        "output_file": filename,
-                        "executed_sql": args.sql.strip(),
-                    }
+                metadata = {
+                    "row_count": row_count,
+                    "columns": columns,
+                    "results": results_data,
+                    "output_file": filename,
+                    "executed_sql": args.sql.strip(),
+                }
             else:
-                # For non-SELECT queries (INSERT, UPDATE, DELETE, etc.)
-                # The SqlRunner should return a DataFrame with affected row count
-                rows_affected = len(df) if not df.empty else 0
+                # The SqlRunner returned a one-column rows_affected frame.
+                rows_affected = (
+                    int(df.iloc[0]["rows_affected"]) if not df.empty else 0
+                )
                 result = (
                     f"Query executed successfully. {rows_affected} row(s) affected."
                 )
 
                 metadata = {
                     "rows_affected": rows_affected,
-                    "query_type": query_type,
                     "executed_sql": args.sql.strip(),
                 }
                 ui_component = UiComponent(

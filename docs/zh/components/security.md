@@ -2,7 +2,7 @@
 
 QueryMind 的安全体系不是单点开关，而是分层防护。身份在请求边界被解析，授权在工具和 UI 特性层面被统一执行，而 SQL 安全则被前移到注册表级策略，在数据库真正执行前完成拦截或改写。这样做的好处是：同一套工具代码可以在不同部署里复用，而且更容易向面试官解释清楚。
 
-本页也是 [Tool Registry Use Case: RLS Protection](./tools.md#tool-registry-use-case-rls-protection) 的策略参考页。
+本页是 [工具系统](./tools.md) 里注册表级 SQL 安全和访问控制行为的策略参考页。
 
 ## 用户解析与认证^
 
@@ -99,34 +99,53 @@ QueryMind 还把同样的权限模型复用到 UI 特性上。`AgentConfig` 里�
 ## RLS 防护模块^*
 
 ```text
-┌────────────────────────────────────────────────────────────────────┐
-│                    RLSToolRegistry.transform_args()                │
-├────────────────────────────────────────────────────────────────────┤
-│  tool 是 run_sql 吗?                                               │
-│     ├─ 否 → 原样放行                                               │
-│     └─ 是                                                         │
-│            ▼                                                       │
-│      RunSqlToolArgs (typed)                                        │
-│            ▼                                                       │
-│  1) SQL 注入检测                                                   │
-│            ├─ reject → ToolRejection                               │
-│            ▼                                                       │
-│  2) 查询复杂度校验                                                 │
-│            ├─ reject → ToolRejection                               │
-│            ▼                                                       │
-│  3) Territory 级改写                                               │
-│            ▼                                                       │
-│      RunSqlTool.execute()                                          │
-└────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 1) ToolRegistry.execute()                                                                                │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 输入: ToolCall(name="run_sql", arguments={sql: ...}) + ToolContext(user, metadata, request_id, ...)    │
+│ 逻辑: 查找工具 -> 校验 access groups -> model_validate(args) -> 记录基础 metadata                        │
+│ 输出: 已验证的 tool + RunSqlToolArgs，或 ToolResult(success=False, error=...)                           │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+                                                │
+                                                v
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 2) RLSToolRegistry.transform_args()                                                                      │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 输入: 已验证的 RunSqlToolArgs + user.group_memberships + context.raw_user_message + context.metadata    │
+│ 逻辑: 只处理 run_sql / RunSqlToolArgs；然后按顺序执行策略门禁：                                          │
+│   - _detect_sql_injection(sql) -> sql_injection.allowed_metadata_patterns / forbidden_patterns          │
+│   - _validate_query_complexity(sql) -> 长度、子查询、CTE、JOIN                                           │
+│   - sql_semantics_rejection_reason(...) -> 窗口、聚合、ROLLUP、导航函数、行粒度                         │
+│   - _apply_territory_rls(sql, user) -> 将 group 映射成 territory ids 并改写受保护表                     │
+│   - sql_governance_rejection_reason(...) -> context.metadata 里的 snapshot + SqlGovernancePolicy       │
+│   - sql_skeleton_freeze_rejection_reason(...) -> 保持已验证 skeleton 不被破坏                           │
+│ 输出: 改写后的 RunSqlToolArgs，或 ToolRejection(reason=...)                                             │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+                                                │
+                                                v
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 3) RunSqlTool.execute()                                                                                  │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 输入: 通过策略门禁的 RunSqlToolArgs + ToolContext                                                        │
+│ 逻辑: self.sql_runner.run_sql(args, context)                                                             │
+│   - query 分支: 写 CSV，构建 DataFrameComponent + SimpleTextComponent                                    │
+│   - rows_affected 分支: 构建 NotificationComponent                                                       │
+│ sql_126 真实快照: row_count=290，columns=["businessentityid", "salariedflag"]，                          │
+│                 output_file=query_results_<id>.csv                                                       │
+│ 输出: ToolResult(success=True, result_for_llm=CSV 预览 + 文件指针, metadata=...)                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-`RLSToolRegistry` 是 QueryMind 为什么要把策略放在注册表层的最好例子。行级安全属于跨工具的横切逻辑，不应该塞进 `RunSqlTool` 里；放在注册表层之后，同一个 SQL 工具就能在不同部署中复用，而安全规则只需要替换 `rls_config.yaml`。
+`RLSToolRegistry` 是 QueryMind 为什么要把策略放在注册表层的最好例子。它不只是做 territory 改写，而是把 `run_sql` 的执行前安全门统一收拢到一起：先过滤工具名，再校验 typed args，随后按顺序执行 injection、复杂度、SQL 语义、territory RLS、SQL governance 和 skeleton freeze。
 
-这个 YAML 配置分成四个策略块：
+这个 YAML 配置分成这些策略块：
 - `territory_rls`：group 到 territory 的映射，以及受保护的表
 - `sql_injection`：拒绝模式和 metadata allowlist
+- `sql_semantics`：窗口、聚合、ROLLUP、导航函数等语义约束
 - `query_limits`：查询长度和结构复杂度限制
 - `audit`：SQL 改写与拒绝查询的日志开关
+
+其中 `sql_governance` 和 `sql_skeleton_freeze` 不在 `rls_config.yaml` 里，它们读取的是 `context.metadata` 里的治理 snapshot 和 `SqlGovernancePolicy`。也就是说，这条链不只是改写 SQL，还会把安全、治理和冻结串成一个前置门禁。
 
 当前只会改写 `run_sql`。注册表先检查工具名，再校验类型化后的 `RunSqlToolArgs`，然后在执行前套上策略。因为这一步发生在 Pydantic 校验之后、数据库调用之前，所以策略层看到的是结构化参数，而不是原始字符串。
 
@@ -213,7 +232,7 @@ territory 策略是配置驱动的。group 会映射到允许访问的 `Territor
 
 ## 关联
 
-另见 [Tool Registry Use Case: RLS Protection](./tools.md#tool-registry-use-case-rls-protection)。
+另见 [工具系统](./tools.md)，了解 registry 与执行边界。
 
 
 <details open>
@@ -235,7 +254,7 @@ territory 策略是配置驱动的。group 会映射到允许访问的 `Territor
 - [`src/QueryMind/core/recovery/default.py`](../../../src/QueryMind/core/recovery/default.py) - 默认重试/退避策略
 - [`src/QueryMind/integrations/local/audit.py`](../../../src/QueryMind/integrations/local/audit.py) - 本地 audit logger 实现
 - [`src/QueryMind/integrations/auditlogger/postgres_logger.py`](../../../src/QueryMind/integrations/auditlogger/postgres_logger.py) - Postgres audit logger 实现
-- [`src/rls_registry.py`](../../../src/rls_registry.py) - 支持 RLS 的注册表及 SQL 改写/拒绝逻辑
-- [`src/rls_config.yaml`](../../../src/rls_config.yaml) - territory RLS 策略配置
+- [`src/QueryMind/rls_registry.py`](../../../src/QueryMind/rls_registry.py) - 支持 RLS 的注册表及 SQL 改写/拒绝逻辑
+- [`src/QueryMind/rls_config.yaml`](../../../src/QueryMind/rls_config.yaml) - territory RLS 策略配置
 
 </details>

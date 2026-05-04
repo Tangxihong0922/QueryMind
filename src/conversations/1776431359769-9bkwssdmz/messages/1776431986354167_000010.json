@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "SQL rejected: Direct system catalog access attempt",
-  "timestamp": "2026-04-17T13:19:35.005766Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_llfxb773k26m_1"
-}

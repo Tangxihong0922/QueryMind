@@ -1,280 +1,144 @@
-# Context Assembly/Enhancement Pipeline
+# Context Assembly
 
+QueryMind splits context into two separate paths:
 
-QueryMind assembles context in three layers:
-- `SystemPromptBuilder` creates the base instruction scaffold.
-- `LlmContextEnhancer` enriches the prompt and message stream before each LLM call.
-- `ToolContextEnricher` injects execution-time state into tool calls.
+- prompt-facing context, which shapes what the model sees
+- tool-facing context, which shapes what tools receive at execution time
 
-This separation is important because prompt context, conversational context, and tool-execution context solve different problems. The system prompt tells the model how to think. The message enhancer gives it relevant prior context. The tool enricher gives tools the runtime state they need to behave correctly.
+Those paths solve different problems and should stay separate from the prompt chain itself.
 
-## System Prompt Builder^
+## Two Paths
 
-The system prompt builder is the first step in request assembly. Its job is to produce the base prompt for the current user and the tools available in that turn. In the default implementation, the prompt is not static: it is built from the current tool list and can include memory-related instructions when the memory tools are present.
+| Path | Contract | Main output |
+|---|---|---|
+| Prompt-facing | `SystemPromptBuilder`, `LlmContextEnhancer` | `system_prompt` and the final `LlmRequest.messages` list |
+| Tool-facing | `ToolContextEnricher` | `ToolContext.metadata` |
 
-If a fixed `base_prompt` is provided, the default builder returns it as-is and skips dynamic assembly.
+Prompt-facing details live in [`prompt-chain.md`](./prompt-chain.md).
 
-The main implementation is `DefaultSystemPromptBuilder`. It:
-- identifies the available tools from the tool schema list,
-- inspects whether memory-related tools exist,
-- adds the core QueryMind role and response guidelines,
-- appends structured instructions only when the relevant tools are available.
+For the concrete turn-by-turn walk-through, see
+[`request-assembly.md`](./request-assembly.md).
 
-That design keeps the base prompt short when the agent is configured with a small toolset, but expands it when the agent has memory capabilities. In other words, the prompt adapts to capability, not just to branding.
+## Request Assembly Order
 
-#### System Prompt Builder Flow^
+This page keeps only the request assembly path itself.
+The full `sql_126` Agent Loop trace lives in [`agent-loop.md`](./agent-loop.md).
+
 ```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                           SYSTEM PROMPT BUILDING                             │
-│                                                                              │
-│  ┌──────────────────────────────┐                                            │
-│  │ User + Available Tool Schemas │                                            │
-│  └──────────────┬───────────────┘                                            │
-│                 ▼                                                            │
-│  ┌──────────────────────────────┐                                            │
-│  │ DefaultSystemPromptBuilder   │                                            │
-│  │                              │                                            │
-│  │  1. read tool names          │                                            │
-│  │  2. detect memory tools      │                                            │
-│  │  3. write base assistant role│                                            │
-│  │  4. append capability rules  │                                            │
-│  └──────────────┬───────────────┘                                            │
-│                 ▼                                                            │
-│  ┌──────────────────────────────┐                                            │
-│  │ Base system prompt           │                                            │
-│  │ + optional memory workflow   │                                            │
-│  └──────────────────────────────┘                                            │
-└──────────────────────────────────────────────────────────────────────────────┘
++====================================================================================================+
+| 1) Build ToolContext                                                                               |
+|----------------------------------------------------------------------------------------------------|
+| input: user, conversation_id, request_id, raw_user_message, request_context.metadata               |
+| seed metadata: ui_features_available, tool_memory_session_isolated                                  |
+| output: ToolContext(user, conversation_id, request_id, metadata=...)                               |
++=============================================+======================================================+
+                                                |
+                                                v
++====================================================================================================+
+| 2) ToolContextEnricher chain                                                                       |
+|----------------------------------------------------------------------------------------------------|
+| SchemaRetrieveContextEnricher.enrich_context(context)                                              |
+| - prefer turn-local schema snapshot in context.metadata                                            |
+| - else read conversation history via conversation_store                                           |
+| output: context.metadata.last_schema_summary / schema_retrieve_context                             |
++=============================================+======================================================+
+                                                |
+                                                v
++====================================================================================================+
+| 3) ToolRegistry.get_schemas(user)                                                                  |
+|----------------------------------------------------------------------------------------------------|
+| fetch visible tool schemas for this turn                                                           |
+| output: tool_schemas[]                                                                             |
++=============================================+======================================================+
+                                                |
+                                                v
++====================================================================================================+
+| 4) _prepare_turn_prompt()                                                                          |
+|----------------------------------------------------------------------------------------------------|
+| SystemPromptBuilder.build_system_prompt(user, visible_tool_schemas)                                |
+| schema governance may add a prompt block or hide the schema tool                                   |
+| LlmContextEnhancer.enhance_system_prompt(): memory examples                                        |
+| output: visible_tool_schemas + system_prompt + prepared_metadata                                   |
++=============================================+======================================================+
+                                                |
+                                                v
++====================================================================================================+
+| 5) ConversationFilter chain + _build_llm_request()                                                 |
+|----------------------------------------------------------------------------------------------------|
+| filters run in order over conversation.messages                                                    |
+| message -> LlmMessage(role/content/tool_calls/tool_call_id/metadata/tool_result)                   |
+| request_metadata merged into each message.metadata                                                  |
+| LlmContextEnhancer.enhance_user_messages(): final pass (default = identity)                        |
+| output: LlmRequest(messages, tools, user, system_prompt, metadata)                                 |
++====================================================================================================+
 ```
 
-### What the Base Prompt Actually Does
+The important boundaries are:
+- `ToolContextEnricher` writes `ToolContext.metadata` first, then fetches visible tool schemas; it affects execution state only, not the prompt.
+- `_prepare_turn_prompt()` is responsible for `SystemPromptBuilder` + the governance block + `enhance_system_prompt()`, and produces the current turn's `system_prompt` and `visible_tool_schemas`.
+- `ConversationFilter` trims and reorders conversation history before it becomes `LlmMessage` objects.
+- `LlmContextEnhancer.enhance_user_messages()` is the final message-side hook, and only then is `LlmRequest` materialized.
 
-The default prompt establishes a few practical rules:
-- the assistant identifies itself as QueryMind,
-- the current date is included,
-- tool output is treated as externally visible, so the assistant should summarize instead of repeating raw results,
-- tool names are listed so the model knows what it can call.
+## Tool Context Enrichment
 
-When memory tools are present, the prompt also contains explicit tool-usage policy. That policy is not decorative; it is there to steer the model toward consistent tool search/save behavior.
+`ToolContextEnricher` is the lowest layer in the assembly pipeline.
+It does not change the prompt.
+It writes execution-time state into `ToolContext.metadata`.
 
-## LLM Context Enhancers^
+The current concrete enricher shipped in the codebase is:
 
-LLM context enhancers modify the prompt and message stream right before an LLM call. QueryMind uses them to add memory snippets and schema-routing rules without hardcoding those details into the base prompt.
+- `SchemaRetrieveContextEnricher`
 
-There are two important enhancer behaviors:
-- `enhance_system_prompt()` appends persistent guidance.
-- `enhance_user_messages()` injects turn-specific context into the message sequence.
+That enricher:
+- prefers turn-local schema snapshot data already present in `context.metadata`
+- falls back to recent conversation history when needed
+- reads the latest schema retrieval result from the conversation
+- writes `last_schema_summary` and `schema_retrieve_context` into the tool context
 
-This is a useful split. Stable policy belongs in the system prompt. Fresh evidence belongs in the message stream.
-
-#### LLM Enhancer Pipeline^
-```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                             LLM CONTEXT ENHANCERS                            │
-│                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────────┐  │
-│  │ System Prompt                                                          │  │
-│  │                                                                        │  │
-│  │  DefaultSystemPromptBuilder                                             │  │
-│  │           │                                                            │  │
-│  │           ▼                                                            │  │
-│  │  CompositeLlmContextEnhancer                                           │  │
-│  │           │                                                            │  │
-│  │   ┌───────┴────────┐                                                   │  │
-│  │   ▼                ▼                                                   │  │
-│  │ SchemaContextEnhancer   DefaultLlmContextEnhancer                      │  │
-│  │   │                    │                                              │  │
-│  │   │ append schema      │ search AgentMemory for relevant examples     │  │
-│  │   │ routing rules      │ append memory snippets to prompt            │  │
-│  │   └────────────┬────────┘                                              │  │
-│  └─────────────────┼──────────────────────────────────────────────────────┘  │
-│                    ▼                                                         │
-│  ┌────────────────────────────────────────────────────────────────────────┐  │
-│  │ User Messages                                                          │  │
-│  │                                                                        │  │
-│  │  CompositeLlmContextEnhancer                                           │  │
-│  │           │                                                            │  │
-│  │           ▼                                                            │  │
-│  │  enhance_user_messages()                                               │  │
-│  │                                                                        │  │
-│  │  - schema enhancer can prepend retrieved schema context                │  │
-│  │  - default enhancer usually leaves messages unchanged                  │  │
-│  └────────────────────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────────────────────┘
-```
-
-### System Prompt Enhancer
-
-`SchemaContextEnhancer` is responsible for schema-routing instructions. It appends search-mode rules to the system prompt so the LLM can choose between `hybrid`, `vector`, `graph`, and `expand` in a way that matches the query.
-
-This matters because QueryMind does not want schema search to be a single fixed strategy. The enhancer gives the model a policy for choosing the search mode based on semantics and context:
-- `hybrid` for general business questions,
-- `vector` for semantic discovery,
-- `graph` for relationship-heavy exploration,
-- `expand` when seed tables already exist in context.
-
-The prompt-level rules make the tool selection more reliable, but they are still advisory. The tool execution layer remains the source of truth.
-
-`DefaultLlmContextEnhancer` serves a different purpose. It looks up relevant text memories from `AgentMemory` and appends them to the system prompt as a compact “relevant context” section. That gives the model prior examples or domain facts that are likely to help on the current turn.
-
-If agent memory is missing or degraded, the enhancer leaves the prompt unchanged.
-
-The two enhancers are often combined in `CompositeLlmContextEnhancer`, which applies them in order. This is deliberate: schema rules should be in place before the memory snippets are appended, so the final prompt reads as one coherent instruction set.
-If one enhancer fails, the composite skips it and continues with the rest, so a bad enhancer does not break the whole turn.
-
-### User Message Enhancer
-
-The same enhancer interface can also modify message history. In current QueryMind behavior, the schema enhancer uses this path to inject the latest retrieved schema block as a synthetic system message, while the default memory enhancer leaves the messages untouched.
-
-That choice is subtle but useful. Putting retrieved schema context into messages instead of the base prompt makes it easier to separate stable instructions from turn-specific evidence.
-
-#### Why This Layer Exists
-
-The enhancer layer solves a practical LLM problem: the model should not have to infer everything from raw history alone.
-
-Without enhancers, the model may:
-- ignore useful prior memory,
-- choose the wrong schema search mode,
-- or fail to keep retrieval results visible across turns.
-
-By separating prompt policy from retrieved evidence, QueryMind keeps the conversation easier to steer and easier to debug.
-
-## Tool Context Enricher^
-
-Tool context enrichers operate one layer lower than prompt enhancers. They do not change what the model sees directly; they change what the tool receives when the model actually calls it.
-
-The hook is intentionally narrow: enrichers usually mutate `context.metadata` instead of replacing the whole context object.
-
-This is where runtime state becomes execution state. The most important example in QueryMind is `SchemaRetrieveContextEnricher`.
-
-#### Tool Context Enricher Flow^
-```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                            TOOL CONTEXT ENRICHMENT                           │
-│                                                                              │
-│  Conversation history                                                        │
-│          │                                                                   │
-│          ▼                                                                   │
-│  SchemaRetrieveContextEnricher                                               │
-│          │                                                                   │
-│          ├─→ read recent conversation messages                                │
-│          ├─→ find latest schema_retrieve tool result                         │
-│          ├─→ extract selected_tables / graph_hint / required_fields          │
-│          └─→ write context.metadata["schema_retrieve_context"]               │
-│                                                                              │
-│          ▼                                                                   │
-│  SchemaRetrieveTool.execute()                                                │
-│          │                                                                   │
-│          └─→ reads seed_tables from ToolContext.metadata                      │
-│              and can switch into expand mode                                  │
-└──────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Use Case: Schema Retrieve Context Enricher^*
-
-`SchemaRetrieveContextEnricher` is one of the most important pieces in the whole pipeline because it turns schema retrieval into a multi-turn workflow instead of a one-shot lookup.
-
-Its job is to inspect recent conversation history, locate the latest `schema_retrieve` tool result, and extract the tables selected in that previous step. It then injects a `schema_retrieve_context` object into `ToolContext.metadata`.
-
-That metadata usually contains:
+`schema_retrieve_context` can carry:
 - `seed_tables`
 - `seed_table_refs`
 - `expand_mode`
 - `last_query`
+- `last_search_mode`
 - `graph_hint`
 - `required_fields`
 - `domain_filter`
+- `summary_text`
+- `schema_locked`
+- `lock_reason`
 
-This is not just bookkeeping. It is what allows a follow-up query like “find all tables related to those orders” to reuse the previous result instead of starting over.
+This is execution state, not prompt policy. The enricher exists so a later `schema_retrieve` call can continue from the previous structured result without rebuilding that state in prose.
 
-#### Why This Is Innovative
+## Conversation Filters
 
-The key idea is stateful retrieval.
+`ConversationFilter` transforms conversation history before the LLM sees it.
 
-Most systems treat schema search as a stateless query. QueryMind treats it as a conversation. The previous search result becomes an explicit input to the next search. That makes the retrieval process more natural for users and more controllable for the agent.
+Filters run in order inside `Agent._build_llm_request()`, so later filters receive the output of earlier filters.
+They can:
+- remove sensitive text
+- trim long histories
+- summarize older turns
+- deduplicate or reorder messages
 
-The benefits are practical:
-- better multi-turn follow-up handling,
-- less repetition in schema discovery,
-- more deterministic expansion from known tables,
-- cleaner separation between “finding a good starting point” and “expanding from it”.
+This layer works on the message history itself, not on storage and not on tool state.
 
-In interview terms, this is the part that shows the system is not just doing retrieval. It is maintaining retrieval state.
+## Source Boundaries
 
-#### Schema Retrieve Context Flow
-```text
-┌──────────────────────────────┐
-│ Recent conversation history   │
-│ contains prior tool results   │
-└──────────────┬───────────────┘
-               ▼
-┌──────────────────────────────┐
-│ SchemaRetrieveContextEnricher│
-│ finds last schema_retrieve   │
-└──────────────┬───────────────┘
-               ▼
-┌──────────────────────────────┐
-│ ToolContext.metadata         │
-│ schema_retrieve_context      │
-└──────────────┬───────────────┘
-               ▼
-┌──────────────────────────────┐
-│ schema_retrieve tool call    │
-│ reads seed_tables            │
-└──────────────┬───────────────┘
-               ▼
-┌──────────────────────────────┐
-│ expand mode can continue     │
-│ from the prior schema result  │
-└──────────────────────────────┘
-```
+This page covers request assembly boundaries, tool-context enrichment, and conversation filtering.
+It does not define prompt policy, schema governance state, SQL governance state, or the final system-prompt prose.
 
-### Assembly Order in Practice
+## Relevant Source Files
 
-The execution order in the agent is:
-- `context_enrichers` run before tool schemas are fetched,
-- `SystemPromptBuilder` builds the base prompt,
-- `llm_context_enhancer` appends policy and memory context,
-- message enhancement runs before each LLM request,
-- the resulting `ToolContext` is passed into tool execution.
-
-That order matters because each step consumes a different kind of context. Changing the order would change the behavior.
-
-## Closing Note
-
-The overall pattern is simple: build a base prompt, enrich it with policy and memory, then enrich tool execution with state from the conversation.
-
-That gives QueryMind a clean separation between what the model is told, what it remembers, and what the tool can actually use.
-
-
-<details open>
-<summary>Relevant source files</summary>
-
-- [`src/QueryMind/core/agent/agent.py`](../../../src/QueryMind/core/agent/agent.py) - request assembly and the main agent loop
-- [`src/QueryMind/core/agent/config.py`](../../../src/QueryMind/core/agent/config.py) - agent options, UI feature gating, and schema defaults used during assembly
-- [`src/QueryMind/core/user/request_context.py`](../../../src/QueryMind/core/user/request_context.py) - structured request metadata passed into user resolution
-- [`src/QueryMind/core/user/resolver.py`](../../../src/QueryMind/core/user/resolver.py) - user resolution interface used at request entry
-- [`src/QueryMind/core/user/models.py`](../../../src/QueryMind/core/user/models.py) - user model shared by request assembly and stores
-- [`src/QueryMind/core/system_prompt/base.py`](../../../src/QueryMind/core/system_prompt/base.py) - system prompt builder interface
-- [`src/QueryMind/core/system_prompt/default.py`](../../../src/QueryMind/core/system_prompt/default.py) - default system prompt assembly
-- [`src/QueryMind/core/enhancer/base.py`](../../../src/QueryMind/core/enhancer/base.py) - LLM context enhancer interface
-- [`src/QueryMind/core/enhancer/default.py`](../../../src/QueryMind/core/enhancer/default.py) - memory-backed prompt enrichment
-- [`src/QueryMind/core/enhancer/composite.py`](../../../src/QueryMind/core/enhancer/composite.py) - enhancer composition and ordering
-- [`src/QueryMind/core/enhancer/schema_retrieve.py`](../../../src/QueryMind/core/enhancer/schema_retrieve.py) - schema-routing prompt rules
-- [`src/QueryMind/core/enricher/base.py`](../../../src/QueryMind/core/enricher/base.py) - tool context enricher interface
-- [`src/QueryMind/core/enricher/schema_retrieve.py`](../../../src/QueryMind/core/enricher/schema_retrieve.py) - history-aware schema retrieval context injection
-- [`src/QueryMind/core/filter/base.py`](../../../src/QueryMind/core/filter/base.py) - conversation filter interface
-- [`src/QueryMind/core/llm/models.py`](../../../src/QueryMind/core/llm/models.py) - LLM message/request/response contracts used by enhancers and filters
-- [`src/QueryMind/core/tool/models.py`](../../../src/QueryMind/core/tool/models.py) - ToolContext and ToolResult contracts used during enrichment and execution
-- [`src/QueryMind/capabilities/agent_memory/base.py`](../../../src/QueryMind/capabilities/agent_memory/base.py) - agent memory interface used by memory-backed prompt enrichment
-- [`src/QueryMind/capabilities/agent_memory/models.py`](../../../src/QueryMind/capabilities/agent_memory/models.py) - tool/text memory data models
-- [`src/QueryMind/capabilities/schema_memory/base.py`](../../../src/QueryMind/capabilities/schema_memory/base.py) - schema memory interface carried in ToolContext
-- [`src/QueryMind/capabilities/schema_memory/models.py`](../../../src/QueryMind/capabilities/schema_memory/models.py) - table schema and schema search data models
-- [`src/QueryMind/capabilities/schema_management/base.py`](../../../src/QueryMind/capabilities/schema_management/base.py) - schema management service interface carried in ToolContext
-- [`src/QueryMind/capabilities/schema_management/models.py`](../../../src/QueryMind/capabilities/schema_management/models.py) - schema management list and enrichment models
-- [`src/QueryMind/core/storage/base.py`](../../../src/QueryMind/core/storage/base.py) - conversation store contract
-- [`src/QueryMind/core/storage/models.py`](../../../src/QueryMind/core/storage/models.py) - Conversation and Message data models
-- [`src/QueryMind/integrations/local/file_system_conversation_store.py`](../../../src/QueryMind/integrations/local/file_system_conversation_store.py) - persistent conversation history backend
-- [`src/QueryMind/integrations/local/storage.py`](../../../src/QueryMind/integrations/local/storage.py) - in-memory conversation history backend
-
-</details>
+- [`src/QueryMind/core/enricher/base.py`](../../../src/QueryMind/core/enricher/base.py) - `ToolContextEnricher` interface
+- [`src/QueryMind/core/enricher/schema_retrieve.py`](../../../src/QueryMind/core/enricher/schema_retrieve.py) - schema retrieve context enricher
+- [`src/QueryMind/core/filter/base.py`](../../../src/QueryMind/core/filter/base.py) - `ConversationFilter` interface
+- [`src/QueryMind/core/agent/agent.py`](../../../src/QueryMind/core/agent/agent.py) - enrichment, filtering, and request assembly flow
+- [`src/QueryMind/core/agent/governance.py`](../../../src/QueryMind/core/agent/governance.py) - schema governance manager
+- [`src/QueryMind/core/enhancer/default.py`](../../../src/QueryMind/core/enhancer/default.py) - default LLM context enhancer
+- [`src/QueryMind/core/llm/models.py`](../../../src/QueryMind/core/llm/models.py) - `LlmRequest` / `LlmMessage`
+- [`src/QueryMind/core/registry.py`](../../../src/QueryMind/core/registry.py) - `ToolRegistry.get_schemas`
+- [`src/QueryMind/core/tool/models.py`](../../../src/QueryMind/core/tool/models.py) - `ToolContext`
+- [`src/QueryMind/core/user/request_context.py`](../../../src/QueryMind/core/user/request_context.py) - `RequestContext`
+- [`src/QueryMind/core/system_prompt/default.py`](../../../src/QueryMind/core/system_prompt/default.py) - default system prompt builder
+- [`src/QueryMind/core/storage/base.py`](../../../src/QueryMind/core/storage/base.py) - conversation store contract used by history-aware enrichers

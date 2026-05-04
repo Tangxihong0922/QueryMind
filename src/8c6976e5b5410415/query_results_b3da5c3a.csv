@@ -1,3 +1,0 @@
-column_name,data_type,is_nullable
-businessentityid,integer,YES
-lastname,text,YES

@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "function year(timestamp without time zone) does not exist\nLINE 3:     YEAR(QuotaDate) AS QuotaYear,\n            ^\nHINT:  No function matches the given name and argument types. You might need to add explicit type casts.\n",
-  "timestamp": "2026-04-17T06:46:10.366595Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_6egbonn6q9bt_1"
-}

@@ -154,6 +154,23 @@ def test_schema_governance_manager_builds_locked_prompt_block() -> None:
     assert "`schema_retrieve` is locked for this turn" in block
     assert "Enter SQL draft mode now" in block
     assert "Latest schema snapshot" in block
+    assert "read-only metadata discovery is allowed" in block
+    assert "candidate tables and join paths" in block
+
+
+def test_schema_governance_empty_lock_enables_metadata_query_flag() -> None:
+    manager = SchemaGovernanceManager(SchemaGovernancePolicy())
+    state = asyncio.run(manager.get_state("conv-empty-lock"))
+    state.schema_locked = True
+    state.lock_reason = "schema_retrieve_empty_results"
+    state.last_schema_summary = {
+        "summary_text": "schema_retrieve[hybrid] query='product' -> 0 table(s)",
+    }
+
+    snapshot = asyncio.run(manager.build_request_metadata(conversation_id="conv-empty-lock"))
+
+    assert snapshot["allow_metadata_query"] is True
+    assert snapshot["schema_governance"]["allow_metadata_query"] is True
 
 
 def test_schema_governance_locks_after_two_empty_results() -> None:

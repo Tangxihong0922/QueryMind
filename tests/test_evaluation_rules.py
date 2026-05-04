@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from QueryMind.core.evaluation.base import (  # noqa: E402
     AgentResult,
     ExpectedOutcome,
+    JudgeInput,
     SqlTestCase,
     ToolInvocationRecord,
 )
@@ -186,3 +187,43 @@ def test_sql_accuracy_falls_back_to_artifact_match_when_judge_parse_fails() -> N
     assert judge_result is not None
     assert judge_result.passed is True
     assert judge_result.issue_tags == ["formatting_only"]
+
+
+def test_sql_accuracy_prompt_excludes_trace_summary() -> None:
+    evaluator = SqlAccuracyEvaluator(
+        runtime_resolver=SimpleNamespace(),
+        judge_llm=SimpleNamespace(),
+    )
+    judge_input = JudgeInput(
+        query="demo query",
+        database_id="adventureworks",
+        dialect="postgres",
+        ground_truth_sql="SELECT 1",
+        agent_sql="SELECT 1",
+        trace_summary={
+            "tool_count": 9,
+            "has_final_answer": True,
+            "run_sql_call_count": 1,
+        },
+    )
+
+    prompt = evaluator._build_judge_prompt(judge_input)
+
+    assert "trace_summary" not in prompt
+    assert "tool_count" not in prompt
+    assert "has_final_answer" not in prompt
+
+
+def test_sql_accuracy_scores_overlap_by_primary_issue_only() -> None:
+    evaluator = SqlAccuracyEvaluator(
+        runtime_resolver=SimpleNamespace(),
+        judge_llm=SimpleNamespace(),
+    )
+
+    assert (
+        evaluator._score_from_tags(["wrong_result_preview", "wrong_columns"]) == 0.7
+    )
+    assert (
+        evaluator._score_from_tags(["wrong_result_preview", "wrong_order_by"]) == 0.7
+    )
+    assert evaluator._score_from_tags(["wrong_semantics", "wrong_columns"]) == 0.5

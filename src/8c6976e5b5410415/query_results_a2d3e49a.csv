@@ -1,9 +1,0 @@
-column_name,data_type,character_maximum_length,is_nullable,key_type
-businessentityid,integer,,NO,PK
-accountnumber,character varying,15.0,NO,
-name,character varying,50.0,NO,
-creditrating,smallint,,NO,
-preferredvendorstatus,boolean,,NO,
-activeflag,boolean,,NO,
-purchasingwebserviceurl,character varying,1024.0,YES,
-modifieddate,timestamp without time zone,,NO,

@@ -1,7 +1,0 @@
-column_name,data_type,is_nullable
-businessentityid,integer,NO
-name,character varying,NO
-salespersonid,integer,YES
-demographics,xml,YES
-rowguid,uuid,NO
-modifieddate,timestamp without time zone,NO

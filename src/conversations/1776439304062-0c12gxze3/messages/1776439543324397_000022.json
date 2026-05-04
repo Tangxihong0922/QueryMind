@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "relation \"employeepayhistory\" does not exist\nLINE 14:     employeepayhistory eph\n             ^\n",
-  "timestamp": "2026-04-17T15:24:45.787822Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_yaxyegjpvqvz_1"
-}

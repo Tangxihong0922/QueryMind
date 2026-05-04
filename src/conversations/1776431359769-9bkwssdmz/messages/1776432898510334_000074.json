@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "relation \"Person.Person\" does not exist\nLINE 1: SELECT * FROM \"Person\".\"Person\" LIMIT 5;\n                      ^\n",
-  "timestamp": "2026-04-17T13:34:36.023840Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_ny3ds02q09rd_1"
-}

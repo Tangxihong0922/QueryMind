@@ -1,8 +1,0 @@
-table_name,table_schema
-salesperson,sales
-salespersonquotahistory,sales
-salesterritory,sales
-salesterritoryhistory,sales
-vsalesperson,sales
-vsalespersonsalesbyfiscalyears,sales
-vsalespersonsalesbyfiscalyearsdata,sales

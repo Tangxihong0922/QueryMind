@@ -130,6 +130,7 @@ class SqlExecutionArtifact(BaseModel):
     error_message: Optional[str] = None
     row_count: int = 0
     column_names: List[str] = Field(default_factory=list)
+    preview_column_names: List[str] = Field(default_factory=list)
     preview_rows: List[Dict[str, Any]] = Field(default_factory=list)
     truncated: bool = False
     execution_time_ms: float = 0.0
@@ -144,11 +145,13 @@ class JudgeInput(BaseModel):
     database_id: str
     dialect: str
     ground_truth_sql: str
+    ground_truth_preview_column_names: List[str] = Field(default_factory=list)
     ground_truth_result_preview: List[Dict[str, Any]] = Field(default_factory=list)
     ground_truth_row_count: int = 0
     ground_truth_truncated: bool = False
     ground_truth_error: Optional[str] = None
     agent_sql: str
+    agent_preview_column_names: List[str] = Field(default_factory=list)
     agent_result_preview: List[Dict[str, Any]] = Field(default_factory=list)
     agent_row_count: int = 0
     agent_truncated: bool = False

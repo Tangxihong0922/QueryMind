@@ -60,3 +60,10 @@ class MemoryConversationStore(ConversationStore):
         # Sort by updated_at desc
         user_conversations.sort(key=lambda x: x.updated_at, reverse=True)
         return user_conversations[offset : offset + limit]
+
+    async def get_recent(self, conversation_id: str, limit: int = 10) -> List[Message]:
+        """Get the most recent messages for a conversation."""
+        conversation = self._conversations.get(conversation_id)
+        if not conversation or limit <= 0:
+            return []
+        return conversation.messages[-limit:]

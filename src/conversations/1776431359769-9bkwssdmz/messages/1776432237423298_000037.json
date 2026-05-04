@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "syntax error at or near \"VacationHours\"\nLINE 10: QUALIFY VacationHours = FIRST_VALUE(VacationHours) OVER (\n                 ^\n",
-  "timestamp": "2026-04-17T13:23:38.796904Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_495alxm8h87d_1"
-}

@@ -1,4 +1,0 @@
-businessentityid,nationalidnumber,loginid,jobtitle,birthdate,maritalstatus,gender,hiredate,salariedflag,vacationhours,sickleavehours,currentflag,rowguid,modifieddate,organizationnode
-217,345106466,adventure-works\zainal0,Document Control Manager,1976-01-30,M,M,2009-01-04,False,77,58,True,dc60eeed-9f9f-4435-8666-4de4fafde9c3,2014-06-30,/3/2/2/
-218,540688287,adventure-works\tengiz0,Control Specialist,1990-04-28,S,M,2008-12-16,False,76,58,True,c609b3b2-7969-410c-934c-62c34b63c4ee,2014-06-30,/3/2/2/1/
-219,242381745,adventure-works\sean1,Document Control Assistant,1987-03-12,S,M,2009-01-22,False,78,59,True,f78657a9-83ef-4b4d-9809-3c4c6d1a7bb4,2014-06-30,/3/2/2/2/

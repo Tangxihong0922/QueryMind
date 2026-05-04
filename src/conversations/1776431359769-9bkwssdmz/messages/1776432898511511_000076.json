@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "relation \"personcontact\" does not exist\nLINE 10: JOIN PersonContact p ON e.BusinessEntityID = p.BusinessEntit...\n              ^\n",
-  "timestamp": "2026-04-17T13:34:40.924629Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_fu2as5tv53ax_1"
-}

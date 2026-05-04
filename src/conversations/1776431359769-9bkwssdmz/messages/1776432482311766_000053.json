@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "Query executed successfully. No rows returned.",
-  "timestamp": "2026-04-17T13:27:45.997081Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_nzw9xethxizx_3"
-}

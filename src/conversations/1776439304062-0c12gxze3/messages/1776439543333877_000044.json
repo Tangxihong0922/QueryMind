@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "File 'query_results_af8377a3.csv' does not exist",
-  "timestamp": "2026-04-17T15:25:08.446848Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_nr689zw5sjvo_2"
-}

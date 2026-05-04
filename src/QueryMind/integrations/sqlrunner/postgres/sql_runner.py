@@ -92,25 +92,22 @@ class PostgresRunner(SqlRunner):
             # Execute the query
             cursor.execute(args.sql)
 
-            # Determine if this is a SELECT query or modification query
-            query_type = args.sql.strip().upper().split()[0]
-
-            if query_type == "SELECT":
-                # Fetch results for SELECT queries
+            # Treat any statement that produces a result set as a read query.
+            # This correctly handles SELECT as well as CTE-based queries that
+            # start with WITH but still return rows.
+            if cursor.description is not None:
                 rows = cursor.fetchall()
+                columns = [desc[0] for desc in cursor.description]
                 if not rows:
-                    # Return empty DataFrame
-                    return pd.DataFrame()
+                    return pd.DataFrame(columns=columns)
 
-                # Convert rows to list of dictionaries
                 results_data = [dict(row) for row in rows]
-                return pd.DataFrame(results_data)
-            else:
-                # For non-SELECT queries (INSERT, UPDATE, DELETE, etc.)
-                conn.commit()
-                rows_affected = cursor.rowcount
-                # Return a DataFrame indicating rows affected
-                return pd.DataFrame({"rows_affected": [rows_affected]})
+                return pd.DataFrame(results_data, columns=columns)
+
+            # For non-result statements (INSERT, UPDATE, DELETE, etc.)
+            conn.commit()
+            rows_affected = cursor.rowcount
+            return pd.DataFrame({"rows_affected": [rows_affected]})
 
         finally:
             cursor.close()

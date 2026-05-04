@@ -10,17 +10,10 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 SRC_DIR = SCRIPT_DIR.parent
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
 
-try:  # noqa: E402
-    from .bootstrap import DEFAULT_REPORT_ROOT, DEFAULT_RESUME_ROOT
-    from .reporting import save_report_artifacts
-    from .resume_store import EvaluationRunStore
-except ImportError:  # pragma: no cover - script execution fallback
-    from bootstrap import DEFAULT_REPORT_ROOT, DEFAULT_RESUME_ROOT
-    from reporting import save_report_artifacts
-    from resume_store import EvaluationRunStore
+from evals.bootstrap import DEFAULT_REPORT_ROOT, DEFAULT_RESUME_ROOT
+from evals.reporting import save_report_artifacts
+from evals.resume_store import EvaluationRunStore
 
 
 def parse_args() -> argparse.Namespace:
@@ -34,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        help="Directory for generated reports (defaults to eval_results/<run_id>)",
+        help="Directory for generated reports (defaults to eval_output/<run_id>_<model>)",
     )
     parser.add_argument(
         "--latest",

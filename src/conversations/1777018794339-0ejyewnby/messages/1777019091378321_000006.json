@@ -1,9 +1,0 @@
-{
-  "role": "user",
-  "content": "Write a query in SQL to find the average and the sum of the subtotal for every customer. Return customerid, average and sum of the subtotal. Grouped the result on customerid and salespersonid. Sort the result on customerid column in descending order.",
-  "timestamp": "2026-04-24T08:24:09.388512Z",
-  "metadata": {},
-  "tool_result": null,
-  "tool_calls": null,
-  "tool_call_id": null
-}

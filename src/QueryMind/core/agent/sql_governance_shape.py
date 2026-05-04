@@ -480,6 +480,18 @@ def _infer_semantic_intents(message: Optional[str]) -> List[str]:
     ):
         intents.append("ordering")
 
+    if re.search(
+        r"\b(union(?:\s+all)?|intersect|except)\b",
+        text,
+    ):
+        intents.append("set_operation")
+
+    if re.search(
+        r"\b(time series|time-series|trend|trends|over time|by date|by day|by week|by month|by quarter|by year|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
+        text,
+    ):
+        intents.append("time_series")
+
     return _dedupe_preserve_order(intents)
 
 
@@ -518,6 +530,8 @@ class SqlShapeAnalysis:
     has_grouping: bool = False
     has_outer_join: bool = False
     has_outer_join_null_filter: bool = False
+    has_set_operation: bool = False
+    has_time_series: bool = False
     outer_join_count: int = 0
     null_filter_count: int = 0
     metadata_query: bool = False
@@ -540,6 +554,7 @@ def analyze_sql_shape(
 ) -> SqlShapeAnalysis:
     """Extract higher-level SQL shape information using sqlglot AST parsing."""
     normalized = _collapse_sql(sql)
+    upper = normalized.upper()
     read_dialect = _normalize_dialect(dialect)
     parsed_statements = [
         statement
@@ -716,6 +731,15 @@ def analyze_sql_shape(
             statement.find(exp.GroupingSets) is not None for statement in parsed_statements
         )
         has_grouping = bool(grouping_nodes)
+        has_set_operation = bool(
+            re.search(r"\bUNION\b|\bINTERSECT\b|\bEXCEPT\b", upper)
+        )
+        has_time_series = bool(
+            re.search(
+                r"\b(date_trunc|date_part|extract|current_date|current_timestamp|interval|year\s*\(|month\s*\(|quarter\s*\(|week\s*\(|day\s*\(|timestamp|time series|time-series|over time|by date|by day|by week|by month|by quarter|by year)\b",
+                upper,
+            )
+        )
         table_references = _dedupe_preserve_order(
             _table_reference_name(table) for table in table_nodes
         )
@@ -817,6 +841,8 @@ def analyze_sql_shape(
             has_grouping=has_grouping,
             has_outer_join=has_outer_join,
             has_outer_join_null_filter=has_outer_join_null_filter,
+            has_set_operation=has_set_operation,
+            has_time_series=has_time_series,
             outer_join_count=outer_join_count,
             null_filter_count=len(null_filter_aliases),
             metadata_query=metadata_query,
@@ -955,6 +981,7 @@ def analyze_sql_shape(
         has_rollup=bool(re.search(r"\bROLLUP\b", upper)),
         has_grouping_sets=bool(re.search(r"\bGROUPING SETS?\b", upper)),
         has_grouping=bool(re.search(r"\bGROUPING\b", upper)),
+        has_set_operation=bool(re.search(r"\bUNION\b|\bINTERSECT\b|\bEXCEPT\b", upper)),
         has_outer_join=has_outer_join,
         has_outer_join_null_filter=has_outer_join_null_filter,
         outer_join_count=len(re.findall(r"\b(LEFT|RIGHT|FULL)\s+JOIN\b", upper)),
@@ -1431,6 +1458,10 @@ def build_sql_governance_profile(
         inferred.append("subquery")
     if any(tag in tag_pool for tag in {"filtering", "date_filter", "numeric_filter", "text_filter", "null_handling", "comparison"}):
         inferred.append("filtering")
+    if "set_operation" in tag_pool:
+        inferred.append("set_operation")
+    if "time_series" in tag_pool:
+        inferred.append("time_series")
 
     query_text = _normalize_text(query)
     if query_text:
@@ -1446,6 +1477,13 @@ def build_sql_governance_profile(
             inferred.append("distinct")
         if re.search(r"\b(subquery|nested query|in\s*\()\b", query_text):
             inferred.append("subquery")
+        if re.search(r"\b(union(?:\s+all)?|intersect|except)\b", query_text):
+            inferred.append("set_operation")
+        if re.search(
+            r"\b(time series|time-series|trend|trends|over time|by date|by day|by week|by month|by quarter|by year|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
+            query_text,
+        ):
+            inferred.append("time_series")
 
     categories = _dedupe_preserve_order(inferred)
     notes = _dedupe_preserve_order(raw_tags)
@@ -1517,6 +1555,10 @@ def _profile_gap_categories(profile: Optional[SqlGovernanceProfile], features: D
         gaps.append("filtering")
     if "grouping" in categories and not features.get("has_group_by") and not features.get("has_over"):
         gaps.append("grouping")
+    if "set_operation" in categories and not features.get("has_set_operation"):
+        gaps.append("set_operation")
+    if "time_series" in categories and not features.get("has_time_series"):
+        gaps.append("time_series")
 
     return _dedupe_preserve_order(gaps)
 
@@ -1546,6 +1588,10 @@ def _runtime_profile_categories_from_snapshot(
         categories.append("join")
     if sql_family == "subquery":
         categories.append("subquery")
+    if sql_family == "set_operation":
+        categories.append("set_operation")
+    if sql_family == "time_series":
+        categories.append("time_series")
     if sql_family == "ordering":
         categories.append("ordering")
     if sql_family == "filtering":
@@ -1768,6 +1814,8 @@ def analyze_sql_text(sql: str, *, dialect: Optional[str] = None) -> Dict[str, An
         "has_rollup": shape.has_rollup,
         "has_grouping_sets": shape.has_grouping_sets,
         "has_grouping": shape.has_grouping,
+        "has_set_operation": shape.has_set_operation,
+        "has_time_series": shape.has_time_series,
         "has_outer_join": shape.has_outer_join,
         "has_outer_join_null_filter": shape.has_outer_join_null_filter,
         "outer_join_count": shape.outer_join_count,
@@ -1784,6 +1832,7 @@ def analyze_sql_text(sql: str, *, dialect: Optional[str] = None) -> Dict[str, An
                 "has_having": shape.has_having,
                 "has_join": shape.has_join,
                 "has_subquery": shape.has_subquery,
+                "has_set_operation": shape.has_set_operation,
             }
         ),
         "row_grain": _row_grain_label_from_features(
@@ -1808,6 +1857,8 @@ def _shape_family_signature(features: Dict[str, Any]) -> str:
         return "navigation"
     if features.get("has_ranking_window_function"):
         return "ranking"
+    if features.get("has_set_operation"):
+        return "set_operation"
     if features.get("has_over"):
         return "window"
     if features.get("has_rollup"):
@@ -1900,6 +1951,8 @@ _SQL_FAMILY_PRIORITY: List[str] = [
     "aggregation",
     "join",
     "subquery",
+    "set_operation",
+    "time_series",
     "ordering",
     "filtering",
     "detail",
@@ -1913,6 +1966,8 @@ _SQL_FAMILY_FALLBACKS: Dict[str, str] = {
     "aggregation": "grouping",
     "join": "subquery",
     "subquery": "join",
+    "set_operation": "detail",
+    "time_series": "detail",
     "ordering": "detail",
     "filtering": "detail",
     "detail": "detail",
@@ -2028,6 +2083,15 @@ def _resolve_sql_family_state(
         scores["rollup"] += 6
         scores["grouping"] += 2
         scores["aggregation"] += 1
+    if re.search(r"\b(union(?:\s+all)?|intersect|except)\b", normalized_message):
+        scores["set_operation"] += 6
+        scores["detail"] += 1
+    if re.search(
+        r"\b(time series|time-series|trend|trends|over time|by date|by day|by week|by month|by quarter|by year|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
+        normalized_message,
+    ):
+        scores["time_series"] += 6
+        scores["filtering"] += 1
     if _strong_grouping_cue(normalized_message):
         scores["grouping"] += 4
         scores["aggregation"] += 2
@@ -2064,6 +2128,10 @@ def _resolve_sql_family_state(
         scores["filtering"] += 4
     if "rollup" in categories:
         scores["rollup"] += 4
+    if "set_operation" in categories:
+        scores["set_operation"] += 4
+    if "time_series" in categories:
+        scores["time_series"] += 4
 
     if feature_map:
         if feature_map.get("has_navigation_window_function"):
@@ -2085,6 +2153,9 @@ def _resolve_sql_family_state(
         if feature_map.get("has_grouping"):
             scores["grouping"] += 5
             scores["rollup"] += 2
+        if feature_map.get("has_set_operation"):
+            scores["set_operation"] += 6
+            scores["detail"] += 1
         if feature_map.get("has_group_by") or feature_map.get("has_having"):
             scores["aggregation"] += 5
             scores["grouping"] += 4
@@ -2129,6 +2200,12 @@ def _resolve_sql_family_state(
         elif gap == "ordering":
             scores["ordering"] += 1
         elif gap == "filtering":
+            scores["filtering"] += 1
+        elif gap == "set_operation":
+            scores["set_operation"] += 1
+            scores["detail"] += 1
+        elif gap == "time_series":
+            scores["time_series"] += 1
             scores["filtering"] += 1
 
     sorted_families = sorted(

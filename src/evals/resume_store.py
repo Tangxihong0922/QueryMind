@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import threading
 import uuid
 from dataclasses import asdict, dataclass, field
@@ -43,6 +44,15 @@ def compute_file_hash(path: Path) -> str:
         for chunk in iter(lambda: handle.read(65536), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _slugify_model_name(value: Any) -> str:
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    text = re.sub(r"[^a-z0-9.]+", "_", text)
+    text = re.sub(r"_+", "_", text)
+    return text.strip("._")
 
 
 @dataclass
@@ -269,10 +279,23 @@ class EvaluationRunStore:
             completed.add(result.test_case.id)
         return completed
 
+    def _report_directory_name(self) -> str:
+        agent_model = _slugify_model_name(self.checkpoint.config_snapshot.get("agent_model"))
+        judge_model = _slugify_model_name(self.checkpoint.config_snapshot.get("judge_model"))
+
+        suffix = ""
+        if agent_model:
+            suffix = agent_model
+            if judge_model and judge_model != agent_model:
+                suffix = f"{suffix}_judge_{judge_model}"
+
+        return f"{self.checkpoint.run_id}_{suffix}" if suffix else self.checkpoint.run_id
+
     def _write_checkpoint(self) -> None:
         _write_json_atomic(self.checkpoint_path, self.checkpoint.to_dict())
 
     def report_output_dir(self, root_dir: Path) -> Path:
-        if root_dir.name == self.checkpoint.run_id:
+        desired_name = self._report_directory_name()
+        if root_dir.name in {self.checkpoint.run_id, desired_name}:
             return root_dir
-        return root_dir / self.checkpoint.run_id
+        return root_dir / desired_name

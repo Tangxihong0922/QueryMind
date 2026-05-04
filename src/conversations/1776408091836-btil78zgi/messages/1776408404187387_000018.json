@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "mindate,maxdate\n2022-05-30,2025-02-28\n\n\nResults saved to file: query_results_81d352be.csv\n\n**IMPORTANT: FOR VISUALIZE_DATA USE FILENAME: query_results_81d352be.csv**",
-  "timestamp": "2026-04-17T06:46:34.930874Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_awgt6nw4hu3p_1"
-}

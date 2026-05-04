@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "No table schemas found matching 'sales person quota history salesperson businessentityid quota date year quarter'",
-  "timestamp": "2026-04-17T06:46:03.485462Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_q32pbdeiqdci_1"
-}

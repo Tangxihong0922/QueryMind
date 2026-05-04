@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "businessentityid,departmentid,shiftid,startdate,enddate,modifieddate\n1,16,1,2009-01-14,,2009-01-13\n2,1,1,2008-01-31,,2008-01-30\n3,1,1,2007-11-11,,2007-11-10\n4,1,1,2007-12-05,2010-05-30,2010-05-28\n4,2,1,2010-05-31,,2010-05-30\n\n\nResults saved to file: query_results_14ab3f05.csv\n\n**IMPORTANT: FOR VISUALIZE_DATA USE FILENAME: query_results_14ab3f05.csv**",
-  "timestamp": "2026-04-17T13:27:43.659905Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_vpej4e5bq7yx_1"
-}

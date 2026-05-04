@@ -1,9 +1,0 @@
-table_name,table_type
-vindividualcustomer,VIEW
-vpersondemographics,VIEW
-vstorewithdemographics,VIEW
-vsalesperson,VIEW
-vsalespersonsalesbyfiscalyearsdata,VIEW
-vsalespersonsalesbyfiscalyears,VIEW
-vstorewithcontacts,VIEW
-vstorewithaddresses,VIEW

@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "Error code: 429 - {'errors': {'message': \"You have exceeded today's quota for model ,  please try again tomorrow, or consider using other models\"}, 'request_id': 'e3631b56-b130-44b5-a99e-2e9c5bd912cb'}",
-  "timestamp": "2026-04-16T15:41:06.967389Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_wpalgfwsrtdu_1"
-}

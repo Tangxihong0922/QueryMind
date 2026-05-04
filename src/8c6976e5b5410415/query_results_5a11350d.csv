@@ -1,6 +1,0 @@
-column_name,data_type
-businessentityid,integer
-quotadate,timestamp without time zone
-salesquota,numeric
-rowguid,uuid
-modifieddate,timestamp without time zone

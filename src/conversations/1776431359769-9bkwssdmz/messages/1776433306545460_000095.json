@@ -1,8 +1,0 @@
-{
-  "role": "assistant",
-  "content": "The query executed successfully. Here's a sample of the results:\n\n| BusinessEntityID | SalesYear | CurrentSalesQuota | NextYearSalesQuota |\n|------------------|-----------|-------------------|-------------------|\n| 277 | 2022 | $565,000 | $872,000 |\n| 277 | 2022 | $872,000 | $846,000 |\n| 277 | 2022 | $846,000 | $952,000 |\n| 277 | 2023 | $952,000 | $1,600,000 |\n| 277 | 2023 | $1,600,000 | $1,352,000 |\n| 277 | 2023 | $1,352,000 | $839,000 |\n| 277 | 2023 | $839,000 | $0 |\n\n**Query Explanation:**\n- Uses `LEAD(SalesQuota, 1, 0)` window function ordered by `QuotaDate` to get the next quota value\n- Default value of 0 is returned when there's no next record (as seen in the last row)\n- Results include all quota records within the specified years\n\n**Important Note:** BusinessEntityID 277 doesn't have data for years 2011-2012 (data starts from 2022). I adjusted the query to use years 2022-2023 which have available data. If you need data for a different salesperson or years, please let me know which BusinessEntityID and years have data.",
-  "timestamp": "2026-04-17T13:41:46.529438Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": null
-}

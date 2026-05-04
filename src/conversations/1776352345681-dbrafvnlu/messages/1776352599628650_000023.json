@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "relation \"employee\" does not exist\nLINE 1: SELECT DISTINCT jobtitle FROM employee ORDER BY jobtitle ASC\n                                      ^\n",
-  "timestamp": "2026-04-16T15:16:19.511024Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_opt96bgz2tc7_1"
-}

@@ -28,11 +28,39 @@ def _make_store(tmp_path: Path, run_id: str = "20260423_000000_deadbeef") -> Eva
 def test_report_output_dir_appends_run_id(tmp_path: Path) -> None:
     store = _make_store(tmp_path)
 
-    assert store.report_output_dir(tmp_path / "eval_results") == tmp_path / "eval_results" / store.checkpoint.run_id
+    assert store.report_output_dir(tmp_path / "eval_output") == tmp_path / "eval_output" / store.checkpoint.run_id
 
 
 def test_report_output_dir_keeps_explicit_run_dir(tmp_path: Path) -> None:
     store = _make_store(tmp_path)
-    explicit = tmp_path / "eval_results" / store.checkpoint.run_id
+    explicit = tmp_path / "eval_output" / store.checkpoint.run_id
 
     assert store.report_output_dir(explicit) == explicit
+
+
+def test_report_output_dir_appends_model_suffix(tmp_path: Path) -> None:
+    store = _make_store(tmp_path)
+    store.checkpoint.config_snapshot = {
+        "agent_model": "deepseek-v4-flash",
+        "judge_model": "deepseek-v4-flash",
+    }
+
+    expected = tmp_path / "eval_output" / f"{store.checkpoint.run_id}_deepseek_v4_flash"
+
+    assert store.report_output_dir(tmp_path / "eval_output") == expected
+
+
+def test_report_output_dir_includes_judge_suffix_when_models_differ(tmp_path: Path) -> None:
+    store = _make_store(tmp_path)
+    store.checkpoint.config_snapshot = {
+        "agent_model": "deepseek-v4-flash",
+        "judge_model": "Minimax-M2.7",
+    }
+
+    expected = (
+        tmp_path
+        / "eval_output"
+        / f"{store.checkpoint.run_id}_deepseek_v4_flash_judge_minimax_m2.7"
+    )
+
+    assert store.report_output_dir(tmp_path / "eval_output") == expected

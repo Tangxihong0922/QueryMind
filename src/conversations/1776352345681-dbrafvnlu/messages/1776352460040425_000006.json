@@ -1,8 +1,0 @@
-{
-  "role": "tool",
-  "content": "relation \"orders\" does not exist\nLINE 2: FROM orders \n             ^\n",
-  "timestamp": "2026-04-16T15:14:00.494305Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": "call_function_p7kczm6qv65p_1"
-}

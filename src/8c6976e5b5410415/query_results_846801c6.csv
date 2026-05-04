@@ -1,8 +1,0 @@
-column_name,data_type
-SalesPersonID,integer
-FullName,text
-JobTitle,text
-SalesTerritory,text
-2012,numeric
-2013,numeric
-2014,numeric

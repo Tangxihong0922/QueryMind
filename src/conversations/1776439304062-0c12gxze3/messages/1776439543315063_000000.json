@@ -1,8 +1,0 @@
-{
-  "role": "user",
-  "content": "write a query in SQL to calculate the salary percentile for each employee within the 'Information Services' and 'Document Control' departments. The query should return the department, last name, rate, cumulative distribution (CUME_DIST), and percent rank (PERCENT_RANK) of the rate. The result set should be ordered by department in ascending order and rate in descending order.",
-  "timestamp": "2026-04-17T15:23:47.048569Z",
-  "metadata": {},
-  "tool_calls": null,
-  "tool_call_id": null
-}

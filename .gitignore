@@ -5,8 +5,12 @@ __pycache__/
 *.pyo
 *.pyd
 .env
-src/.env
-mem0_history.db
-src/evals/eval_results/
-src/evals/resume_points/
+*.db
+*.sqlite
+conversations/
+query_results/
+eval_output/
+conversations/
+query_results/
+eval_output/
 .DS_Store

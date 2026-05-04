@@ -28,7 +28,7 @@ from QueryMind.core.user import User  # noqa: E402
 from QueryMind.server.base.chat_handler import ChatHandler  # noqa: E402
 from QueryMind.capabilities.sql_runner.models import RunSqlToolArgs  # noqa: E402
 from QueryMind.tools.run_sql import RunSqlTool  # noqa: E402
-from rls_registry import RLSToolRegistry  # noqa: E402
+from QueryMind.rls_registry import RLSToolRegistry  # noqa: E402
 
 
 def _make_user() -> User:
@@ -77,6 +77,17 @@ def test_sql_governance_profile_inference_from_tags() -> None:
 
     assert profile.categories == ["window", "join", "ordering"]
     assert "case" in profile.signature()
+
+
+def test_sql_governance_profile_inference_covers_set_operation_and_time_series() -> None:
+    profile = build_sql_governance_profile(
+        tags=["set_operation", "time_series"],
+        query="show trends by month and combine with prior periods using union",
+        source="case",
+    )
+
+    assert "set_operation" in profile.categories
+    assert "time_series" in profile.categories
 
 
 def test_analyze_sql_shape_is_none_safe(monkeypatch) -> None:
@@ -234,6 +245,31 @@ def test_sql_governance_middleware_injects_baseline_prompt_without_static_checkl
     assert "sql_governance_profile" not in (updated.metadata or {})
     assert "sql_profile" not in (updated.metadata or {})
     assert updated.metadata.get("sql_governance", {}).get("sql_family") is not None
+
+
+def test_sql_governance_recap_includes_set_operation_and_time_series_guidance() -> None:
+    recap = build_sql_governance_recap_block(
+        build_sql_governance_profile(
+            tags=["set_operation", "time_series"],
+            query="union monthly trends",
+            source="case",
+        ),
+        ["set_operation", "time_series"],
+        sql_family="set_operation",
+        row_grain_state={
+            "expected": "detail",
+            "observed": "detail",
+            "status": "aligned",
+        },
+        last_sql_shape={
+            "has_set_operation": True,
+            "has_time_series": True,
+        },
+        last_sql_text="SELECT date_trunc('month', order_date), SUM(total) FROM sales UNION SELECT date_trunc('month', order_date), SUM(total) FROM archived_sales",
+    )
+
+    assert "set operation semantics stable" in recap.lower()
+    assert "time grain stable" in recap.lower()
 
 
 def test_sql_governance_middleware_injects_recap_after_failed_sql_attempt() -> None:

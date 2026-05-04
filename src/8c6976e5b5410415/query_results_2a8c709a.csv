@@ -1,9 +1,0 @@
-column_name,data_type
-stateprovinceid,integer
-stateprovincecode,character
-countryregioncode,character varying
-isonlystateprovinceflag,boolean
-name,character varying
-territoryid,integer
-rowguid,uuid
-modifieddate,timestamp without time zone
