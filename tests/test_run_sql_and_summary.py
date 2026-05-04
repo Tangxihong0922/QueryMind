@@ -15,6 +15,7 @@ from QueryMind.core.system_prompt.default import DefaultSystemPromptBuilder  # n
 from QueryMind.core.tool import ToolContext  # noqa: E402
 from QueryMind.core.tool import ToolSchema  # noqa: E402
 from QueryMind.core.user import User  # noqa: E402
+from QueryMind.runtime_paths import repo_root  # noqa: E402
 from QueryMind.tools.run_sql import RunSqlTool  # noqa: E402
 
 
@@ -69,6 +70,12 @@ class DummyFileSystem:
                 "overwrite": overwrite,
             }
         )
+
+
+def test_run_sql_defaults_to_repo_query_results_directory() -> None:
+    tool = RunSqlTool(sql_runner=DummySqlRunner(pd.DataFrame({"id": [1]})))
+
+    assert tool.file_system.working_directory == repo_root() / "query_results"
 
 
 def _make_context() -> ToolContext:

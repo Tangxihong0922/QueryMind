@@ -11,6 +11,7 @@ from typing import List, Optional
 
 from QueryMind.capabilities.file_system import CommandResult, FileSearchMatch, FileSystem
 from QueryMind.core.tool import ToolContext
+from QueryMind.runtime_paths import resolve_data_dir
 
 MAX_SEARCH_FILE_BYTES = 1_000_000
 
@@ -18,12 +19,18 @@ MAX_SEARCH_FILE_BYTES = 1_000_000
 class LocalFileSystem(FileSystem):
     """Local file system implementation with per-user isolation."""
 
-    def __init__(self, working_directory: str = "."):
+    def __init__(self, working_directory: str | Path | None = None):
         """Initialize with a working directory.
 
         Args:
-            working_directory: Base directory where user-specific folders will be created
+            working_directory: Base directory where user-specific folders will be created.
+                Defaults to the repository-level query_results directory so SQL result
+                files do not fall back to the process working directory.
         """
+        if working_directory is None:
+            working_directory = str(
+                resolve_data_dir("QUERYMIND_QUERY_RESULTS_DIR", "query_results")
+            )
         self.working_directory = Path(working_directory)
 
     def _get_user_directory(self, context: ToolContext) -> Path:
