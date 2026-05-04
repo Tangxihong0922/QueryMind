@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        help="Directory for generated reports (defaults to eval_output/<run_id>_<model>)",
+        help="Directory for generated reports (defaults to eval_output/eval_results/<run_id>_<model>)",
     )
     parser.add_argument(
         "--latest",
@@ -58,6 +58,8 @@ def main() -> None:
     args = parse_args()
     store = resolve_store(args)
     report_root = Path(args.output_dir).expanduser() if args.output_dir else DEFAULT_REPORT_ROOT
+    if report_root.name == "eval_output":
+        report_root = report_root / "eval_results"
     output_dir = store.report_output_dir(report_root)
     report = save_report_artifacts(store, output_dir)
     print(f"Report generated: {output_dir}")

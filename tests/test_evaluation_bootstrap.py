@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from evals.bootstrap import (  # noqa: E402
     DEFAULT_OUTPUT_ROOT,
+    DEFAULT_RESULTS_ROOT,
     DEFAULT_RESUME_ROOT,
     resolve_evaluation_providers,
 )
@@ -35,3 +36,4 @@ def test_resolve_evaluation_providers_cli_override_wins(monkeypatch) -> None:
 def test_bootstrap_defaults_live_under_eval_output() -> None:
     assert DEFAULT_OUTPUT_ROOT.name == "eval_output"
     assert DEFAULT_RESUME_ROOT.parent == DEFAULT_OUTPUT_ROOT
+    assert DEFAULT_RESULTS_ROOT == DEFAULT_OUTPUT_ROOT / "eval_results"

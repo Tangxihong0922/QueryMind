@@ -14,9 +14,10 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[1]
 SRC_DIR = REPO_ROOT / "src"
 DEFAULT_OUTPUT_ROOT = REPO_ROOT / "eval_output"
+DEFAULT_RESULTS_ROOT = DEFAULT_OUTPUT_ROOT / "eval_results"
 DEFAULT_DATASET_PATH = SRC_DIR / "evals" / "datasets" / "basic.yaml"
 DEFAULT_RESUME_ROOT = DEFAULT_OUTPUT_ROOT / "resume_points"
-DEFAULT_REPORT_ROOT = DEFAULT_OUTPUT_ROOT
+DEFAULT_REPORT_ROOT = DEFAULT_RESULTS_ROOT
 
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))

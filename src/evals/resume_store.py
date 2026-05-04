@@ -295,6 +295,8 @@ class EvaluationRunStore:
         _write_json_atomic(self.checkpoint_path, self.checkpoint.to_dict())
 
     def report_output_dir(self, root_dir: Path) -> Path:
+        if root_dir.name == "eval_output":
+            root_dir = root_dir / "eval_results"
         desired_name = self._report_directory_name()
         if root_dir.name in {self.checkpoint.run_id, desired_name}:
             return root_dir

@@ -37,7 +37,7 @@ LLM_BASE_URL=https://api.minimaxi.com/anthropic
 my-evaluation \
   --dataset-path src/evals/datasets/basic.yaml \
   --resume-root eval_output/resume_points \
-  --report-output-dir eval_output
+  --report-output-dir eval_output/eval_results
 ```
 
 继续上次未完成的评测：
@@ -55,7 +55,7 @@ python evals/generate_report.py --latest --resume-root evals/resume_points
 常用环境变量：
 
 - `EVAL_DATASET_PATH`：默认数据集路径
-- `EVAL_OUTPUT_DIR`：报告输出目录
+- `EVAL_OUTPUT_DIR`：评测结果输出根目录，默认会落到 `eval_output/eval_results`
 - `EVAL_MAX_CONCURRENCY`：并发数
 - `EVAL_MAX_TOOL_ITERATIONS`：evaluation 中 Agent 的工具调用轮数上限，默认 `25`
 - `EVAL_PASS_THRESHOLD`：`sql_accuracy` 的通过阈值
@@ -72,7 +72,7 @@ src/evals/resume_points/<run_id>/
   results.jsonl
   run.log
 
-src/evals/eval_results/<run_id>/
+eval_output/eval_results/<run_id>/
   evaluation_report.json
   evaluation_report.csv
   evaluation_report.md

@@ -1,6 +1,6 @@
 # QueryMind
 
-QueryMind is a sample agent framework for SQL workflows, with a FastAPI backend and a webcomponent demo frontend.
+QueryMind is an agent framework for SQL workflows, with a FastAPI backend and a webcomponent demo frontend.
 
 - Chinese README: [README_zh.md](README_zh.md)
 

@@ -77,7 +77,7 @@ packages = ["src/QueryMind"]
 
 [project.scripts]
 my-agent = "my_agent:main"
-my-evaluation = "my_evaluation:main"
+my-evaluation = "QueryMind.evaluation_cli:main"
 querymind = "QueryMind.querymind_demo:main"
 
 [tool.ruff]

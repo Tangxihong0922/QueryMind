@@ -49,7 +49,7 @@ Common execution entry points:
 my-evaluation \
   --dataset-path src/evals/datasets/expansion.yaml \
   --resume-root eval_output/resume_points \
-  --report-output-dir eval_output
+  --report-output-dir eval_output/eval_results
 ```
 
 Resume the latest incomplete run:
@@ -176,7 +176,7 @@ dataset -> validation -> run store -> runtime -> session -> agent trace
 `my-evaluation` loads the dataset, resolves or creates a `EvaluationRunStore`,
 and stores a checkpoint under:
 
-`src/evals/resume_points/<run_id>/checkpoint.json`
+`eval_output/resume_points/<run_id>/checkpoint.json`
 
 `EvaluationRunStore` keeps:
 

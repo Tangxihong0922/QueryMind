@@ -28,12 +28,15 @@ def _make_store(tmp_path: Path, run_id: str = "20260423_000000_deadbeef") -> Eva
 def test_report_output_dir_appends_run_id(tmp_path: Path) -> None:
     store = _make_store(tmp_path)
 
-    assert store.report_output_dir(tmp_path / "eval_output") == tmp_path / "eval_output" / store.checkpoint.run_id
+    assert (
+        store.report_output_dir(tmp_path / "eval_output" / "eval_results")
+        == tmp_path / "eval_output" / "eval_results" / store.checkpoint.run_id
+    )
 
 
 def test_report_output_dir_keeps_explicit_run_dir(tmp_path: Path) -> None:
     store = _make_store(tmp_path)
-    explicit = tmp_path / "eval_output" / store.checkpoint.run_id
+    explicit = tmp_path / "eval_output" / "eval_results" / store.checkpoint.run_id
 
     assert store.report_output_dir(explicit) == explicit
 
@@ -45,9 +48,14 @@ def test_report_output_dir_appends_model_suffix(tmp_path: Path) -> None:
         "judge_model": "deepseek-v4-flash",
     }
 
-    expected = tmp_path / "eval_output" / f"{store.checkpoint.run_id}_deepseek_v4_flash"
+    expected = (
+        tmp_path
+        / "eval_output"
+        / "eval_results"
+        / f"{store.checkpoint.run_id}_deepseek_v4_flash"
+    )
 
-    assert store.report_output_dir(tmp_path / "eval_output") == expected
+    assert store.report_output_dir(tmp_path / "eval_output" / "eval_results") == expected
 
 
 def test_report_output_dir_includes_judge_suffix_when_models_differ(tmp_path: Path) -> None:
@@ -60,7 +68,8 @@ def test_report_output_dir_includes_judge_suffix_when_models_differ(tmp_path: Pa
     expected = (
         tmp_path
         / "eval_output"
+        / "eval_results"
         / f"{store.checkpoint.run_id}_deepseek_v4_flash_judge_minimax_m2.7"
     )
 
-    assert store.report_output_dir(tmp_path / "eval_output") == expected
+    assert store.report_output_dir(tmp_path / "eval_output" / "eval_results") == expected
