@@ -5,7 +5,6 @@ This page is the documentation entry point: it explains the system at a high
 level and points to the component pages, governance pages, use cases, and
 support material that carry the detailed implementation notes.
 
-For the target document map, see [Docs Restructure Outline](../restructure-outline.md).
 
 ## What QueryMind Is
 

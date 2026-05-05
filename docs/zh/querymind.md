@@ -3,8 +3,6 @@
 QueryMind 是一个面向自然语言转 SQL 的 LLM Agent 框架。
 本页是文档入口索引：只负责说明系统的整体结构，并指向组件页、治理页、用例页和支持材料。
 
-关于目标目录结构，请见 [文档重构目录大纲](../restructure-outline.md)。
-
 ## QueryMind 是什么
 
 QueryMind 主要由五层组成：

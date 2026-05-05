@@ -4,7 +4,40 @@ QueryMind is an agent framework for building LLM-powered agents specialized in r
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![README_zh](https://img.shields.io/badge/README-简体中文-0ea5e9.svg)](README_zh.md)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](#license)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+https://github.com/user-attachments/assets/e87fc532-ef82-4765-96a7-e693924de5c7
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="33%">
+      <img src="docs/figures/chat-ui/chat-panel.png" alt="chat-panel" width="240" />
+      <br /><sub>Chat panel</sub>
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="docs/figures/chat-ui/schema-management.png" alt="schema-management" width="240" />
+      <br /><sub>Schema management</sub>
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="docs/figures/chat-ui/user-query.png" alt="user-query" width="240" />
+      <br /><sub>User query</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="33%">
+      <img src="docs/figures/chat-ui/query-results.png" alt="query-results" width="240" />
+      <br /><sub>Query results</sub>
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="docs/figures/chat-ui/summary.png" alt="summary" width="240" />
+      <br /><sub>Summary</sub>
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="docs/figures/chat-ui/bar-chart.png" alt="bar-chart" width="240" />
+      <br /><sub>Data Visualization</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -22,7 +55,7 @@ QueryMind is an agent framework for building LLM-powered agents specialized in r
 When the loop runs, QueryMind can stream progress updates, schema results, SQL results, charts, cards, and follow-up actions back to the frontend instead of returning plain text only.
 
 
-## What is New in QueryMind compared to Vanna 2.0
+## 🏗️ What is New in QueryMind compared to Vanna 2.0
 
 💡QueryMind is inspired by [Vanna's agent framework](https://github.com/vanna-ai/vanna) and adapts Vanna's webcomponents into a customized demo web experience.
 
@@ -33,10 +66,10 @@ It builds on that foundation with differences in runtime structure, governance, 
 - **Two memory planes** - agent memory and schema memory serve different roles: agent memory captures reusable tool-use experience, while schema memory grounds SQL generation with Neo4j + Mem0 hybrid retrieval over database knowledge.
 - **Schema management** - schema management panel and deterministic slash commands serves as the supporting infrastructure for schema memory and schema retrieval tool, grounding the agent in real-world business databases before the normal LLM/tool loop begins.
 
-## QueryMind's Agent Loop
+## 🔄 QueryMind's Agent Loop
 ![QueryMind agent loop](docs/figures/components/agent-loop.png)
 
-## How It Works
+## 🧠 How It Works
 
 ```mermaid
 sequenceDiagram
@@ -173,12 +206,19 @@ The handbook expands the README into components, advanced-features, use-case, an
 - English: [docs/en/querymind.md](docs/en/querymind.md)
 - 中文: [docs/zh/querymind.md](docs/zh/querymind.md)
 
-## Ongoing and Future Actions
+## 👉 Ongoing and Future Actions
 
 ### Ongoing
 
 1. Iterate on the AdventureWorks micro-benchmark by analyzing tool-call chains, prompt injection patterns, and common SQL failure modes.
+
+<figure>
+  <img src="docs/figures/use-cases/eval-driven%20iterations.png" alt="Eval-driven iterations" />
+  <figcaption>Eval-driven iterations: use benchmark feedback to refine prompts, governance, and SQL recovery behavior.</figcaption>
+</figure>
+
 2. Evaluate QueryMind against BIRD-SQL to measure text-to-SQL capability.
+
 
 ### Future Actions
 
@@ -189,5 +229,6 @@ The handbook expands the README into components, advanced-features, use-case, an
 
 ## License
 
-QueryMind is released under the MIT License.
-Special thanks to Vanna for being the comparison point and inspiration for this work.
+QueryMind is released under the MIT License. See [LICENSE](LICENSE).
+
+This project is developed for personal learning and research purposes. Special thanks to Vanna for being an important reference point and source of inspiration for this work.
