@@ -26,3 +26,8 @@ frontends/**/*.tsbuildinfo
 
 # Generated demo bundle synced from dist
 frontends/webcomponent/static/querymind-components.js
+
+# Repo-local generated docs and agent instructions
+AGENTS.md
+docs/restructure-outline.md
+docs/zh/querymind-eval-retro.md
