@@ -14,3 +14,15 @@ conversations/
 query_results/
 eval_output/
 .DS_Store
+
+# Frontend build and dependency artifacts
+frontends/**/node_modules/
+frontends/**/dist/
+frontends/**/storybook-static/
+frontends/**/coverage/
+frontends/**/.vite/
+frontends/**/.cache/
+frontends/**/*.tsbuildinfo
+
+# Generated demo bundle synced from dist
+frontends/webcomponent/static/querymind-components.js

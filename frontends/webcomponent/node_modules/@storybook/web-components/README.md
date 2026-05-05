@@ -1,1 +1,0 @@
-# Storybook web-components renderer
