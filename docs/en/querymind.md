@@ -58,6 +58,7 @@ The pages linked below are the source of truth for the implementation details.
 | Page | Status | Purpose |
 |---|---|---|
 | [support/installation.md](./support/installation.md) | Current | Environment setup and infrastructure bootstrap |
+| [support/prerequisite.md](./support/prerequisite.md) | Current | Full prerequisite and deployment guide |
 | [support/debugging.md](./support/debugging.md) | Current | Troubleshooting, runtime checks, and failure paths |
 | [support/evaluation.md](./support/evaluation.md) | Current | Evaluation harness, datasets, metrics, and reporting |
 | [support/querymind-eval-retro.md](./support/querymind-eval-retro.md) | Current | Retrospective on governance iteration and evaluation learnings |

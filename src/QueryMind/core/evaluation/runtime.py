@@ -220,7 +220,7 @@ class EvaluationRuntime:
             stream_responses=False,
             auto_save_conversations=True,
             include_thinking_indicators=False,
-            temperature=0.0,
+            temperature=1.0,
         )
     )
     schema_management_service: Any = None

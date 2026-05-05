@@ -56,6 +56,7 @@ QueryMind 主要由五层组成：
 | 页面 | 状态 | 职责 |
 |---|---|---|
 | [support/installation.md](./support/installation.md) | 当前 | 环境配置和基础设施初始化 |
+| [support/prerequisite.md](./support/prerequisite.md) | 当前 | 完整的前置条件与部署指南 |
 | [support/debugging.md](./support/debugging.md) | 当前 | 排障、运行时检查和故障路径 |
 | [support/evaluation.md](./support/evaluation.md) | 当前 | 评测框架、数据集、指标和报告 |
 | [support/querymind-eval-retro.md](./support/querymind-eval-retro.md) | 当前 | governance 迭代和评测经验复盘 |

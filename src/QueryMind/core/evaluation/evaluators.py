@@ -514,7 +514,7 @@ class SqlAccuracyEvaluator(Evaluator):
                 group_memberships=["judge"],
             ),
             messages=[LlmMessage(role="user", content=prompt)],
-            temperature=0.0,
+            temperature=1.0,
             max_tokens=1024,
             stream=False,
             system_prompt=(
