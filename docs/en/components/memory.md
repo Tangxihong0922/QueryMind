@@ -146,7 +146,7 @@ fed back into the message side.
 | Logic:                                                                                             |
 |   - build a temporary ToolContext(conversation_id='temp', request_id=uuid4())                      |
 |   - call search_text_memories(query=user_message, limit=5)                                         |
-|   - prepend matching snippets as a user-side advisory message                                       |
+|   - append matching snippets as a user-side advisory message                                        |
 |   - return the original prompt unchanged when degraded or failing                                  |
 | Real prompt excerpt:                                                                               |
 |   - "## Memory Advisory"                                                                           |
@@ -309,7 +309,7 @@ trace to show how the lock heuristic works.
 | Logic:                                                                                             |
 |   - stop appending retrieval rules once schema_locked is true                                      |
 |   - otherwise inject `## Schema Retrieval Tool - Search Mode Selection Rules`                      |
-|   - prepend `## Schema Context` as a user-side advisory message                                     |
+|   - append `## Schema Context` as a user-side advisory message at the tail                         |
 | Real prompt excerpt:                                                                               |
 |   - "## Schema Context"                                                                            |
 |   - "Search Mode: hybrid"                                                                          |

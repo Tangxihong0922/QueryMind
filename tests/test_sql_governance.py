@@ -273,12 +273,9 @@ def test_sql_governance_middleware_injects_baseline_prompt_without_static_checkl
     assert "sql_governance_profile" not in (updated.metadata or {})
     assert "sql_profile" not in (updated.metadata or {})
     assert updated.metadata.get("sql_governance", {}).get("sql_family") is not None
-    assert any(
-        msg.role == "user"
-        and "## Runtime Context Notice" in msg.content
-        and "SQL governance:" in msg.content
-        for msg in updated.messages
-    )
+    assert updated.messages[-1].role == "user"
+    assert "## Runtime Context Notice" in updated.messages[-1].content
+    assert "SQL governance:" in updated.messages[-1].content
 
 
 def test_sql_governance_recap_includes_set_operation_and_time_series_guidance() -> None:
@@ -378,12 +375,9 @@ def test_sql_governance_middleware_injects_recap_after_failed_sql_attempt() -> N
     updated = asyncio.run(middleware.before_llm_request(followup))
 
     assert updated.system_prompt == "base prompt"
-    assert any(
-        msg.role == "user"
-        and "## Runtime Context Notice" in msg.content
-        and "SQL recap:" in msg.content
-        for msg in updated.messages
-    )
+    assert updated.messages[-1].role == "user"
+    assert "## Runtime Context Notice" in updated.messages[-1].content
+    assert "SQL recap:" in updated.messages[-1].content
 
 
 def test_sql_governance_recap_is_empty_without_anchor_or_drift() -> None:
@@ -442,13 +436,10 @@ def test_sql_governance_middleware_injects_recap_after_shape_gap() -> None:
     )
 
     assert updated.system_prompt == "base prompt"
-    assert any(
-        msg.role == "user"
-        and "SQL recap:" in msg.content
-        and "row grain stable" in msg.content.lower()
-        and "window shape" in msg.content.lower()
-        for msg in updated.messages
-    )
+    assert updated.messages[-1].role == "user"
+    assert "SQL recap:" in updated.messages[-1].content
+    assert "row grain stable" in updated.messages[-1].content.lower()
+    assert "window shape" in updated.messages[-1].content.lower()
     assert "window shape" in recap_block.lower()
     assert "LAG" not in recap_block
     assert "ROW_NUMBER" not in recap_block
@@ -497,14 +488,16 @@ def test_sql_governance_middleware_injects_grouped_output_positive_recap_after_s
         tool_iterations=1,
     )
     updated = asyncio.run(middleware.before_llm_request(followup))
+    snapshot = asyncio.run(
+        manager.build_request_metadata(conversation_id="conv-agg")
+    )
 
     assert updated.system_prompt == "base prompt"
-    assert any(
-        msg.role == "user"
-        and "row grain" in msg.content.lower()
-        and "grouped summary" in msg.content.lower()
-        for msg in updated.messages
-    )
+    assert updated.messages[-1].role == "user"
+    assert "SQL governance:" in updated.messages[-1].content
+    assert "repair strategy: structural_rewrite" in updated.messages[-1].content.lower()
+    assert snapshot["sql_governance"]["row_grain_state"]["status"] == "mismatch"
+    assert "aggregate/detail grain drift" in snapshot["sql_governance"]["row_grain_state"]["reason"]
 
 
 def test_sql_governance_middleware_merges_runtime_snapshot_into_metadata() -> None:
@@ -699,13 +692,11 @@ def test_sql_governance_structural_rewrite_lane_surfaces_cte_and_group_by_signal
     assert snapshot["sql_governance"]["turn_local_repair_mode"] is False
     assert "Structural rewrite mode" in prompt_block
     assert "candidate skeleton" not in prompt_block.lower()
-    assert any(
-        msg.role == "user"
-        and "repair strategy: structural_rewrite" in msg.content.lower()
-        and "cte_count=2" in msg.content.lower()
-        and "group_by_items=department" in msg.content.lower()
-        for msg in updated.messages
-    )
+    assert updated.messages[-1].role == "user"
+    assert "SQL governance:" in updated.messages[-1].content
+    assert "repair strategy: structural_rewrite" in updated.messages[-1].content.lower()
+    assert snapshot["sql_governance"]["last_sql_shape"]["cte_count"] == 2
+    assert snapshot["sql_governance"]["last_sql_shape"]["group_by_items"] == ["department"]
 
 
 def test_sql_governance_freezes_valid_anchor_without_profile() -> None:

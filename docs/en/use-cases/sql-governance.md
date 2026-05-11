@@ -28,7 +28,7 @@ stable skeleton or to steer into local repair.
    `sql_family`, `sql_family_candidates`, and `row_grain_state` for the next
    turn, along with `repair_strategy`, `repair_reason`, and `repair_signals`.
 6. `SqlGovernanceMiddleware.before_llm_request(...)` folds those snapshots into
-   `request.metadata`, then prepends a message-side runtime notice; it also
+   `request.metadata`, then appends a message-side runtime notice at the tail; it also
    injects a recap when the turn has drifted, failed, or run long enough.
 7. Once the evidence is strong enough, the manager freezes the skeleton. If
    the turn is classified as `structural_rewrite`, the next turn rewrites the
@@ -144,7 +144,7 @@ facts come from `src/QueryMind/core/agent/sql_governance.py`,
 | Input: request.metadata + request.system_prompt + request.messages                                  |
 | Logic:                                                                                             |
 |   - merge the latest snapshot                                                                      |
-|   - prepend a message-side runtime notice                                                          |
+|   - append a message-side runtime notice at the tail                                               |
 |   - inject a recap block when needed                                                               |
 |   - adjust the next turn based on current anchor / repair mode                                     |
 | sql_126 visible context:                                                                           |

@@ -2,7 +2,7 @@
 
 Schema governance 管理的是按会话维度维护的 `schema_retrieve` 循环。
 它把 schema 发现和 SQL 起草分开，并向 prompt 组装和请求时过滤暴露
-一个紧凑的状态快照，同时通过消息侧 runtime notice 让模型看到动态状态，
+一个紧凑的状态快照，同时通过消息链尾部的 runtime notice 让模型看到动态状态，
 而 system prompt 保持稳定。
 
 ## 核心组件
@@ -120,7 +120,7 @@ middleware 和 agent 的 turn-prep path 会用这个信号把 `schema_retrieve` 
 
 对于 empty-results 锁定，它还会附上特殊说明：这一轮仍然允许只读的
 metadata discovery。
-不过默认运行时已经把可变的 schema 状态移到了消息侧 runtime notice，
+不过默认运行时已经把可变的 schema 状态移到了消息链尾部的 runtime notice，
 不再依赖 system prompt 来承载动态信息。
 
 ## 请求时流程
@@ -129,7 +129,7 @@ metadata discovery。
 
 - `Agent._prepare_turn_prompt()` 会把 snapshot 合并到 turn metadata，锁定时隐藏 `schema_retrieve`，并保持 system prompt 稳定。
 - `SchemaGovernanceMiddleware.before_llm_request()` 会再次合并 metadata，把 recap 内容放到下游 runtime notice 用的 metadata 里，在需要时插入 recap，并在会话锁定时把 `schema_retrieve` 从 `request.tools` 中移除。
-- `SqlGovernanceMiddleware.before_llm_request()` 会进一步把 schema summary 和 lock reason 合并进消息侧 runtime notice，让模型在同一条通知里看到 schema / SQL 的动态状态。
+- `SqlGovernanceMiddleware.before_llm_request()` 会进一步把 schema summary 和 lock reason 合并进消息链尾部的 runtime notice，让模型在同一条通知里看到 schema / SQL 的动态状态。
 
 middleware 不再依赖 system prompt 去表达动态锁定信息。
 

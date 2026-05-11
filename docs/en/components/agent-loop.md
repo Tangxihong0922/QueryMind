@@ -87,7 +87,7 @@ Each box shows three things:
 | 5) LLM planner / middleware                                                                        |
 |----------------------------------------------------------------------------------------------------|
 | Input: system_prompt + visible tool schemas + conversation messages + request metadata             |
-| middleware.before_llm_request(): prepend runtime notices and snapshot metadata                     |
+| middleware.before_llm_request(): append runtime notices and snapshot metadata                      |
 | Trace result: the first LLM turn emits tool_calls = schema_retrieve x3                            |
 | Loop rule: tool_calls -> execute tools -> append tool messages -> rebuild request -> next LLM turn |
 +============================================+=======================================================+
@@ -166,7 +166,7 @@ So `tool_count = 6` is the full loop from exploration to verification to SQL dra
 - `_build_live_schema_snapshot()` turns the same-turn `schema_retrieve` result into `last_schema_summary` and `schema_retrieve_context`, so the next turn can inherit seed tables, `graph_hint`, and `required_fields`.
 - `SchemaRetrieveContextEnricher` reads recent conversation history from `FileSystemConversationStore`, reuses the latest schema snapshot first, and falls back to history when needed.
 - `SqlGovernanceHook.after_tool(...)` records each `run_sql` result and writes back `sql_governance`, `last_sql_summary`, and `last_sql_shape`.
-- `SqlGovernanceMiddleware.before_llm_request(...)` reuses or infers the SQL profile, prepends the SQL runtime notice, and injects recap when needed.
+- `SqlGovernanceMiddleware.before_llm_request(...)` reuses or infers the SQL profile, appends the SQL runtime notice at the tail, and injects recap when needed.
 - `_build_live_sql_snapshot()` turns the `run_sql` result into a same-turn snapshot, so the next turn can continue from a validated SQL shape.
 - `ConversationStore` persists `user / assistant / tool` messages for later turns, replay, and evaluation extraction.
 

@@ -29,7 +29,7 @@
    `row_grain_state` 暴露给下一轮，同时把 `repair_strategy`、`repair_reason`
    和 `repair_signals` 一并带上。
 7. `SqlGovernanceMiddleware.before_llm_request(...)` 会把这些 snapshot 合并进
-   `request.metadata`，再预置一条 message-side runtime notice；当轮次漂移、
+   `request.metadata`，再在消息链尾部追加一条 message-side runtime notice；当轮次漂移、
    失败或运行过长时，还会插入 recap。
 8. 一旦证据足够，manager 会冻结 skeleton；如果当前 turn 被判定为
    `structural_rewrite`，下一轮会优先重写 grouped summary / CTE 形状，而
@@ -145,7 +145,7 @@
 | 输入：request.metadata + request.system_prompt + request.messages                                   |
 | 逻辑：                                                                                             |
 |   - 读取并合并最新 snapshot                                                                        |
-|   - 预置 message-side runtime notice                                                               |
+|   - 在消息链尾部追加 message-side runtime notice                                                   |
 |   - 必要时插入 recap block                                                                         |
 |   - 依据 current anchor / repair mode 调整下一轮提示                                              |
 | sql_126 可见上下文：                                                                               |

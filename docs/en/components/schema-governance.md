@@ -133,7 +133,7 @@ The runtime uses the manager in two places:
   stores recap text for the downstream runtime notice, and removes
   `schema_retrieve` from `request.tools` when the conversation is locked.
 - `SqlGovernanceMiddleware.before_llm_request()` later consumes the schema
-  snapshot and prepends the user-side runtime notice that exposes the live
+  snapshot and appends the user-side runtime notice at the tail that exposes the live
   schema summary and lock reason together with the SQL state.
 
 The middleware only adds recap payloads when the current request has not already
@@ -228,7 +228,7 @@ prompt assembly, and tool filtering. The facts come from `src/my_agent.py`,
 | eval-sql_126 result:                                                                               |
 |   - next turn keeps only `run_sql`                                                                  |
 |   - `schema_retrieve` is no longer exposed to the LLM                                               |
-|   - the SQL middleware prepends the user-side runtime notice that makes lock reason visible         |
+|   - the SQL middleware appends the user-side runtime notice at the tail that makes lock reason visible |
 | Output: final request.system_prompt + request.tools + request.metadata                              |
 +====================================================================================================+
 ```

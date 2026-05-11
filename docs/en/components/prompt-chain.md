@@ -54,7 +54,7 @@ The runtime order is:
 | source: DefaultLlmContextEnhancer(agent_memory)                                                     |
 | logic:                                                                                             |
 |   - search AgentMemory from `user_message`                                                         |
-|   - prepend a user-side memory advisory message                                                     |
+|   - append a user-side memory advisory message                                                      |
 |   - return the original messages unchanged when degraded or failing                               |
 | prompt excerpt:                                                                                    |
 |   "## Memory Advisory"                                                                             |
@@ -88,7 +88,7 @@ The runtime order is:
 |   - refresh request.metadata from runtime snapshots                                                 |
 |   - infer or reuse SQL profile from request.metadata / user message                                |
 |   - hide `schema_retrieve` from request.tools when needed                                           |
-|   - prepend a single user-side runtime notice                                                       |
+|   - append a single user-side runtime notice at the tail                                            |
 |   - include schema lock / summary, SQL anchor preview, freeze reason, repair strategy / reason / signals, row grain, and recap          |
 | SQL governance excerpt:                                                                             |
 |   "## Runtime Context Notice"                                                                      |

@@ -2,14 +2,14 @@
 
 SQL governance 管理的是 schema discovery 开始之后的 SQL 起草循环。
 它把任务画像、SQL 形状、最佳 anchor，以及 freeze / repair 的切换和
-schema 探索分开，并通过消息侧 runtime notice 把 live summary / anchor / freeze
+schema 探索分开，并通过消息链尾部的 runtime notice 把 live summary / anchor / freeze
 状态暴露给模型，而不是主要依赖 system prompt。
 
 ## 核心组件
 
 - `SqlGovernanceManager`：负责 policy、状态、snapshot 组装、recap gating 和 freeze 决策。
 - `SqlGovernanceHook`：在工具执行后记录 `run_sql` 的结果，并把刷新后的 snapshot 写回 `result.metadata`。
-- `SqlGovernanceMiddleware`：推断或复用当前画像，合并 request metadata，预置消息侧 runtime notice，并在轮次漂移或运行过长时插入 recap；runtime notice 里也会带上 repair strategy / reason / signals。
+- `SqlGovernanceMiddleware`：推断或复用当前画像，合并 request metadata，在消息链尾部追加 runtime notice，并在轮次漂移或运行过长时插入 recap；runtime notice 里也会带上 repair strategy / reason / signals。
 
 SQL 没有单独的 enhancer。prompt 文本通过 manager 辅助方法生成，用于稳定的 system prompt 尾部；动态 SQL 状态则通过 middleware 注入到消息侧。
 
@@ -281,7 +281,7 @@ validated anchor 的检查还要求 best SQL candidate 的支持度足够：`bes
 |   - 读取 `sql_governance_profile` / `sql_profile` / `runtime_profile`                             |
 |   - 调用 `register_request_profile(...)`                                                           |
 |   - 合并最新 snapshot 回 `request.metadata`                                                        |
-|   - 预置一条消息侧 runtime notice，里面包含 schema recap、SQL anchor preview、freeze reason、     |
+|   - 在消息链尾部追加一条消息侧 runtime notice，里面包含 schema recap、SQL anchor preview、freeze reason、     |
 |     row grain 和 SQL recap                                                                         |
 |   - 必要时再插入 recap block                                                                       |
 | sql_126 可见上下文:                                                                                |
@@ -303,7 +303,7 @@ validated anchor 的检查还要求 best SQL candidate 的支持度足够：`bes
 
 这条链路的边界是：`run_sql` 先把结果写回 `result.metadata`，`SqlGovernanceManager`
 更新 state 和 snapshot，随后 `SqlGovernanceMiddleware` 再把这些状态注入下一轮
-`request.metadata` / 消息侧 runtime notice，而不是继续写进 system prompt。
+`request.metadata` / 消息链尾部的 runtime notice，而不是继续写进 system prompt。
 
 ## 本页覆盖什么
 

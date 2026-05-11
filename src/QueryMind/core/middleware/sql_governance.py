@@ -1,7 +1,7 @@
 from __future__ import annotations
 """
-LLM middleware that tracks SQL strategy state and injects runtime advisories
-without mutating the system prompt.
+LLM middleware that tracks SQL strategy state and appends runtime advisories
+to the tail of the message list without mutating the system prompt.
 """
 
 from typing import TYPE_CHECKING, Any, Optional
@@ -125,19 +125,9 @@ def _build_runtime_context_notice(
     sql_summary_text = str(last_sql_summary.get("summary_text") or "").strip()
     schema_runtime_recap = str(sql_snapshot.get("schema_runtime_recap") or "").strip()
     sql_runtime_recap = str(sql_snapshot.get("sql_runtime_recap") or "").strip()
-    row_grain_state = sql_governance.get("row_grain_state") or {}
-    if not isinstance(row_grain_state, dict):
-        row_grain_state = {}
-    active_shape = (
-        sql_governance.get("last_sql_shape")
-        or sql_governance.get("best_sql_shape")
-        or sql_governance.get("frozen_sql_shape")
-        or {}
-    )
-    shape_summary = _summarize_sql_shape(active_shape)
 
     lines = ["## Runtime Context Notice"]
-    if schema_locked or schema_summary_text or str(schema_snapshot.get("schema_runtime_recap") or "").strip():
+    if schema_locked or schema_lock_reason or schema_summary_text or schema_runtime_recap:
         lines.extend(
             [
                 "",
@@ -153,13 +143,16 @@ def _build_runtime_context_notice(
     if schema_runtime_recap:
         lines.extend(["", "Schema recap:", schema_runtime_recap])
 
-    if anchor_tier or sql_summary_text or best_sql_preview or freeze_reason or sql_family or row_grain_state or repair_strategy or repair_signals or sql_runtime_recap:
-        lines.extend(
-            [
-                "",
-                "SQL governance:",
-            ]
-        )
+    if (
+        anchor_tier
+        or sql_summary_text
+        or best_sql_preview
+        or freeze_reason
+        or sql_family
+        or repair_strategy
+        or sql_runtime_recap
+    ):
+        lines.extend(["", "SQL governance:"])
         if anchor_tier:
             lines.append(f"- anchor tier: {anchor_tier}")
         if sql_family:
@@ -168,31 +161,10 @@ def _build_runtime_context_notice(
             lines.append(f"- live summary: {sql_summary_text}")
         if repair_strategy:
             lines.append(f"- repair strategy: {repair_strategy}")
-        if repair_reason:
-            lines.append(f"- repair reason: {repair_reason}")
-        if repair_signals:
-            lines.append(f"- repair signals: {', '.join(repair_signals)}")
-        if repair_strategy == "structural_rewrite" and shape_summary:
-            lines.append(f"- structural shape: {shape_summary}")
         if best_sql_preview:
             lines.append(f"- anchor preview: {best_sql_preview}")
         if freeze_reason:
             lines.append(f"- freeze reason: {freeze_reason}")
-        if row_grain_state:
-            expected = str(row_grain_state.get("expected") or "").strip()
-            observed = str(row_grain_state.get("observed") or "").strip()
-            status = str(row_grain_state.get("status") or "").strip()
-            grain_bits = ", ".join(
-                bit
-                for bit in [
-                    f"expected={expected}" if expected else "",
-                    f"observed={observed}" if observed else "",
-                    f"status={status}" if status else "",
-                ]
-                if bit
-            )
-            if grain_bits:
-                lines.append(f"- row grain: {grain_bits}")
 
     if sql_runtime_recap:
         lines.extend(["", "SQL recap:", sql_runtime_recap])
@@ -213,12 +185,17 @@ def _build_runtime_context_notice(
             "repair_strategy": repair_strategy or None,
             "repair_reason": repair_reason or None,
             "repair_signals": repair_signals or None,
+            "schema_summary_text": schema_summary_text or None,
+            "sql_summary_text": sql_summary_text or None,
+            "best_sql_preview": best_sql_preview or None,
+            "schema_runtime_recap": schema_runtime_recap or None,
+            "sql_runtime_recap": sql_runtime_recap or None,
         },
     )
 
 
 class SqlGovernanceMiddleware(LlmMiddleware):
-    """Track SQL governance state and inject runtime notices."""
+    """Track SQL governance state and append runtime notices at the tail."""
 
     def __init__(self, manager: SqlGovernanceManager):
         self._manager = manager
@@ -274,7 +251,7 @@ class SqlGovernanceMiddleware(LlmMiddleware):
             sql_snapshot=metadata,
         )
         if notice is not None:
-            request.messages = [notice, *request.messages]
+            request.messages = [*request.messages, notice]
 
         return request
 

@@ -20,6 +20,7 @@ from QueryMind.core.agent.sql_governance import (  # noqa: E402
 from QueryMind.core.agent.agent import (  # noqa: E402
     _build_live_schema_snapshot,
 )
+from QueryMind.core.enhancer.default import DefaultLlmContextEnhancer  # noqa: E402
 from QueryMind.core.enhancer.schema_retrieve import SchemaContextEnhancer  # noqa: E402
 from QueryMind.core.enricher.schema_retrieve import (  # noqa: E402
     SchemaRetrieveContextEnricher,
@@ -37,7 +38,12 @@ from QueryMind.core.tool import Tool, ToolCall, ToolContext  # noqa: E402
 from QueryMind.core.tool import ToolSchema  # noqa: E402
 from QueryMind.core.tool.models import ToolResult  # noqa: E402
 from QueryMind.core.user import User  # noqa: E402
+from QueryMind.capabilities.agent_memory import (  # noqa: E402
+    TextMemory,
+    TextMemorySearchResult,
+)
 from QueryMind.capabilities.agent_memory.base import AgentMemory  # noqa: E402
+from QueryMind.core.evaluation.runtime import NoOpAgentMemory  # noqa: E402
 from QueryMind.tools.schema_retrieve import SchemaRetrieveTool, SchemaRetrieveToolArgs  # noqa: E402
 
 
@@ -68,6 +74,28 @@ class _DummyTool(Tool[_DummyArgs]):
 
     async def execute(self, context: ToolContext, args: _DummyArgs) -> ToolResult:
         return ToolResult(success=True, result_for_llm="ok", metadata={"value": args.value})
+
+
+class _MemoryStub(NoOpAgentMemory):
+    def __init__(self) -> None:
+        self.search_queries: list[str] = []
+
+    async def search_text_memories(
+        self,
+        query: str,
+        context: ToolContext,
+        *,
+        limit: int = 10,
+        similarity_threshold: float = 0.7,
+    ) -> list[TextMemorySearchResult]:
+        self.search_queries.append(query)
+        return [
+            TextMemorySearchResult(
+                memory=TextMemory(content="cached note"),
+                similarity_score=0.99,
+                rank=1,
+            )
+        ]
 
 
 class _DummyAgentMemory(AgentMemory):
@@ -343,19 +371,12 @@ def test_schema_governance_runtime_notice_is_emitted_via_sql_middleware() -> Non
     updated = asyncio.run(schema_middleware.before_llm_request(request))
     updated = asyncio.run(sql_middleware.before_llm_request(updated))
 
-    assert any(
-        msg.role == "user"
-        and "## Runtime Context Notice" in msg.content
-        and "schema_retrieve unavailable this turn: yes" in msg.content
-        and "lock reason: enough_schema" in msg.content
-        for msg in updated.messages
-    )
-    assert any(
-        msg.role == "user"
-        and "Schema recap:" in msg.content
-        and "schema_retrieve[hybrid] query='product'" in msg.content
-        for msg in updated.messages
-    )
+    assert updated.messages[-1].role == "user"
+    assert "## Runtime Context Notice" in updated.messages[-1].content
+    assert "schema_retrieve unavailable this turn: yes" in updated.messages[-1].content
+    assert "lock reason: enough_schema" in updated.messages[-1].content
+    assert "Schema recap:" in updated.messages[-1].content
+    assert "schema_retrieve[hybrid] query='product'" in updated.messages[-1].content
 
 
 def test_schema_context_enhancer_skips_search_rules_when_locked() -> None:
@@ -398,10 +419,10 @@ def test_schema_context_enhancer_prefers_explicit_last_schema_summary() -> None:
 
     updated = asyncio.run(enhancer.enhance_user_messages(messages, _make_user()))
 
-    assert updated[0].role == "user"
-    assert "## Schema Context" in updated[0].content
-    assert "Results: 0 table(s)" in updated[0].content
-    assert "lock_reason" not in updated[0].content
+    assert updated[-1].role == "user"
+    assert "## Schema Context" in updated[-1].content
+    assert "Results: 0 table(s)" in updated[-1].content
+    assert "lock_reason" not in updated[-1].content
 
 
 def test_schema_context_enhancer_prefers_schema_retrieve_context_snapshot() -> None:
@@ -435,12 +456,24 @@ def test_schema_context_enhancer_prefers_schema_retrieve_context_snapshot() -> N
 
     updated = asyncio.run(enhancer.enhance_user_messages(messages, _make_user()))
 
-    assert updated[0].role == "user"
-    assert "## Schema Context" in updated[0].content
-    assert "Search Mode: expand" in updated[0].content
-    assert "Results: 1 table(s)" in updated[0].content
-    assert "production.product" in updated[0].content
-    assert "Lock: enough_schema" in updated[0].content
+    assert updated[-1].role == "user"
+    assert "## Schema Context" in updated[-1].content
+    assert "Search Mode: expand" in updated[-1].content
+    assert "Results: 1 table(s)" in updated[-1].content
+    assert "production.product" in updated[-1].content
+    assert "Lock: enough_schema" in updated[-1].content
+
+
+def test_default_llm_context_enhancer_appends_memory_advisory_to_tail() -> None:
+    enhancer = DefaultLlmContextEnhancer(_MemoryStub())
+    messages = [LlmMessage(role="user", content="need sql")]
+
+    updated = asyncio.run(enhancer.enhance_user_messages(messages, _make_user()))
+
+    assert updated[-1].role == "user"
+    assert "## Memory Advisory" in updated[-1].content
+    assert "cached note" in updated[-1].content
+    assert updated[0].content == "need sql"
 
 
 def test_schema_retrieve_context_enricher_prefers_explicit_last_schema_summary() -> None:

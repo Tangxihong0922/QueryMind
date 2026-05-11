@@ -9,7 +9,7 @@ state as message-side runtime notices while the system prompt stays stable.
 
 - `SqlGovernanceManager`: owns policy, state, snapshot assembly, recap gating, and freeze decisions.
 - `SqlGovernanceHook`: records `run_sql` outcomes after tool execution and writes the refreshed snapshot back into `result.metadata`.
-- `SqlGovernanceMiddleware`: infers or reuses the current profile, merges request metadata, prepends the user-side runtime notice, and injects recap blocks when the turn has drifted or run long enough; the runtime notice also carries repair strategy / reason / signals.
+- `SqlGovernanceMiddleware`: infers or reuses the current profile, merges request metadata, appends the user-side runtime notice at the tail, and injects recap blocks when the turn has drifted or run long enough; the runtime notice also carries repair strategy / reason / signals.
 
 There is no separate SQL enhancer. Prompt text is rendered through manager helpers for the stable system-prompt tail, while volatile SQL state is exposed by middleware as message-side runtime notices.
 
@@ -281,7 +281,7 @@ target to `HumanResources.Employee`, and SQL governance then takes over.
 |   - read `sql_governance_profile` / `sql_profile` / `runtime_profile`                             |
 |   - call `register_request_profile(...)`                                                            |
 |   - merge the latest snapshot back into `request.metadata`                                         |
-|   - prepend a single user-side runtime notice with schema recap, SQL anchor preview, freeze reason, |
+|   - append a single user-side runtime notice at the tail with schema recap, SQL anchor preview, freeze reason, |
 |     row grain, and SQL recap                                                                        |
 |   - insert a recap block when needed                                                                |
 | sql_126 visible context:                                                                           |
@@ -304,7 +304,7 @@ target to `HumanResources.Employee`, and SQL governance then takes over.
 The boundary is simple: `run_sql` writes back into `result.metadata` first,
 `SqlGovernanceManager` turns that into a state snapshot, and
 `SqlGovernanceMiddleware` injects that state into the next `request.metadata`
-and prepends the user-side runtime notice instead of mutating the system prompt.
+and appends the user-side runtime notice at the tail instead of mutating the system prompt.
 
 ## What This Page Covers
 

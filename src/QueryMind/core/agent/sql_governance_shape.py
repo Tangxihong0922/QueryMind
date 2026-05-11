@@ -1523,6 +1523,12 @@ def build_sql_governance_profile(
         inferred.append("ordering")
     if "distinct" in tag_pool:
         inferred.append("distinct")
+    if "case_when" in tag_pool:
+        inferred.append("case_when")
+    if "null_handling" in tag_pool:
+        inferred.append("null_handling")
+    if "comparison" in tag_pool:
+        inferred.append("comparison")
     if "subquery" in tag_pool:
         inferred.append("subquery")
     if any(tag in tag_pool for tag in {"filtering", "date_filter", "numeric_filter", "text_filter", "null_handling", "comparison"}):

@@ -54,7 +54,7 @@
 | 来源：DefaultLlmContextEnhancer(agent_memory)                                                       |
 | 逻辑：                                                                                             |
 |   - 从 `user_message` 检索 AgentMemory                                                              |
-|   - 预置一条面向用户的 memory advisory message                                                      |
+|   - 在消息链尾部追加一条面向用户的 memory advisory message                                           |
 |   - degraded 或失败时原样返回                                                                        |
 | prompt 片段：                                                                                       |
 |   "## Memory Advisory"                                                                             |
@@ -88,7 +88,7 @@
 |   - 根据运行时快照刷新 request.metadata                                                             |
 |   - 结合 request.metadata / user message 推断或复用 SQL profile                                      |
 |   - 隐藏 `schema_retrieve`（如需要）                                                                |
-|   - 预置一条用户侧 runtime notice                                                                   |
+|   - 在消息链尾部追加一条用户侧 runtime notice                                                       |
 |   - 把 schema lock / summary、SQL anchor preview、freeze reason、repair strategy / reason / signals、row grain 和 recap 放进去         |
 | SQL governance 片段：                                                                               |
 |   "## Runtime Context Notice"                                                                      |

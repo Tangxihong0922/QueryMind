@@ -72,8 +72,11 @@ QueryMind 的灵感来自 [Vanna agent framework](https://github.com/vanna-ai/va
 - 将 QueryMind 的上下文拼装链路统一为“稳定 system prompt + 消息侧 runtime notice + tool-result metadata”。
 - 把动态的 schema lock、schema summary、SQL anchor / freeze / recap 以及 memory advisory 从 system prompt 路径中移出。
 - 继续通过请求时过滤控制 `schema_retrieve` 的可见性，而不是修改 tool registry。
+- 将 runtime notice 调整为尾部追加：保留短的可见信号，把更细的动态细节放进 metadata。
+- 将 `case_when`、`null_handling`、`comparison`、`distinct` 这些 detail-expression tag 的 profile 识别补齐，并同步更新 prompt-chain / agent-loop / governance 文档以及测试，改为验证“尾部通知 + metadata snapshot”。
 - 为 aggregation / rollup / 多 CTE 这类 SQL turn 增加 structural rewrite 分流，让 local repair 继续聚焦在 window / join / filtering 场景。
 - 为 `case_when`、`null_handling`、`comparison` 和 `distinct` 增加 detail-family 护栏，让保持投影稳定的 turn 更保守。
+- 在 test set 上，SQL accuracy 保持在 66%-72% 区间内，未出现负面影响；按最近一次对比，输入缓存命中率由 44.28% 提升至 69.35%。
 </details>
 
 ## QueryMind 的 Agent Loop

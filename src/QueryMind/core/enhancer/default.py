@@ -99,7 +99,7 @@ class DefaultLlmContextEnhancer(LlmContextEnhancer):
                     ),
                 },
             )
-            return [advisory, *messages]
+            return [*messages, advisory]
         except Exception as e:
             import logging
 

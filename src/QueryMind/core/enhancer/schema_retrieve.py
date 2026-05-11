@@ -165,7 +165,7 @@ class SchemaContextEnhancer(LlmContextEnhancer):
                     "tool_name": self._tool_name,
                 },
             )
-            return [schema_message, *messages]
+            return [*messages, schema_message]
 
         except Exception as e:
             logger.warning(f"Failed to format schema context: {e}")
