@@ -61,11 +61,12 @@ In practice, the middleware layer is where request-time policy lives:
 
 The governance middlewares use this path directly:
 
-- `SchemaGovernanceMiddleware` injects schema-governance prompt blocks, adds
-  recap text when the schema loop should be restated, and can hide
-  `schema_retrieve` once the conversation is locked;
-- `SqlGovernanceMiddleware` registers or infers the SQL profile, appends SQL
-  governance text, injects recap text when the SQL loop drifts, and preserves
+- `SchemaGovernanceMiddleware` merges governance metadata, injects schema
+  recap text as a message-side runtime notice when the schema loop should be
+  restated, and can hide `schema_retrieve` once the conversation is locked;
+- `SqlGovernanceMiddleware` registers or infers the SQL profile, injects a
+  user-side runtime notice with anchor preview, freeze reason, repair strategy /
+  reason / signals, and recap text when the SQL loop drifts, while preserving
   the current snapshot in request metadata.
 
 So hooks are the tool-result side of governance, while middlewares are the

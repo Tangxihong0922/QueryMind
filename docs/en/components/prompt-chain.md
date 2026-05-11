@@ -8,9 +8,11 @@ Conversation reads, filtering, and `LlmRequest.messages` construction are docume
 The facts here come from [`src/my_agent.py`](../../../src/my_agent.py) and [`src/QueryMind/core/agent/agent.py`](../../../src/QueryMind/core/agent/agent.py).
 The runtime order is:
 
-- `enhancer = CompositeLlmContextEnhancer([schema_governance.enhancer, SchemaContextEnhancer(), DefaultLlmContextEnhancer(agent_mem)])`
+- `enhancer = CompositeLlmContextEnhancer([DefaultLlmContextEnhancer(agent_mem)])`
 - `llm_middlewares = [schema_governance.middleware, sql_governance.middleware]`
-- `Agent._prepare_turn_prompt()` builds the system prompt first, then `before_llm_request()` applies request-time injections
+- `Agent._prepare_turn_prompt()` builds a stable system prompt first, then `before_llm_request()` applies request-time message-side notices
+
+`SchemaContextEnhancer` and `SchemaGovernanceEnhancer` still exist as reusable helpers, but they are not part of the default runtime wiring anymore.
 
 ```text
 +====================================================================================================+
@@ -20,10 +22,10 @@ The runtime order is:
 | logic:                                                                                             |
 |   - merge schema-governance snapshot into metadata                                                 |
 |   - hide `schema_retrieve` when governance says so                                                 |
-|   - render governance block                                                                         |
 |   - call DefaultSystemPromptBuilder                                                                 |
 |   - run llm_context_enhancer.enhance_system_prompt()                                               |
-| output: visible_tool_schemas + system_prompt + merged_metadata                                     |
+|   - keep the system prompt byte-stable                                                              |
+| output: visible_tool_schemas + stable system_prompt + merged_metadata                              |
 | example (sql_126): user query = "write a query in SQL to sort the BusinessEntityID ..."           |
 +====================================================================================================+
                                               |
@@ -34,53 +36,47 @@ The runtime order is:
 | input: user + visible_tool_schemas                                                                 |
 | logic:                                                                                             |
 |   - `base_prompt != None` -> return unchanged                                                      |
-|   - otherwise emit today's date, visible tool names, and memory workflow                          |
+|   - otherwise emit the stable core rules and a short stable tail                                    |
 | prompt excerpt:                                                                                    |
 |   "You are QueryMind, an AI data analyst assistant..."                                             |
 |   "Response Guidelines:"                                                                           |
 |   "- When you execute a query, that raw result is shown to the user ..."                           |
 |   "- If a SQL query was executed successfully, append the executed SQL ..."                        |
-|   "You have access to the following tools: ..."                                                     |
-|   "MEMORY SYSTEM:" / "1. TOOL USAGE MEMORY..." / "2. TEXT MEMORY..."                               |
+|   "- Use `schema_retrieve` only for schema discovery..."                                           |
+|   "Runtime context notices are authoritative..."                                                    |
 | output: base system prompt                                                                          |
 +====================================================================================================+
                                               |
                                               v
 +====================================================================================================+
-| 3) SchemaGovernanceManager + SchemaGovernanceEnhancer                                              |
+| 3) DefaultLlmContextEnhancer                                                                      |
 |----------------------------------------------------------------------------------------------------|
-| source: SchemaGovernanceManager.build_prompt_block() + manager.policy.system_prompt_block          |
+| source: DefaultLlmContextEnhancer(agent_memory)                                                     |
 | logic:                                                                                             |
-|   - append only once                                                                                |
-|   - `schema_locked: false` while discovery is open                                                  |
-|   - `schema_locked: true` after lock                                                                |
+|   - search AgentMemory from `user_message`                                                         |
+|   - prepend a user-side memory advisory message                                                     |
+|   - return the original messages unchanged when degraded or failing                               |
 | prompt excerpt:                                                                                    |
-|   "## Schema Governance"                                                                           |
-|   "- Treat `schema_retrieve` as discovery support, not as the final answer."                      |
-|   "- Once you have enough schema context, switch to SQL draft mode..."                             |
-|   "## Core Objective Reminder"                                                                      |
-| example (sql_126): after the 3rd schema_retrieve, the next turn is locked                           |
-| output: schema-governance block that steers discovery vs SQL draft mode                             |
+|   "## Memory Advisory"                                                                             |
+|   "Use these snippets only if they are relevant to the current turn:"                              |
+| output: message-side memory advisory, not system prompt                                             |
 +====================================================================================================+
                                               |
                                               v
 +====================================================================================================+
-| 4) CompositeLlmContextEnhancer                                                                     |
+| 4) Optional SchemaContextEnhancer                                                                  |
 |----------------------------------------------------------------------------------------------------|
 | order: SchemaContextEnhancer() -> DefaultLlmContextEnhancer(agent_mem)                             |
 | logic:                                                                                             |
 |   - each enhancer receives previous output                                                          |
 |   - one enhancer failing does not stop the chain                                                    |
-|   - SchemaContextEnhancer keeps the prompt unchanged when `schema_locked` is true                  |
-|   - DefaultLlmContextEnhancer searches AgentMemory from `user_message`                             |
-| SchemaContextEnhancer excerpt:                                                                      |
-|   "## Schema Retrieval Tool - Search Mode Selection Rules"                                         |
-|   "hybrid / vector / graph / expand"                                                                |
-|   "【Current Retrieved Schema Information】"                                                          |
-| DefaultLlmContextEnhancer excerpt:                                                                  |
-|   "## Relevant Context from Memory"                                                                 |
-|   "The following domain knowledge and context from prior interactions may be relevant:"            |
-| output: refined system prompt with schema rules + memory context                                   |
+|   - SchemaContextEnhancer injects schema context as a user-side message                            |
+|   - it does not mutate the system prompt                                                            |
+| SchemaContextEnhancer excerpt:                                                                     |
+|   "## Schema Context"                                                                              |
+|   "Search Mode: hybrid"                                                                            |
+|   "Tables: ..."                                                                                     |
+| output: message-side schema context, not system prompt                                              |
 +====================================================================================================+
                                               |
                                               v
@@ -90,17 +86,17 @@ The runtime order is:
 | order: SchemaGovernanceMiddleware -> SqlGovernanceMiddleware                                        |
 | logic:                                                                                             |
 |   - refresh request.metadata from runtime snapshots                                                 |
-|   - infer or reuse SQL profile from request.metadata / user message                                  |
-|   - append request-time governance blocks                                                            |
-|   - may hide `schema_retrieve` from request.tools                                                    |
-|   - may append recap blocks                                                                          |
+|   - infer or reuse SQL profile from request.metadata / user message                                |
+|   - hide `schema_retrieve` from request.tools when needed                                           |
+|   - prepend a single user-side runtime notice                                                       |
+|   - include schema lock / summary, SQL anchor preview, freeze reason, repair strategy / reason / signals, row grain, and recap          |
 | SQL governance excerpt:                                                                             |
-|   "## SQL Governance"                                                                               |
-|   "- Avoid metadata introspection queries unless they are explicitly allowed."                      |
-|   "- Keep the current row grain stable and call `run_sql` once the table path is clear."            |
-| SQL recap excerpt:                                                                                  |
-|   "## SQL Self-Check Reminder"                                                                      |
-| output: final request.system_prompt + request.tools                                                  |
+|   "## Runtime Context Notice"                                                                      |
+|   "Schema governance:"                                                                             |
+|   "- schema_retrieve unavailable this turn: yes/no"                                                 |
+|   "SQL governance:"                                                                                |
+|   "- repair strategy: local_repair / structural_rewrite"                                           |
+| output: final request.system_prompt + request.tools + request.messages                              |
 +====================================================================================================+
                                               |
                                               v
@@ -111,7 +107,7 @@ The runtime order is:
 | sql_126 path:                                                                                      |
 |   - first LLM turn -> 3 `schema_retrieve` calls                                                     |
 |   - later turn -> 3 `run_sql` calls                                                                 |
-| output: the model sees the full prompt stack before tool selection                                  |
+| output: the model sees a stable system prompt plus message-side runtime notices; the SQL-side notice carries repair strategy / reason / signals before tool selection|
 +====================================================================================================+
 ```
 

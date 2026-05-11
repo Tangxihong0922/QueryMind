@@ -60,10 +60,20 @@ QueryMind 的灵感来自 [Vanna agent framework](https://github.com/vanna-ai/va
 
 它在这一基础之上进一步扩展了运行时结构、治理、记忆和业务数据库集成，与 Vanna 2.0 形成了差异。
 
-- **Schema 治理** - schema governance 会标准化 schema 检索轨迹，跟踪已发现的数据库上下文，并帮助 Agent 始终落在正确的业务 schema 上。
-- **SQL 治理** - SQL governance 会标准化 SQL 编写模式，把执行反馈带入下一轮推理，并帮助 Agent 从 SQL 语义上的 false-negative 陷阱中恢复。
+- **Schema 治理** - schema governance 会标准化 schema 检索轨迹，跟踪已发现的数据库上下文，并把 lock / recap 状态作为运行时通知显式告诉模型，同时帮助 Agent 始终落在正确的业务 schema 上。
+- **SQL 治理** - SQL governance 会标准化 SQL 编写模式，把执行反馈带入下一轮推理，并把 anchor / freeze / recap 状态作为运行时通知显式告诉模型，帮助 Agent 从 SQL 语义上的 false-negative 陷阱中恢复。
 - **独立的 Schema Memory** - Agent memory 和 schema memory 分工明确：agent memory 用来沉淀可复用的工具使用经验，schema memory 通过 Neo4j + Mem0 混合检索为 SQL 生成提供数据库知识锚点。
 - **Schema 管理** - schema management 面板和确定性的 slash command 为 schema memory 和 schema retrieval tool 提供支撑，在正常的 LLM/tool 循环开始前先把 Agent 锚定到真实业务数据库。
+
+### 📝 更新日志
+<details>
+<summary> <b>🔥 2026-05-11</b> </summary>
+- 将 QueryMind 的上下文拼装链路统一为“稳定 system prompt + 消息侧 runtime notice + tool-result metadata”。
+- 把动态的 schema lock、schema summary、SQL anchor / freeze / recap 以及 memory advisory 从 system prompt 路径中移出。
+- 继续通过请求时过滤控制 `schema_retrieve` 的可见性，而不是修改 tool registry。
+- 为 aggregation / rollup / 多 CTE 这类 SQL turn 增加 structural rewrite 分流，让 local repair 继续聚焦在 window / join / filtering 场景。
+- 为 `case_when`、`null_handling`、`comparison` 和 `distinct` 增加 detail-family 护栏，让保持投影稳定的 turn 更保守。
+</details>
 
 ## QueryMind 的 Agent Loop
 ![QueryMind agent loop](docs/figures/components/agent-loop.png)
@@ -232,4 +242,4 @@ python webcomponent_demo.py --api-base http://127.0.0.1:8000
 
 QueryMind 采用 MIT License 发布，详见 [LICENSE](LICENSE)。
 
-本项目出于个人学习与研究目的而开发。特别感谢 Vanna，作为本工作的一个重要参考点和灵感来源。
+本项目出于个人学习与研究目的而开发。特别感谢 [Vanna](https://github.com/vanna-ai/vanna)，作为本工作的一个重要参考点和灵感来源。

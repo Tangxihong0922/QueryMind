@@ -8,9 +8,11 @@
 事实源来自 [`src/my_agent.py`](../../../src/my_agent.py) 和 [`src/QueryMind/core/agent/agent.py`](../../../src/QueryMind/core/agent/agent.py)。
 运行时顺序是：
 
-- `enhancer = CompositeLlmContextEnhancer([schema_governance.enhancer, SchemaContextEnhancer(), DefaultLlmContextEnhancer(agent_mem)])`
+- `enhancer = CompositeLlmContextEnhancer([DefaultLlmContextEnhancer(agent_mem)])`
 - `llm_middlewares = [schema_governance.middleware, sql_governance.middleware]`
-- `Agent._prepare_turn_prompt()` 先拼 system prompt，再在 `before_llm_request()` 里做 request-time 注入
+- `Agent._prepare_turn_prompt()` 先构建稳定 system prompt，再在 `before_llm_request()` 里做消息侧 runtime notice 注入
+
+`SchemaContextEnhancer` 和 `SchemaGovernanceEnhancer` 仍然保留为可复用 helper，但默认运行时里已经不再把它们接到 enhancer 链上。
 
 ```text
 +====================================================================================================+
@@ -20,10 +22,10 @@
 | 逻辑：                                                                                             |
 |   - 将 schema-governance 快照合并进 metadata                                                       |
 |   - 当治理层要求时隐藏 `schema_retrieve`                                                           |
-|   - 渲染治理块                                                                                     |
 |   - 调用 DefaultSystemPromptBuilder                                                                 |
 |   - 执行 llm_context_enhancer.enhance_system_prompt()                                              |
-| 输出：visible_tool_schemas + system_prompt + merged_metadata                                       |
+|   - 保持 system prompt 稳定、可缓存                                                                |
+| 输出：visible_tool_schemas + 稳定 system_prompt + merged_metadata                                   |
 | 示例（sql_126）：user query = "write a query in SQL to sort the BusinessEntityID ..."             |
 +====================================================================================================+
                                               |
@@ -34,53 +36,47 @@
 | 输入：user + visible_tool_schemas                                                                  |
 | 逻辑：                                                                                             |
 |   - `base_prompt != None` -> 直接返回                                                               |
-|   - 否则输出当天日期、可见工具名和记忆工作流                                                         |
+|   - 否则输出稳定核心规则和很短的稳定尾部                                                            |
 | prompt 片段：                                                                                       |
 |   "You are QueryMind, an AI data analyst assistant..."                                             |
 |   "Response Guidelines:"                                                                           |
 |   "- When you execute a query, that raw result is shown to the user ..."                           |
 |   "- If a SQL query was executed successfully, append the executed SQL ..."                        |
-|   "You have access to the following tools: ..."                                                     |
-|   "MEMORY SYSTEM:" / "1. TOOL USAGE MEMORY..." / "2. TEXT MEMORY..."                               |
+|   "- Use `schema_retrieve` only for schema discovery..."                                           |
+|   "Runtime context notices are authoritative..."                                                    |
 | 输出：基础 system prompt                                                                             |
 +====================================================================================================+
                                               |
                                               v
 +====================================================================================================+
-| 3) SchemaGovernanceManager + SchemaGovernanceEnhancer（Schema 治理注入）                           |
+| 3) DefaultLlmContextEnhancer                                                                      |
 |----------------------------------------------------------------------------------------------------|
-| 来源：SchemaGovernanceManager.build_prompt_block() + manager.policy.system_prompt_block           |
+| 来源：DefaultLlmContextEnhancer(agent_memory)                                                       |
 | 逻辑：                                                                                             |
-|   - 只注入一次                                                                                      |
-|   - discovery 期间 `schema_locked: false`                                                         |
-|   - lock 之后 `schema_locked: true`                                                               |
+|   - 从 `user_message` 检索 AgentMemory                                                              |
+|   - 预置一条面向用户的 memory advisory message                                                      |
+|   - degraded 或失败时原样返回                                                                        |
 | prompt 片段：                                                                                       |
-|   "## Schema Governance"                                                                           |
-|   "- Treat `schema_retrieve` as discovery support, not as the final answer."                      |
-|   "- Once you have enough schema context, switch to SQL draft mode..."                             |
-|   "## Core Objective Reminder"                                                                      |
-| 示例（sql_126）：第 3 次 `schema_retrieve` 之后，下一轮进入锁定                                     |
-| 输出：引导 discovery / SQL draft 切换的 schema-governance 块                                        |
+|   "## Memory Advisory"                                                                             |
+|   "Use these snippets only if they are relevant to the current turn:"                              |
+| 输出：消息侧 memory advisory，而不是 system prompt                                                  |
 +====================================================================================================+
                                               |
                                               v
 +====================================================================================================+
-| 4) CompositeLlmContextEnhancer（增强器链）                                                          |
+| 4) 可选 SchemaContextEnhancer                                                                      |
 |----------------------------------------------------------------------------------------------------|
 | 顺序：SchemaContextEnhancer() -> DefaultLlmContextEnhancer(agent_mem)                              |
 | 逻辑：                                                                                             |
 |   - 每个增强器接收上一个增强器的输出                                                                 |
 |   - 任一增强器失败都不会中断整条链                                                                   |
-|   - `schema_locked` 为 true 时，SchemaContextEnhancer 保持 prompt 不变                            |
-|   - DefaultLlmContextEnhancer 依据 `user_message` 检索 AgentMemory                                 |
+|   - SchemaContextEnhancer 以消息侧 user message 的形式注入 schema context                           |
+|   - 它不会修改 system prompt                                                                        |
 | SchemaContextEnhancer 片段：                                                                       |
-|   "## Schema Retrieval Tool - Search Mode Selection Rules"                                         |
-|   "hybrid / vector / graph / expand"                                                                |
-|   "【Current Retrieved Schema Information】"                                                          |
-| DefaultLlmContextEnhancer 片段：                                                                   |
-|   "## Relevant Context from Memory"                                                                 |
-|   "The following domain knowledge and context from prior interactions may be relevant:"            |
-| 输出：包含 schema 规则和 memory 上下文的最终 system prompt                                          |
+|   "## Schema Context"                                                                              |
+|   "Search Mode: hybrid"                                                                            |
+|   "Tables: ..."                                                                                     |
+| 输出：消息侧 schema context，而不是 system prompt                                                  |
 +====================================================================================================+
                                               |
                                               v
@@ -91,16 +87,16 @@
 | 逻辑：                                                                                             |
 |   - 根据运行时快照刷新 request.metadata                                                             |
 |   - 结合 request.metadata / user message 推断或复用 SQL profile                                      |
-|   - 追加 request-time 治理块                                                                        |
-|   - 必要时从 request.tools 中隐藏 `schema_retrieve`                                                |
-|   - 必要时追加 recap 块                                                                             |
+|   - 隐藏 `schema_retrieve`（如需要）                                                                |
+|   - 预置一条用户侧 runtime notice                                                                   |
+|   - 把 schema lock / summary、SQL anchor preview、freeze reason、repair strategy / reason / signals、row grain 和 recap 放进去         |
 | SQL governance 片段：                                                                               |
-|   "## SQL Governance"                                                                               |
-|   "- Avoid metadata introspection queries unless they are explicitly allowed."                      |
-|   "- Keep the current row grain stable and call `run_sql` once the table path is clear."            |
-| SQL recap 片段：                                                                                   |
-|   "## SQL Self-Check Reminder"                                                                      |
-| 输出：最终 request.system_prompt + request.tools                                                    |
+|   "## Runtime Context Notice"                                                                      |
+|   "Schema governance:"                                                                             |
+|   "- schema_retrieve unavailable this turn: yes/no"                                                 |
+|   "SQL governance:"                                                                                |
+|   "- repair strategy: local_repair / structural_rewrite"                                           |
+| 输出：最终 request.system_prompt + request.tools + request.messages                                 |
 +====================================================================================================+
                                               |
                                               v
@@ -111,7 +107,7 @@
 | sql_126 路径：                                                                                     |
 |   - 第一轮 LLM -> 3 次 `schema_retrieve` 调用                                                       |
 |   - 后续轮次 LLM -> 3 次 `run_sql` 调用                                                             |
-| 输出：模型在选工具前看到完整 prompt 栈                                                              |
+| 输出：模型在选工具前看到稳定 system prompt + 消息侧 runtime notice；SQL 侧 notice 会携带 repair strategy / reason / signals |
 +====================================================================================================+
 ```
 

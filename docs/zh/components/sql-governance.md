@@ -2,15 +2,16 @@
 
 SQL governance 管理的是 schema discovery 开始之后的 SQL 起草循环。
 它把任务画像、SQL 形状、最佳 anchor，以及 freeze / repair 的切换和
-schema 探索分开。
+schema 探索分开，并通过消息侧 runtime notice 把 live summary / anchor / freeze
+状态暴露给模型，而不是主要依赖 system prompt。
 
 ## 核心组件
 
 - `SqlGovernanceManager`：负责 policy、状态、snapshot 组装、recap gating 和 freeze 决策。
 - `SqlGovernanceHook`：在工具执行后记录 `run_sql` 的结果，并把刷新后的 snapshot 写回 `result.metadata`。
-- `SqlGovernanceMiddleware`：推断或复用当前画像，追加治理块，合并 request metadata，并在轮次漂移或运行过长时插入 recap。
+- `SqlGovernanceMiddleware`：推断或复用当前画像，合并 request metadata，预置消息侧 runtime notice，并在轮次漂移或运行过长时插入 recap；runtime notice 里也会带上 repair strategy / reason / signals。
 
-SQL 没有单独的 enhancer。prompt 文本通过 manager 辅助方法生成，然后由 middleware 注入。
+SQL 没有单独的 enhancer。prompt 文本通过 manager 辅助方法生成，用于稳定的 system prompt 尾部；动态 SQL 状态则通过 middleware 注入到消息侧。
 
 `build_sql_governance_stack()` 会返回一个可复用的 bundle，里面包含 policy、manager、hook 和 middleware。
 
@@ -23,6 +24,7 @@ SQL 没有单独的 enhancer。prompt 文本通过 manager 辅助方法生成，
 
 `build_sql_governance_profile()`、`infer_profile_from_message()`、`build_sql_governance_prompt_block()` 和 `build_sql_governance_recap_block()` 都在这套拆分里。
 `analyze_sql_text()` 和 `analyze_sql_shape()` 使用 `sqlglot` 提取 SQL 结构。
+这套帮助函数现在还会显式区分 `local_repair` 和 `structural_rewrite`，并对 `case_when`、`null_handling`、`comparison`、`distinct` 这类 detail 表达式家族给出更保守的提示。
 
 分析覆盖：
 
@@ -121,6 +123,9 @@ metadata-query 结果会被单独对待：它们不会进入已验证的 anchor�
   - `last_rejection_reason`
   - `last_rejection_reason_count`
   - `turn_local_repair_mode`
+  - `repair_strategy`
+  - `repair_reason`
+  - `repair_signals`
   - `sql_family`
   - `sql_family_candidates`
   - `row_grain_state`
@@ -159,7 +164,8 @@ metadata-query 结果会被单独对待：它们不会进入已验证的 anchor�
 ### `build_prompt_block(...)` 与 `build_recap_block(...)`
 
 `build_prompt_block(...)` 和 `build_recap_block(...)` 通过辅助模块渲染 prompt 文本。
-`build_prompt_block(...)` 会把当前 profile、缺失类别、冻结状态、freeze 原因、冻结和最佳 anchor 文本、anchor tier、SQL family，以及 turn-local repair mode 传给 prompt renderer。
+`build_prompt_block(...)` 会把当前 profile、缺失类别、冻结状态、freeze 原因、冻结和最佳 anchor 文本、anchor tier、SQL family，以及 turn-local repair mode 传给 prompt renderer，但默认运行时只把这些稳定规则留在 system prompt 的尾部。
+当 `repair_strategy` 为 `structural_rewrite` 时，它会显式要求重建 grouped summary 或 CTE shape；当 profile 命中 `case_when`、`null_handling`、`comparison`、`distinct` 这类 detail 家族时，它会更保守地提示只调整 CASE / COALESCE / comparison / deduplication 逻辑。
 `build_recap_block(...)` 会在当前状态需要 recap 时渲染 reactive recap 文本。
 
 ## Freeze 与 Repair
@@ -178,7 +184,7 @@ validated anchor 的检查还要求 best SQL candidate 的支持度足够：`bes
 
 状态冻结后，manager 会把最佳 anchor 复制到 frozen snapshot，并记录带有迭代信息的 freeze reason。
 
-`turn_local_repair_mode` 会在 anchor 处于 candidate 或 validated、状态未冻结、row grain 对齐，并且出现同一个成功 canonical SQL 重复或者同一个 rejection reason 重复时变为 true。
+`turn_local_repair_mode` 会在 anchor 处于 candidate 或 validated、状态未冻结、row grain 对齐，并且出现同一个成功 canonical SQL 重复或者同一个 rejection reason 重复时变为 true；如果 `_sql_repair_strategy_from_snapshot()` 判定为 `structural_rewrite`，这个开关会被强制关闭，让 aggregation / rollup / 多 CTE 这类 turn 走重写而不是局部修补。
 
 ## 请求时流程
 
@@ -257,13 +263,13 @@ validated anchor 的检查还要求 best SQL candidate 的支持度足够：`bes
 +====================================================================================================+
 | 5) sql_governance_prompt.py                                                                        |
 |----------------------------------------------------------------------------------------------------|
-| 生成 prompt 文本与 recap 文本                                                                       |
+| 生成稳定的 prompt 文本与 recap 文本                                                                 |
 | prompt 真实片段:                                                                                   |
 |   "## SQL Governance"                                                                              |
 |   "- Avoid metadata introspection queries unless they are explicitly allowed."                     |
 |   "- Keep the current row grain stable and call `run_sql` once the table path is clear."           |
 | sql_126 语义: profile source=message, categories=["ordering"]                                      |
-| 输出: governance prompt block +（仅在 drift / mismatch / repeated rejection 时才会）recap block      |
+| 输出: 稳定治理块 +（仅在 drift / mismatch / repeated rejection 时才会）recap block                  |
 +=============================================+======================================================+
                                                 |
                                                 v
@@ -274,8 +280,9 @@ validated anchor 的检查还要求 best SQL candidate 的支持度足够：`bes
 | 顺序:                                                                                              |
 |   - 读取 `sql_governance_profile` / `sql_profile` / `runtime_profile`                             |
 |   - 调用 `register_request_profile(...)`                                                           |
-|   - 追加 SQL governance prompt block                                                               |
 |   - 合并最新 snapshot 回 `request.metadata`                                                        |
+|   - 预置一条消息侧 runtime notice，里面包含 schema recap、SQL anchor preview、freeze reason、     |
+|     row grain 和 SQL recap                                                                         |
 |   - 必要时再插入 recap block                                                                       |
 | sql_126 可见上下文:                                                                                |
 |   request.metadata = {sql_governance:{sql_attempts=3,...},                                         |
@@ -288,7 +295,7 @@ validated anchor 的检查还要求 best SQL candidate 的支持度足够：`bes
 +====================================================================================================+
 | 7) 下一轮 LLM / tool selection                                                                     |
 |----------------------------------------------------------------------------------------------------|
-| 模型看到: system prompt + governance block + metadata snapshot                                     |
+| 模型看到: 稳定 system prompt + runtime notice + metadata snapshot                                   |
 | 结果: 继续修正或结束 SQL 草案                                                                      |
 | sql_126 结果: 生成最终 `ORDER BY CASE ...` 的稳定版本，随后结束该 query turn                        |
 +====================================================================================================+
@@ -296,7 +303,7 @@ validated anchor 的检查还要求 best SQL candidate 的支持度足够：`bes
 
 这条链路的边界是：`run_sql` 先把结果写回 `result.metadata`，`SqlGovernanceManager`
 更新 state 和 snapshot，随后 `SqlGovernanceMiddleware` 再把这些状态注入下一轮
-`request.metadata` / system prompt。
+`request.metadata` / 消息侧 runtime notice，而不是继续写进 system prompt。
 
 ## 本页覆盖什么
 

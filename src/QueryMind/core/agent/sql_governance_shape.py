@@ -213,6 +213,21 @@ def _window_function_name_set(values: Iterable[str]) -> set[str]:
     }
 
 
+def _is_true_aggregate_function_name(name: str) -> bool:
+    return str(name).strip().upper() in {
+        "COUNT",
+        "SUM",
+        "AVG",
+        "MIN",
+        "MAX",
+        "STDDEV",
+        "STDDEV_POP",
+        "STDDEV_SAMP",
+        "VARIANCE",
+        "STRING_AGG",
+    }
+
+
 def _window_partition_is_constant(window: exp.Window, *, dialect: Optional[str] = None) -> bool:
     partition_by = window.args.get("partition_by") or []
     if not partition_by:
@@ -525,6 +540,7 @@ class SqlShapeAnalysis:
     has_ranking_window_function: bool = False
     has_aggregation: bool = False
     has_subquery: bool = False
+    cte_count: int = 0
     has_rollup: bool = False
     has_grouping_sets: bool = False
     has_grouping: bool = False
@@ -556,6 +572,7 @@ def analyze_sql_shape(
     normalized = _collapse_sql(sql)
     upper = normalized.upper()
     read_dialect = _normalize_dialect(dialect)
+    cte_count = len(re.findall(r"\bWITH\b", upper))
     parsed_statements = [
         statement
         for statement in _parse_sqlglot_statements(normalized, dialect=read_dialect)
@@ -571,6 +588,7 @@ def analyze_sql_shape(
         grouping_nodes: List[exp.Grouping] = []
         aggregate_nodes: List[exp.AggFunc] = []
         subquery_nodes: List[exp.Subquery] = []
+        cte_nodes: List[exp.CTE] = []
 
         for statement in parsed_statements:
             if statement is None:
@@ -583,6 +601,7 @@ def analyze_sql_shape(
             grouping_nodes.extend(list(statement.find_all(exp.Grouping)))
             aggregate_nodes.extend(list(statement.find_all(exp.AggFunc)))
             subquery_nodes.extend(list(statement.find_all(exp.Subquery)))
+            cte_nodes.extend(list(statement.find_all(exp.CTE)))
 
         primary_select = _find_primary_select(parsed_statements)
         select_items: List[str] = []
@@ -663,10 +682,37 @@ def analyze_sql_shape(
                         if window_name in _RANKING_WINDOW_FUNCTION_NAMES:
                             has_ranking_window_function = True
                     continue
-                if any(isinstance(node, exp.Grouping) for node in base_expression.walk()):
+                if any(
+                    isinstance(node, exp.Grouping) for node in base_expression.walk()
+                ):
                     continue
-                if any(isinstance(node, exp.AggFunc) for node in base_expression.walk()):
+                agg_function_names = [
+                    _expression_name(node)
+                    for node in base_expression.walk()
+                    if isinstance(node, exp.AggFunc)
+                ]
+                if any(
+                    _is_true_aggregate_function_name(name)
+                    for name in agg_function_names
+                ):
                     aggregate_projection_count += 1
+                    continue
+                if any(
+                    name in _WINDOW_FUNCTION_NAMES for name in agg_function_names
+                ):
+                    window_function_names.extend(
+                        name for name in agg_function_names if name in _WINDOW_FUNCTION_NAMES
+                    )
+                    if any(
+                        name in _NAVIGATION_WINDOW_FUNCTION_NAMES
+                        for name in agg_function_names
+                    ):
+                        has_navigation_window_function = True
+                    if any(
+                        name in _RANKING_WINDOW_FUNCTION_NAMES
+                        for name in agg_function_names
+                    ):
+                        has_ranking_window_function = True
                     continue
                 if _is_constant_expression(base_expression.sql(dialect=read_dialect)):
                     continue
@@ -724,7 +770,10 @@ def analyze_sql_shape(
             for window in window_nodes
             if window.this is not None
         )
-        has_aggregation = bool(aggregate_nodes)
+        has_aggregation = any(
+            _is_true_aggregate_function_name(_expression_name(node))
+            for node in aggregate_nodes
+        )
         has_subquery = bool(subquery_nodes) or len(select_nodes) > len(parsed_statements)
         has_rollup = any(statement.find(exp.Rollup) is not None for statement in parsed_statements)
         has_grouping_sets = any(
@@ -809,6 +858,7 @@ def analyze_sql_shape(
         if has_window_order_by and "window" not in feature_names:
             feature_names.append("window")
 
+        cte_count = len(cte_nodes)
         return SqlShapeAnalysis(
             sql=sql,
             normalized_sql=normalized,
@@ -836,6 +886,7 @@ def analyze_sql_shape(
             has_ranking_window_function=has_ranking_window_function,
             has_aggregation=has_aggregation,
             has_subquery=has_subquery,
+            cte_count=cte_count,
             has_rollup=has_rollup,
             has_grouping_sets=has_grouping_sets,
             has_grouping=has_grouping,
@@ -995,6 +1046,7 @@ def analyze_sql_shape(
         group_by_items=group_by_items,
         aggregate_projection_count=aggregate_projection_count,
         non_aggregate_projection_count=non_aggregate_projection_count,
+        cte_count=cte_count,
         window_function_names=_dedupe_preserve_order(window_function_names),
         feature_names=_dedupe_preserve_order(feature_names),
     )
@@ -1021,7 +1073,7 @@ def _strong_grouping_cue(message: str) -> bool:
 def _strong_window_cue(message: str) -> bool:
     return bool(
         re.search(
-            r"\b(previous|prior|last|next|running total|cumulative|moving average|rank|top\s+\d+|row number|row_number|dense rank|dense_rank|lag|lead|first value|first_value|last value|last_value|ntile|percentile|cume dist|cume_dist|percent rank|percent_rank)\b",
+            r"\b(previous|prior|last|next|running total|cumulative|moving average|windowed|windowing|rank|top\s+\d+|row number|row_number|dense rank|dense_rank|lag|lead|first value|first_value|last value|last_value|ntile|percentile|cume dist|cume_dist|percent rank|percent_rank)\b",
             _normalize_text(message),
         )
     )
@@ -1166,9 +1218,26 @@ def sql_semantics_rejection_reason(
     )
     turn_local_repair_mode = bool(governance_metadata.get("turn_local_repair_mode"))
     anchor_tier = str(runtime_profile.get("anchor_tier") or "").strip().lower()
+    repair_snapshot = _sql_repair_strategy_from_snapshot(
+        sql_family=str(
+            runtime_profile.get("sql_family")
+            or governance_metadata.get("sql_family")
+            or ""
+        ),
+        features=analysis.to_dict(),
+        row_grain_state=runtime_profile.get("row_grain_state")
+        or governance_metadata.get("row_grain_state"),
+        gap_categories=governance_metadata.get("last_gap_categories"),
+    )
     anchor_visible = anchor_tier in {"candidate", "validated"} or turn_local_repair_mode
     repair_mode = turn_local_repair_mode or rejection_reason_streak >= 2
-    repair_prefix = "You already have a candidate skeleton. " if anchor_visible else ""
+    if repair_snapshot.get("repair_strategy") == "structural_rewrite":
+        repair_mode = False
+    repair_prefix = (
+        "You already have a candidate skeleton. "
+        if anchor_visible and repair_snapshot.get("repair_strategy") != "structural_rewrite"
+        else ""
+    )
 
     row_grain_reason = _row_grain_rejection_reason(
         analysis=analysis,
@@ -1480,7 +1549,7 @@ def build_sql_governance_profile(
         if re.search(r"\b(union(?:\s+all)?|intersect|except)\b", query_text):
             inferred.append("set_operation")
         if re.search(
-            r"\b(time series|time-series|trend|trends|over time|by date|by day|by week|by month|by quarter|by year|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
+            r"\b(time series|time-series|trend|trends|over time|by day|by week|by month|by quarter|by year|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
             query_text,
         ):
             inferred.append("time_series")
@@ -1801,7 +1870,7 @@ def analyze_sql_text(sql: str, *, dialect: Optional[str] = None) -> Dict[str, An
         "has_aggregation": shape.has_aggregation,
         "has_subquery": shape.has_subquery,
         "subquery_count": len(re.findall(r"\(\s*SELECT\b", upper)),
-        "cte_count": len(re.findall(r"\bWITH\b", upper)),
+        "cte_count": shape.cte_count,
         "metadata_query": shape.metadata_query,
         "table_reference_count": len(shape.table_references),
         "table_references": list(shape.table_references),
@@ -2087,7 +2156,7 @@ def _resolve_sql_family_state(
         scores["set_operation"] += 6
         scores["detail"] += 1
     if re.search(
-        r"\b(time series|time-series|trend|trends|over time|by date|by day|by week|by month|by quarter|by year|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
+        r"\b(time series|time-series|trend|trends|over time|by day|by week|by month|by quarter|by year|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
         normalized_message,
     ):
         scores["time_series"] += 6
@@ -2174,6 +2243,11 @@ def _resolve_sql_family_state(
         if feature_map.get("has_outer_join_null_filter"):
             scores["join"] += 1
 
+    if feature_map.get("has_ranking_window_function") and not feature_map.get(
+        "has_navigation_window_function"
+    ):
+        scores["ranking"] += 1
+
     for gap in gaps:
         if gap in scores:
             scores[gap] += 2
@@ -2228,6 +2302,13 @@ def _resolve_sql_family_state(
     ):
         primary_family = current_family
         primary_score = current_score
+
+    if feature_map.get("has_ranking_window_function"):
+        ranking_score = scores.get("ranking", 0)
+        navigation_score = scores.get("navigation", 0)
+        if ranking_score >= navigation_score:
+            primary_family = "ranking"
+            primary_score = ranking_score
 
     explicit_rollup_cue = _strong_rollup_cue(normalized_message)
     weak_rollup_signal = (
@@ -2301,6 +2382,111 @@ def _resolve_sql_family_state(
 
 
 
+def _sql_repair_strategy_from_snapshot(
+    *,
+    sql_family: Optional[str] = None,
+    features: Optional[Dict[str, Any]] = None,
+    row_grain_state: Optional[Dict[str, Any]] = None,
+    gap_categories: Optional[Iterable[str]] = None,
+) -> Dict[str, Any]:
+    """Classify a SQL turn as local repair or structural rewrite."""
+    feature_map = dict(features or {})
+    row_state = dict(row_grain_state or {})
+    family = str(
+        sql_family or feature_map.get("sql_family") or ""
+    ).strip().lower()
+
+    expected_row_grain = str(row_state.get("expected") or "").strip().lower()
+    observed_row_grain = str(row_state.get("observed") or "").strip().lower()
+    row_status = str(row_state.get("status") or "").strip().lower()
+
+    cte_count = _safe_int(feature_map.get("cte_count"), 0)
+    has_group_by = bool(feature_map.get("has_group_by"))
+    has_rollup = bool(feature_map.get("has_rollup"))
+    has_grouping_sets = bool(feature_map.get("has_grouping_sets"))
+    has_grouping = bool(feature_map.get("has_grouping"))
+    has_aggregation = bool(feature_map.get("has_aggregation"))
+    aggregate_projection_count = _safe_int(
+        feature_map.get("aggregate_projection_count"), 0
+    )
+    non_aggregate_projection_count = _safe_int(
+        feature_map.get("non_aggregate_projection_count"), 0
+    )
+    group_by_items = [
+        str(item).strip()
+        for item in feature_map.get("group_by_items") or []
+        if str(item).strip()
+    ]
+    gap_set = {
+        str(gap).strip().lower()
+        for gap in (gap_categories or [])
+        if str(gap).strip()
+    }
+
+    structural_reasons: List[str] = []
+    structural = False
+
+    if family in {"aggregation", "grouping", "rollup"}:
+        structural = True
+        structural_reasons.append(f"family={family}")
+
+    if has_rollup or has_grouping_sets or has_grouping:
+        structural = True
+        structural_reasons.append("grouped_shape")
+
+    grouped_projection_mismatch = (
+        has_group_by
+        and non_aggregate_projection_count > max(1, len(group_by_items))
+    )
+    mixed_aggregate_shape = (
+        has_aggregation
+        and not has_group_by
+        and aggregate_projection_count > 0
+        and non_aggregate_projection_count > 0
+    )
+    grouped_row_grain_mismatch = (
+        has_group_by
+        and (
+            row_status != "aligned"
+            or expected_row_grain in {"grouped", "subtotal"}
+            or observed_row_grain in {"grouped", "summary", "subtotal"}
+            or grouped_projection_mismatch
+        )
+    )
+    structural_grouping_gap = bool(gap_set & {"aggregation", "grouping", "rollup"})
+
+    if mixed_aggregate_shape or grouped_row_grain_mismatch:
+        structural = True
+        structural_reasons.append("grouped_summary_needs_rebuild")
+
+    if cte_count >= 2 and (
+        family in {"aggregation", "grouping", "rollup"}
+        or has_group_by
+        or has_rollup
+        or has_grouping_sets
+        or has_grouping
+        or expected_row_grain in {"grouped", "subtotal"}
+        or structural_grouping_gap
+    ):
+        structural = True
+        structural_reasons.append(f"cte_count={cte_count}")
+
+    if structural_grouping_gap and not structural:
+        structural = True
+        structural_reasons.append("shape_gap=aggregation/grouping/rollup")
+
+    strategy = "structural_rewrite" if structural else "local_repair"
+    reason = "; ".join(_dedupe_preserve_order(structural_reasons)) if structural else ""
+
+    return {
+        "repair_strategy": strategy,
+        "repair_reason": reason,
+        "repair_signals": _dedupe_preserve_order(structural_reasons),
+        "cte_count": cte_count,
+        "group_by_items": list(group_by_items),
+    }
+
+
 def sql_governance_rejection_reason(
     sql: str,
     *,
@@ -2319,7 +2505,8 @@ def sql_governance_rejection_reason(
     if context_metadata:
         metadata_dialect = context_metadata.get("dialect")
 
-    if analyze_sql_text(sql, dialect=dialect or metadata_dialect).get("metadata_query"):
+    sql_features = analyze_sql_text(sql, dialect=dialect or metadata_dialect)
+    if sql_features.get("metadata_query"):
         return "Metadata introspection queries are not allowed for NL2SQL tasks"
 
     cleaned = (sql or "").strip()
@@ -2335,7 +2522,7 @@ def sql_governance_rejection_reason(
     if subquery_count > max_subqueries:
         return f"Query has too many subqueries ({subquery_count} > {max_subqueries})"
 
-    cte_count = len(re.findall(r"\bWITH\b", cleaned, re.IGNORECASE))
+    cte_count = int(sql_features.get("cte_count") or 0)
     if cte_count > max_cte_depth:
         return f"Query has too many CTEs ({cte_count} > {max_cte_depth})"
 
