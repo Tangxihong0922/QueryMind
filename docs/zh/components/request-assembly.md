@@ -11,11 +11,13 @@
 [`src/QueryMind/core/agent/agent.py`](../../../src/QueryMind/core/agent/agent.py)，
 再加上评测产物里捕获到的 `sql_126` 轨迹。
 
-- `enhancer = CompositeLlmContextEnhancer([schema_governance.enhancer, SchemaContextEnhancer(), DefaultLlmContextEnhancer(agent_mem)])`
+- `enhancer = CompositeLlmContextEnhancer([DefaultLlmContextEnhancer(agent_mem)])`
 - `enricher = [SchemaRetrieveContextEnricher(conversation_store=FileSystemConversationStore())]`
 - `llm_middlewares = [schema_governance.middleware, sql_governance.middleware]`
 - `my_agent.py` 没有显式传入 `conversation_filters`，所以当前运行里这一段是 identity
 - `AgentConfig` 只覆盖了 `max_tool_iterations` 和 `schema_search_default_threshold`；`temperature`、`max_tokens`、`stream_responses` 仍然走默认值
+
+`SchemaContextEnhancer` 和 `SchemaGovernanceEnhancer` 仍然保留为可复用 helper，但默认运行时里已经不再把它们接到 enhancer 链上。
 
 ## ASCII 图
 
@@ -67,19 +69,15 @@
 |   - 把 schema_governance snapshot 合并进 request_metadata                                          |
 |   - 如果治理状态已经锁定，就把 `schema_retrieve` 从可见工具里隐藏                                 |
 |   - 生成基础 system prompt                                                                        |
-|   - 追加治理 prompt block                                                                         |
+|   - 保持 system prompt 稳定、可缓存                                                                |
 |   - 调用 `CompositeLlmContextEnhancer.enhance_system_prompt()`                                    |
 | 真实 prompt 片段:                                                                                  |
 |   "You are QueryMind, an AI data analyst assistant..."                                             |
 |   "Response Guidelines:"                                                                            |
 |   "- If a SQL query was executed successfully, append the executed SQL..."                          |
-|   "MEMORY SYSTEM:" / "TOOL USAGE MEMORY" / "TEXT MEMORY"                                           |
-| 治理片段:                                                                                          |
-|   "## Schema Governance"                                                                            |
-|   "- schema_locked: false"                                                                          |
-|   "## Schema Retrieval Tool - Search Mode Selection Rules"                                          |
-|   "- hybrid (Balanced mode, default)"                                                              |
-| 输出: visible_tool_schemas + system_prompt + merged_metadata                                       |
+|   "- Use `schema_retrieve` only for schema discovery..."                                            |
+|   "Runtime context notices are authoritative..."                                                    |
+| 输出: visible_tool_schemas + 稳定 system_prompt + merged_metadata                                   |
 +============================================+=======================================================+
                                                 |
                                                 v
@@ -104,7 +102,7 @@
 | 顺序: `SchemaGovernanceMiddleware` -> `SqlGovernanceMiddleware`                                    |
 | 逻辑:                                                                                             |
 |   - 从运行时 snapshot 重新补齐 request.metadata                                                     |
-|   - 追加 request-time 治理 prompt block                                                             |
+|   - 准备 request-time runtime notice，而不是继续追加治理块                                          |
 |   - 根据 user message 或 metadata 推断 / 复用 SQL profile                                          |
 |   - 当 schema 锁定后，从 `request.tools` 里移除 `schema_retrieve`                                   |
 |   - 在 turn 变长或漂移时插入 recap                                                                 |
@@ -125,7 +123,7 @@
 | request 字段:                                                                                      |
 |   messages = 合并了 metadata 的 conversation history                                                |
 |   tools = 治理后仍然可见的 tool schemas                                                             |
-|   system_prompt = 基础 prompt + 治理块 + memory snippet                                            |
+|   system_prompt = 基础 prompt + 很短的稳定尾部                                                      |
 |   metadata = turn 计数 + 治理快照                                                                  |
 |   temperature=0.7, max_tokens=None, stream=True                                                   |
 | 输出: 传给 `llm_service.send_request(request)` 的最终对象                                           |
@@ -154,9 +152,9 @@ have the SalariedFlag set to 'false'. Return BusinessEntityID, and SalariedFlag.
 这一 turn 的 prompt 栈是：
 
 - `DefaultSystemPromptBuilder` 生成的基础 system prompt
-- `SchemaGovernanceEnhancer` 追加的 `schema_locked: false` 治理块
-- `SchemaContextEnhancer` 追加的 `schema_retrieve` 搜索模式规则
-- `DefaultLlmContextEnhancer` 在 `AgentMemory` 命中时追加的 memory snippets
+- `DefaultLlmContextEnhancer` 在 `AgentMemory` 命中时追加的 memory advisory message
+- 可选的 `SchemaContextEnhancer` 消息侧 schema context
+- `SchemaGovernanceMiddleware` / `SqlGovernanceMiddleware` 在下一轮里追加的 runtime notices
 
 工具开始执行之后，下一轮就可以复用治理 hooks 写回的 snapshot：
 

@@ -14,6 +14,8 @@ QueryMind 把上下文拆成两条独立路径：
 | Prompt 侧 | `SystemPromptBuilder`、`LlmContextEnhancer` | `system_prompt` 和最终的 `LlmRequest.messages` 列表 |
 | Tool 侧 | `ToolContextEnricher` | `ToolContext.metadata` |
 
+Prompt 端的 runtime notice 现在优先走消息侧：schema lock notice、schema recap、SQL anchor preview、freeze reason 和 memory advisory 都会以 `LlmMessage(role="user")` 的形式注入，这样 system prompt 就能保持稳定。
+
 Prompt 端的细节见 [`prompt-chain.md`](./prompt-chain.md)。
 
 更完整的单轮组装 walkthrough 见 [`request-assembly.md`](./request-assembly.md)。
@@ -75,7 +77,7 @@ Prompt 端的细节见 [`prompt-chain.md`](./prompt-chain.md)。
 
 关键边界是：
 - `ToolContextEnricher` 先写 `ToolContext.metadata`，再去拉可见工具 schemas；它只影响工具执行态，不改 prompt。
-- `_prepare_turn_prompt()` 负责 `SystemPromptBuilder` + governance block + `enhance_system_prompt()`，产出当前 turn 的 `system_prompt` 和 `visible_tool_schemas`。
+- `_prepare_turn_prompt()` 负责 `SystemPromptBuilder` + 稳定 prompt shaping + 工具可见性，产出当前 turn 的 `system_prompt` 和 `visible_tool_schemas`。
 - `ConversationFilter` 先裁剪/重排 conversation history，再把消息包装成 `LlmMessage`。
 - `LlmContextEnhancer.enhance_user_messages()` 是最后一道消息侧钩子，随后才生成 `LlmRequest`。
 

@@ -2,11 +2,12 @@ from __future__ import annotations
 """
 Default LLM context enhancer implementation using AgentMemory.
 
-This implementation enriches the system prompt with relevant memories
-based on the user's initial message.
+This implementation surfaces relevant memories as message-side advisory
+context instead of appending them to the system prompt.
 """
 
 from typing import TYPE_CHECKING, List, Optional
+
 from .base import LlmContextEnhancer
 
 if TYPE_CHECKING:
@@ -15,20 +16,18 @@ if TYPE_CHECKING:
     from ...capabilities.agent_memory import AgentMemory, TextMemorySearchResult
 
 
+_MEMORY_ADVISORY_HEADER = "## Memory Advisory"
+
+
+def _find_last_user_message(messages: List["LlmMessage"]) -> str:
+    for message in reversed(messages):
+        if message.role == "user" and message.content.strip():
+            return message.content.strip()
+    return ""
+
+
 class DefaultLlmContextEnhancer(LlmContextEnhancer):
-    """Default enhancer that uses AgentMemory to add relevant context.
-
-    This enhancer searches the agent's memory for relevant examples and
-    tool use patterns based on the user's message, and adds them to the
-    system prompt.
-
-    Example:
-        agent = Agent(
-            llm_service=...,
-            agent_memory=agent_memory,
-            llm_context_enhancer=DefaultLlmContextEnhancer(agent_memory)
-        )
-    """
+    """Default enhancer that uses AgentMemory to add relevant context."""
 
     def __init__(self, agent_memory: Optional["AgentMemory"] = None):
         """Initialize with optional agent memory.
@@ -42,31 +41,24 @@ class DefaultLlmContextEnhancer(LlmContextEnhancer):
     async def enhance_system_prompt(
         self, system_prompt: str, user_message: str, user: "User"
     ) -> str:
-        """Enhance system prompt with relevant memories.
+        return system_prompt
 
-        Searches agent memory for relevant text memories based on the
-        user's message and adds them to the system prompt.
+    async def enhance_user_messages(
+        self, messages: list["LlmMessage"], user: "User"
+    ) -> list["LlmMessage"]:
+        """Inject relevant memories as a user-side advisory message."""
+        if not self.agent_memory or getattr(self.agent_memory, "is_degraded", False):
+            return messages
 
-        Args:
-            system_prompt: The original system prompt
-            user_message: The initial user message
-            user: The user making the request
-
-        Returns:
-            Enhanced system prompt with relevant examples from memory
-        """
-        if not self.agent_memory:
-            return system_prompt
-
-        if getattr(self.agent_memory, "is_degraded", False):
-            return system_prompt
+        user_message = _find_last_user_message(messages)
+        if not user_message:
+            return messages
 
         try:
-            # Import here to avoid circular dependency
+            from ..llm import LlmMessage
             from ..tool import ToolContext
             import uuid
 
-            # Create a temporary context for memory search
             context = ToolContext(
                 user=user,
                 conversation_id="temp",
@@ -74,49 +66,43 @@ class DefaultLlmContextEnhancer(LlmContextEnhancer):
                 agent_memory=self.agent_memory,
             )
 
-            # Search for relevant text memories based on user message
-            memories: List[
-                "TextMemorySearchResult"
-            ] = await self.agent_memory.search_text_memories(
-                query=user_message, context=context, limit=5
+            memories: List["TextMemorySearchResult"] = await self.agent_memory.search_text_memories(
+                query=user_message,
+                context=context,
+                limit=5,
             )
-
             if not memories:
-                return system_prompt
+                return messages
 
-            # Format memories as context snippets to add to system prompt
-            examples_section = "\n\n## Relevant Context from Memory\n\n"
-            examples_section += "The following domain knowledge and context from prior interactions may be relevant:\n\n"
-
-            for result in memories:
+            lines = [
+                _MEMORY_ADVISORY_HEADER,
+                "",
+                "Use these snippets only if they are relevant to the current turn:",
+            ]
+            for index, result in enumerate(memories, start=1):
                 memory = result.memory
-                examples_section += f"• {memory.content}\n"
+                content = " ".join(str(memory.content or "").split()).strip()
+                if not content:
+                    continue
+                lines.append(f"{index}. {content}")
 
-            # Append examples to system prompt
-            return system_prompt + examples_section
+            if len(lines) <= 3:
+                return messages
 
+            advisory = LlmMessage(
+                role="user",
+                content="\n".join(lines).strip(),
+                metadata={
+                    "advisory_type": "memory",
+                    "memory_result_count": sum(
+                        1 for result in memories if str(getattr(result.memory, "content", "")).strip()
+                    ),
+                },
+            )
+            return [advisory, *messages]
         except Exception as e:
-            # If memory search fails, return original prompt
-            # Don't fail the entire request due to memory issues
             import logging
 
             logger = logging.getLogger(__name__)
-            logger.warning(f"Failed to enhance system prompt with memories: {e}")
-            return system_prompt
-
-    async def enhance_user_messages(
-        self, messages: list["LlmMessage"], user: "User"
-    ) -> list["LlmMessage"]:
-        """Enhance user messages.
-
-        The default implementation doesn't modify user messages.
-        Override this to add context to user messages if needed.
-
-        Args:
-            messages: The list of messages
-            user: The user making the request
-
-        Returns:
-            Original list of messages (unmodified)
-        """
-        return messages
+            logger.warning("Failed to enhance user messages with memories: %s", e)
+            return messages

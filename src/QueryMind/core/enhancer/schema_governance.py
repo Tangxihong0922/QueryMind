@@ -1,6 +1,10 @@
 from __future__ import annotations
 """
-Prompt enhancer that adds stable schema-governance guidance.
+Compatibility enhancer for schema-governance context.
+
+Runtime schema-governance guidance is now injected as message-side advisories
+by middleware. This enhancer remains for API compatibility and performs no
+prompt mutation.
 """
 
 from typing import TYPE_CHECKING
@@ -14,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class SchemaGovernanceEnhancer(LlmContextEnhancer):
-    """Append a stable schema-governance instruction block to the system prompt."""
+    """No-op compatibility enhancer."""
 
     def __init__(self, manager: SchemaGovernanceManager):
         self._manager = manager
@@ -22,17 +26,7 @@ class SchemaGovernanceEnhancer(LlmContextEnhancer):
     async def enhance_system_prompt(
         self, system_prompt: str, user_message: str, user: "User"
     ) -> str:
-        if "## Schema Governance" in system_prompt:
-            return system_prompt
-
-        block = self._manager.policy.system_prompt_block.strip()
-        if not block:
-            return system_prompt
-        if block in system_prompt:
-            return system_prompt
-        if system_prompt.strip():
-            return f"{system_prompt.rstrip()}\n\n{block}"
-        return block
+        return system_prompt
 
     async def enhance_user_messages(
         self, messages: list["LlmMessage"], user: "User"

@@ -2,16 +2,17 @@
 
 Schema governance 管理的是按会话维度维护的 `schema_retrieve` 循环。
 它把 schema 发现和 SQL 起草分开，并向 prompt 组装和请求时过滤暴露
-一个紧凑的状态快照。
+一个紧凑的状态快照，同时通过消息侧 runtime notice 让模型看到动态状态，
+而 system prompt 保持稳定。
 
 ## 核心组件
 
 - `SchemaGovernanceManager`：负责 policy、可变状态、锁定启发式、recap gating 和 request snapshot。
 - `SchemaGovernanceHook`：在工具执行后观察 `schema_retrieve` 结果，并把刷新后的 snapshot 写回 `result.metadata`。
-- `SchemaGovernanceMiddleware`：把 snapshot 合并到 `request.metadata`，追加治理块，在需要时插入 recap，并且可以把 `schema_retrieve` 从 `request.tools` 中隐藏掉。
-- `SchemaGovernanceEnhancer`：只在 prompt 侧追加来自 `policy.system_prompt_block` 的固定治理块，不改状态。
+- `SchemaGovernanceMiddleware`：把 snapshot 合并到 `request.metadata`，为下游 runtime notice 准备 recap 元数据，在需要时插入 recap，并且可以把 `schema_retrieve` 从 `request.tools` 中隐藏掉。
+- `SchemaGovernanceEnhancer`：兼容性 helper，在默认运行时里不再修改 prompt。
 
-`build_schema_governance_stack()` 会返回一个可复用的 bundle，里面包含 policy、manager、hook、middleware 和 enhancer。
+`build_schema_governance_stack()` 会返回一个可复用的 bundle，里面包含 policy、manager、hook、middleware 和兼容 enhancer。
 
 ## Policy
 
@@ -111,23 +112,26 @@ middleware 和 agent 的 turn-prep path 会用这个信号把 `schema_retrieve` 
 
 ### `build_prompt_block(...)`
 
-`build_prompt_block(...)` 负责渲染请求时的治理 prompt block。
+`build_prompt_block(...)` 负责渲染 system prompt 的稳定尾部治理说明。
 当 `schema_locked` 为 true 时，它会使用 locked prompt；否则使用
 `policy.system_prompt_block`。
-然后它会附上最新的 schema summary；如果会话已经锁定但没有 summary，
+它仍然会附上最新的 schema summary；如果会话已经锁定但没有 summary，
 则会附上 lock reason。
 
 对于 empty-results 锁定，它还会附上特殊说明：这一轮仍然允许只读的
 metadata discovery。
+不过默认运行时已经把可变的 schema 状态移到了消息侧 runtime notice，
+不再依赖 system prompt 来承载动态信息。
 
 ## 请求时流程
 
 运行时在两个地方使用这个 manager：
 
-- `Agent._prepare_turn_prompt()` 会把 snapshot 合并到 turn metadata，锁定时隐藏 `schema_retrieve`，并在最终 system prompt 生成前追加治理块。
-- `SchemaGovernanceMiddleware.before_llm_request()` 会再次合并 metadata，追加治理块，在需要时插入 recap，并在会话锁定时把 `schema_retrieve` 从 `request.tools` 中移除。
+- `Agent._prepare_turn_prompt()` 会把 snapshot 合并到 turn metadata，锁定时隐藏 `schema_retrieve`，并保持 system prompt 稳定。
+- `SchemaGovernanceMiddleware.before_llm_request()` 会再次合并 metadata，把 recap 内容放到下游 runtime notice 用的 metadata 里，在需要时插入 recap，并在会话锁定时把 `schema_retrieve` 从 `request.tools` 中移除。
+- `SqlGovernanceMiddleware.before_llm_request()` 会进一步把 schema summary 和 lock reason 合并进消息侧 runtime notice，让模型在同一条通知里看到 schema / SQL 的动态状态。
 
-middleware 只有在 system prompt 里还没有明确写出 `schema_locked: true` 时，才会额外插入 recap block。
+middleware 不再依赖 system prompt 去表达动态锁定信息。
 
 hook 会在每次 `schema_retrieve` 之后更新 `result.metadata`，这样下一轮就能复用最新的 schema 状态。
 
@@ -189,21 +193,20 @@ prompt 组装和工具过滤串起来。事实源来自 `src/my_agent.py`、
 |   "- `schema_retrieve` is locked for this turn."                                                  |
 |   "- Enter SQL draft mode now."                                                                    |
 |   "- Call `run_sql` instead of exploring more schema."                                            |
-| 输出：request.metadata + 请求时治理块                                                                |
+| 输出：request.metadata + 供下游 runtime notice 使用的 snapshot                                       |
 +====================================================================================================+
                                               |
                                               v
 +====================================================================================================+
-| 3) Agent._prepare_turn_prompt() + SchemaGovernanceEnhancer                                         |
+| 3) Agent._prepare_turn_prompt()                                                                    |
 |----------------------------------------------------------------------------------------------------|
-| 输入：user_message + tool_schemas + request.metadata + system_prompt                               |
+| 输入：user_message + tool_schemas + request.metadata + 稳定的 system_prompt                         |
 | 逻辑：                                                                                             |
 |   - 先把 snapshot 合并进 turn metadata                                                              |
-|   - 再把治理块拼进 system prompt                                                                   |
-|   - `SchemaGovernanceEnhancer` 只追加 `policy.system_prompt_block`，不改状态                       |
-|   - 当 `## Schema Governance` 已存在时，enhancer 直接返回                                          |
-| 结果：最终 system prompt 带着 `schema_locked: true` / `false` 的提示                               |
-| 示例：锁定后 system prompt 继续强调“进入 SQL draft mode”                                           |
+|   - 锁定时隐藏 `schema_retrieve`                                                                    |
+|   - 保持 system prompt byte-stable，避免把动态 schema 状态写进去                                     |
+| 结果：可见工具收敛，而动态 schema 状态留给 metadata 和 runtime notice                              |
+| 示例：锁定后 schema 信息通过消息侧通知暴露，而不是继续拼进 prompt                                   |
 +====================================================================================================+
                                               |
                                               v
@@ -213,12 +216,13 @@ prompt 组装和工具过滤串起来。事实源来自 `src/my_agent.py`、
 | 输入：request.metadata + request.tools + request.system_prompt                                      |
 | 逻辑：                                                                                             |
 |   - 再次合并 snapshot                                                                                |
-|   - 必要时追加 recap block                                                                         |
+|   - 把 recap 内容留给下游 runtime notice                                                             |
 |   - `should_hide_schema_tool()` 为 true 时移除 `schema_retrieve`                                   |
 |   - empty-results 锁定时才允许 metadata discovery 例外                                             |
 | eval-sql_126 结果：                                                                                |
 |   - 下一轮只保留 `run_sql`                                                                         |
-|   - `schema_retrieve` 不再暴露给 LLM                                                              |
+|   - `schema_retrieve` 不再暴露给 LLM                                                               |
+|   - SQL middleware 会把 schema lock reason 和 schema summary 带进消息侧通知                        |
 | 输出：最终 request.system_prompt + request.tools + request.metadata                                |
 +====================================================================================================+
 ```

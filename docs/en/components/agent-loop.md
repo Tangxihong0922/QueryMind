@@ -76,9 +76,9 @@ Each box shows three things:
 | - read recent conversation history from FileSystemConversationStore                                |
 | - recover the latest schema snapshot if it exists                                                  |
 | - generate seed_tables / graph_hint / required_fields                                              |
-| Prompt chain: SystemPromptBuilder + governance enhancers + ConversationFilter                      |
-| - merge tool schemas and governance blocks                                                         |
-| - build LlmRequest.messages                                                                        |
+| Prompt chain: SystemPromptBuilder + DefaultLlmContextEnhancer + ConversationFilter                  |
+| - build a stable system prompt and message-side advisory messages                                  |
+| - assemble LlmRequest.messages                                                                     |
 | Output: request.metadata carries schema_governance / sql_governance snapshots                      |
 +============================================+=======================================================+
                                                 |
@@ -87,7 +87,7 @@ Each box shows three things:
 | 5) LLM planner / middleware                                                                        |
 |----------------------------------------------------------------------------------------------------|
 | Input: system_prompt + visible tool schemas + conversation messages + request metadata             |
-| middleware.before_llm_request(): attach governance text and snapshot metadata                      |
+| middleware.before_llm_request(): prepend runtime notices and snapshot metadata                     |
 | Trace result: the first LLM turn emits tool_calls = schema_retrieve x3                            |
 | Loop rule: tool_calls -> execute tools -> append tool messages -> rebuild request -> next LLM turn |
 +============================================+=======================================================+
@@ -162,11 +162,11 @@ So `tool_count = 6` is the full loop from exploration to verification to SQL dra
 ## How the Modules Hand Off State
 
 - `SchemaGovernanceHook.after_tool(...)` observes each `schema_retrieve` result and writes the refreshed schema snapshot back into `result.metadata`.
-- `SchemaGovernanceMiddleware.before_llm_request(...)` merges `schema_governance`, `last_schema_summary`, and recap logic into the next request.
+- `SchemaGovernanceMiddleware.before_llm_request(...)` merges `schema_governance`, `last_schema_summary`, and recap logic into the next request, then leaves the live notice construction to the runtime notice path.
 - `_build_live_schema_snapshot()` turns the same-turn `schema_retrieve` result into `last_schema_summary` and `schema_retrieve_context`, so the next turn can inherit seed tables, `graph_hint`, and `required_fields`.
 - `SchemaRetrieveContextEnricher` reads recent conversation history from `FileSystemConversationStore`, reuses the latest schema snapshot first, and falls back to history when needed.
 - `SqlGovernanceHook.after_tool(...)` records each `run_sql` result and writes back `sql_governance`, `last_sql_summary`, and `last_sql_shape`.
-- `SqlGovernanceMiddleware.before_llm_request(...)` reuses or infers the SQL profile, appends the SQL governance block, and injects recap when needed.
+- `SqlGovernanceMiddleware.before_llm_request(...)` reuses or infers the SQL profile, prepends the SQL runtime notice, and injects recap when needed.
 - `_build_live_sql_snapshot()` turns the `run_sql` result into a same-turn snapshot, so the next turn can continue from a validated SQL shape.
 - `ConversationStore` persists `user / assistant / tool` messages for later turns, replay, and evaluation extraction.
 
@@ -176,7 +176,7 @@ The key wiring in `my_agent.py` is:
 
 - `workflow_handler=CompositeWorkflowHandler([...])`
 - `context_enrichers=[SchemaRetrieveContextEnricher(...)]`
-- `llm_context_enhancer=CompositeLlmContextEnhancer([...])`
+- `llm_context_enhancer=CompositeLlmContextEnhancer([DefaultLlmContextEnhancer(...)])`
 - `hooks=[schema_governance.hook, sql_governance.hook]`
 - `llm_middlewares=[schema_governance.middleware, sql_governance.middleware]`
 - `conversation_store=FileSystemConversationStore()`

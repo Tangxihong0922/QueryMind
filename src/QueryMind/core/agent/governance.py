@@ -458,7 +458,6 @@ def build_schema_governance_stack(
     policy: Optional[SchemaGovernancePolicy] = None,
 ) -> SchemaGovernanceStack:
     """Create a reusable governance hook/middleware/enhancer bundle."""
-    from ..enhancer.schema_governance import SchemaGovernanceEnhancer
     from ..hook.schema_governance import SchemaGovernanceHook
     from ..middleware.schema_governance import SchemaGovernanceMiddleware
 
@@ -469,5 +468,5 @@ def build_schema_governance_stack(
         manager=manager,
         hook=SchemaGovernanceHook(manager),
         middleware=SchemaGovernanceMiddleware(manager),
-        enhancer=SchemaGovernanceEnhancer(manager),
+        enhancer=None,
     )

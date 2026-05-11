@@ -21,7 +21,6 @@ from QueryMind.core.agent import (
 from QueryMind.core.enhancer import (
     CompositeLlmContextEnhancer,
     DefaultLlmContextEnhancer,
-    SchemaContextEnhancer,
 )
 from QueryMind.core.enricher import SchemaRetrieveContextEnricher
 from QueryMind.core.llm import LlmService
@@ -307,9 +306,6 @@ class EvaluationRuntime:
         governance_enhancer: Optional[Any] = None,
     ) -> CompositeLlmContextEnhancer:
         enhancers = []
-        if governance_enhancer is not None:
-            enhancers.append(governance_enhancer)
-        enhancers.append(SchemaContextEnhancer())
         if agent_memory is not None:
             enhancers.append(DefaultLlmContextEnhancer(agent_memory))
         return CompositeLlmContextEnhancer(enhancers)
@@ -347,11 +343,7 @@ class EvaluationRuntime:
             hooks=[governance_stack.hook, sql_governance_stack.hook],
             llm_middlewares=[governance_stack.middleware, sql_governance_stack.middleware],
             llm_context_enhancer=CompositeLlmContextEnhancer(
-                [
-                    governance_stack.enhancer,
-                    SchemaContextEnhancer(),
-                    DefaultLlmContextEnhancer(agent_memory),
-                ]
+                [DefaultLlmContextEnhancer(agent_memory)]
             ),
             context_enrichers=[
                 SchemaRetrieveContextEnricher(conversation_store=conversation_store)

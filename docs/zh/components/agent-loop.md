@@ -76,9 +76,9 @@
 | - 读取 FileSystemConversationStore 中最近的 conversation history                                   |
 | - 恢复最近的 schema snapshot（如果存在）                                                           |
 | - 生成 seed_tables / graph_hint / required_fields                                                  |
-| Prompt 链: SystemPromptBuilder + governance enhancers + ConversationFilter                         |
-| - 合并 tool schemas 和 governance blocks                                                           |
-| - 构建 LlmRequest.messages                                                                         |
+| Prompt 链: SystemPromptBuilder + DefaultLlmContextEnhancer + ConversationFilter                    |
+| - 构建稳定 system prompt 和消息侧 advisory messages                                                |
+| - 组装 LlmRequest.messages                                                                         |
 | 输出: request.metadata 携带 schema_governance / sql_governance snapshots                          |
 +============================================+=======================================================+
                                                 |
@@ -87,7 +87,7 @@
 | 5) LLM 规划器 / 中间件                                                                             |
 |----------------------------------------------------------------------------------------------------|
 | 输入: system_prompt + visible tool schemas + conversation messages + request metadata              |
-| middleware.before_llm_request(): 追加 governance 文案和 snapshot metadata                          |
+| middleware.before_llm_request(): 预置 runtime notice 和 snapshot metadata                          |
 | 轨迹结果: 首轮 LLM 输出 tool_calls = schema_retrieve x3                                             |
 | 循环规则: tool_calls -> 执行工具 -> 追加 tool messages -> 重建 request -> 下一轮 LLM               |
 +============================================+=======================================================+
@@ -162,11 +162,11 @@
 ## 模块如何接力
 
 - `SchemaGovernanceHook.after_tool(...)` 观察每次 `schema_retrieve` 的结果，并把刷新后的 schema snapshot 写回 `result.metadata`。
-- `SchemaGovernanceMiddleware.before_llm_request(...)` 把 `schema_governance`、`last_schema_summary` 和 recap 逻辑合并进下一轮 request。
+- `SchemaGovernanceMiddleware.before_llm_request(...)` 把 `schema_governance`、`last_schema_summary` 和 recap 逻辑合并进下一轮 request，然后把动态内容留给消息侧 notice。
 - `_build_live_schema_snapshot()` 把同一轮的 `schema_retrieve` 结果整理成 `last_schema_summary` 和 `schema_retrieve_context`，让下一轮可以继承 seed tables、`graph_hint` 和 `required_fields`。
 - `SchemaRetrieveContextEnricher` 从 `FileSystemConversationStore` 读取最近的会话历史，优先复用最新 schema snapshot，再回退到历史消息。
 - `SqlGovernanceHook.after_tool(...)` 记录每次 `run_sql` 的执行结果，并写回 `sql_governance`、`last_sql_summary` 和 `last_sql_shape`。
-- `SqlGovernanceMiddleware.before_llm_request(...)` 复用或推断 SQL profile，追加 SQL governance block，并在需要时插入 recap。
+- `SqlGovernanceMiddleware.before_llm_request(...)` 复用或推断 SQL profile，预置 SQL runtime notice，并在需要时插入 recap。
 - `_build_live_sql_snapshot()` 把 `run_sql` 的结果整理成同轮 snapshot，帮助下一轮继续沿着已经验证过的 SQL 形状推进。
 - `ConversationStore` 负责把 `user / assistant / tool` 消息持久化下来，供后续 turn、replay 和 evaluation 读取。
 
@@ -176,7 +176,7 @@
 
 - `workflow_handler=CompositeWorkflowHandler([...])`
 - `context_enrichers=[SchemaRetrieveContextEnricher(...)]`
-- `llm_context_enhancer=CompositeLlmContextEnhancer([...])`
+- `llm_context_enhancer=CompositeLlmContextEnhancer([DefaultLlmContextEnhancer(...)])`
 - `hooks=[schema_governance.hook, sql_governance.hook]`
 - `llm_middlewares=[schema_governance.middleware, sql_governance.middleware]`
 - `conversation_store=FileSystemConversationStore()`
