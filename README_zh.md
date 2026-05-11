@@ -68,6 +68,7 @@ QueryMind 的灵感来自 [Vanna agent framework](https://github.com/vanna-ai/va
 ### 📝 更新日志
 <details>
 <summary> <b>🔥 2026-05-11</b> </summary>
+
 - 将 QueryMind 的上下文拼装链路统一为“稳定 system prompt + 消息侧 runtime notice + tool-result metadata”。
 - 把动态的 schema lock、schema summary、SQL anchor / freeze / recap 以及 memory advisory 从 system prompt 路径中移出。
 - 继续通过请求时过滤控制 `schema_retrieve` 的可见性，而不是修改 tool registry。

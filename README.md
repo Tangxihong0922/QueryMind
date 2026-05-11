@@ -69,6 +69,7 @@ It builds on that foundation with differences in runtime structure, governance, 
 ### 📝 Changelog
 <details>
 <summary> <b>🔥 2026-05-11</b> </summary>
+
 - Unified QueryMind's context assembly around a stable system prompt, message-side runtime notices, and tool-result metadata.
 - Moved dynamic schema lock, schema summary, SQL anchor / freeze / recap, and memory advisory content out of the system prompt path.
 - Kept schema_retrieve visibility on the request-time filter path instead of mutating the tool registry.
