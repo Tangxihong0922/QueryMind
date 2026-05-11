@@ -27,7 +27,6 @@ from QueryMind.core.agent import (  # noqa: E402
 from QueryMind.core.enhancer import (  # noqa: E402
     CompositeLlmContextEnhancer,
     DefaultLlmContextEnhancer,
-    SchemaContextEnhancer,
 )
 from QueryMind.core.enricher import SchemaRetrieveContextEnricher  # noqa: E402
 from QueryMind.core.recovery import ExponentialBackoffStrategy  # noqa: E402
@@ -198,11 +197,7 @@ def build_agent() -> Agent:
     schema_governance = build_schema_governance_stack()
     sql_governance = build_sql_governance_stack()
     enhancer = CompositeLlmContextEnhancer(
-        [
-            schema_governance.enhancer,
-            SchemaContextEnhancer(),
-            DefaultLlmContextEnhancer(agent_memory=agent_memory),
-        ]
+        [DefaultLlmContextEnhancer(agent_memory=agent_memory)]
     )
 
     conversation_store = FileSystemConversationStore(base_dir=str(CONVERSATIONS_DIR))

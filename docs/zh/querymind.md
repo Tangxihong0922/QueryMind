@@ -8,7 +8,7 @@ QueryMind 是一个面向自然语言转 SQL 的 LLM Agent 框架。
 QueryMind 主要由五层组成：
 
 - 请求边界：解析用户并加载会话。
-- 提示链：构建基础 system prompt，并叠加治理规则。
+- 提示链：构建稳定的基础 system prompt，并把动态治理状态尽量放到 message-side runtime notice。
 - 工具层：对工具调用进行校验、治理和执行。
 - 记忆层：把 Agent Memory 和 Schema Memory 分开保存。
 - 治理层：用显式状态机控制 schema 探索和 SQL 起草。

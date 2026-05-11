@@ -11,11 +11,13 @@ The facts here come from [`src/my_agent.py`](../../../src/my_agent.py) and
 [`src/QueryMind/core/agent/agent.py`](../../../src/QueryMind/core/agent/agent.py),
 plus the `sql_126` trace captured in the evaluation artifacts.
 
-- `enhancer = CompositeLlmContextEnhancer([schema_governance.enhancer, SchemaContextEnhancer(), DefaultLlmContextEnhancer(agent_mem)])`
+- `enhancer = CompositeLlmContextEnhancer([DefaultLlmContextEnhancer(agent_mem)])`
 - `enricher = [SchemaRetrieveContextEnricher(conversation_store=FileSystemConversationStore())]`
 - `llm_middlewares = [schema_governance.middleware, sql_governance.middleware]`
 - `conversation_filters = []` in `my_agent.py`, so the filter chain is identity in the current runtime
 - `AgentConfig` only overrides `max_tool_iterations` and `schema_search_default_threshold`; `temperature`, `max_tokens`, and `stream_responses` stay on their defaults
+
+`SchemaContextEnhancer` and `SchemaGovernanceEnhancer` still exist as reusable helpers, but they are not part of the default runtime wiring anymore.
 
 ## ASCII Diagram
 
@@ -69,19 +71,15 @@ is the same for every normal query turn.
 |   - merge schema_governance snapshot into request_metadata                                         |
 |   - hide `schema_retrieve` when governance says the turn is locked                                 |
 |   - build the base system prompt                                                                   |
-|   - append governance prompt blocks                                                                |
+|   - keep the system prompt stable and cache-friendly                                                |
 |   - call `CompositeLlmContextEnhancer.enhance_system_prompt()`                                     |
 | prompt excerpts from the real builder:                                                             |
 |   "You are QueryMind, an AI data analyst assistant..."                                              |
 |   "Response Guidelines:"                                                                            |
 |   "- If a SQL query was executed successfully, append the executed SQL..."                          |
-|   "MEMORY SYSTEM:" / "TOOL USAGE MEMORY" / "TEXT MEMORY"                                           |
-| governance excerpts from the real stack:                                                           |
-|   "## Schema Governance"                                                                            |
-|   "- schema_locked: false"                                                                          |
-|   "## Schema Retrieval Tool - Search Mode Selection Rules"                                          |
-|   "- hybrid (Balanced mode, default)"                                                              |
-| output: visible_tool_schemas + system_prompt + merged_metadata                                     |
+|   "- Use `schema_retrieve` only for schema discovery..."                                            |
+|   "Runtime context notices are authoritative..."                                                    |
+| output: visible_tool_schemas + stable system_prompt + merged_metadata                              |
 +============================================+=======================================================+
                                                 |
                                                 v
@@ -106,7 +104,7 @@ is the same for every normal query turn.
 | order: `SchemaGovernanceMiddleware` -> `SqlGovernanceMiddleware`                                   |
 | logic:                                                                                             |
 |   - rehydrate request.metadata from runtime snapshots                                               |
-|   - append request-time governance prompt blocks                                                    |
+|   - prepare request-time runtime notices instead of appending governance blocks                     |
 |   - infer or reuse the SQL profile from request metadata or the user message                        |
 |   - hide `schema_retrieve` from `request.tools` when schema is locked                              |
 |   - inject recap blocks when the turn has drifted or run long enough                               |
@@ -127,7 +125,7 @@ is the same for every normal query turn.
 | request fields:                                                                                    |
 |   messages = filtered conversation history with merged metadata                                    |
 |   tools = visible tool schemas after governance narrowing                                          |
-|   system_prompt = base prompt + governance blocks + memory snippets                                |
+|   system_prompt = base prompt + short stable tail only                                             |
 |   metadata = turn counters + governance snapshots                                                  |
 |   temperature=0.7, max_tokens=None, stream=True                                                   |
 | output: the object handed to `llm_service.send_request(request)`                                   |
@@ -156,9 +154,9 @@ The request assembly path sees this turn with:
 The prompt stack assembled for this turn is:
 
 - base prompt from `DefaultSystemPromptBuilder`
-- `SchemaGovernanceEnhancer` block with `schema_locked: false`
-- `SchemaContextEnhancer` search-mode rules for `schema_retrieve`
-- `DefaultLlmContextEnhancer` memory snippets when `AgentMemory` returns matches
+- `DefaultLlmContextEnhancer` memory advisory message when `AgentMemory` returns matches
+- optional `SchemaContextEnhancer` message-side schema context when explicitly wired
+- `SchemaGovernanceMiddleware` / `SqlGovernanceMiddleware` runtime notices in the next request
 
 After tool execution starts, the next turn can reuse the snapshots written back by
 the governance hooks:

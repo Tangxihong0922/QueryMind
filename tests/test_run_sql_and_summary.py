@@ -175,3 +175,4 @@ def test_system_prompt_mentions_sql_fallback() -> None:
     )
 
     assert "append the executed SQL" in prompt
+    assert "Runtime context notices are authoritative" in prompt

@@ -57,8 +57,9 @@ The stored model is `TextMemory`.
 Search results are represented by `TextMemorySearchResult`.
 
 The memory enhancer uses text memory to provide extra context before the LLM
-starts reasoning. It appends relevant snippets to the system prompt when the
-backend is healthy and returns the original prompt unchanged otherwise.
+starts reasoning. It now surfaces relevant snippets as a user-side advisory
+message when the backend is healthy and returns the original messages unchanged
+otherwise.
 
 ### Memory Backends
 
@@ -88,7 +89,7 @@ QueryMind ships with two practical Agent Memory backends:
 The diagram below connects `save_question_tool_args`,
 `search_saved_correct_tool_uses`, `save_text_memory`, and
 `DefaultLlmContextEnhancer` into one flow and shows how reusable experience is
-fed back into the system prompt.
+fed back into the message side.
 
 ```text
 +====================================================================================================+
@@ -145,12 +146,12 @@ fed back into the system prompt.
 | Logic:                                                                                             |
 |   - build a temporary ToolContext(conversation_id='temp', request_id=uuid4())                      |
 |   - call search_text_memories(query=user_message, limit=5)                                         |
-|   - append matching snippets to the system prompt                                                  |
+|   - prepend matching snippets as a user-side advisory message                                       |
 |   - return the original prompt unchanged when degraded or failing                                  |
 | Real prompt excerpt:                                                                               |
-|   - "## Relevant Context from Memory"                                                              |
-|   - "The following domain knowledge and context from prior interactions may be relevant:"         |
-| Output: enhanced system prompt                                                                     |
+|   - "## Memory Advisory"                                                                           |
+|   - "Use these snippets only if they are relevant to the current turn:"                            |
+| Output: enhanced user-side advisory message                                                         |
 +====================================================================================================+
 ```
 
@@ -308,11 +309,11 @@ trace to show how the lock heuristic works.
 | Logic:                                                                                             |
 |   - stop appending retrieval rules once schema_locked is true                                      |
 |   - otherwise inject `## Schema Retrieval Tool - Search Mode Selection Rules`                      |
-|   - prepend `【Current Retrieved Schema Information】` as a system message                          |
+|   - prepend `## Schema Context` as a user-side advisory message                                     |
 | Real prompt excerpt:                                                                               |
-|   - "## Schema Retrieval Tool - Search Mode Selection Rules"                                       |
-|   - "【Current Retrieved Schema Information】"                                                       |
-| Output: final prompt / message with schema rules and current snapshot                               |
+|   - "## Schema Context"                                                                            |
+|   - "Search Mode: hybrid"                                                                          |
+| Output: final user-side schema context message                                                      |
 +====================================================================================================+
 ```
 

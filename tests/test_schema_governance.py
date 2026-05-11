@@ -14,6 +14,9 @@ from QueryMind.core.agent.governance import (  # noqa: E402
     SchemaGovernanceManager,
     SchemaGovernancePolicy,
 )
+from QueryMind.core.agent.sql_governance import (  # noqa: E402
+    SqlGovernanceManager,
+)
 from QueryMind.core.agent.agent import (  # noqa: E402
     _build_live_schema_snapshot,
 )
@@ -24,6 +27,9 @@ from QueryMind.core.enricher.schema_retrieve import (  # noqa: E402
 from QueryMind.core.hook.schema_governance import SchemaGovernanceHook  # noqa: E402
 from QueryMind.core.middleware.schema_governance import (  # noqa: E402
     SchemaGovernanceMiddleware,
+)
+from QueryMind.core.middleware.sql_governance import (  # noqa: E402
+    SqlGovernanceMiddleware,
 )
 from QueryMind.core.llm import LlmMessage, LlmRequest  # noqa: E402
 from QueryMind.core.registry import ToolRegistry  # noqa: E402
@@ -296,12 +302,60 @@ def test_schema_governance_middleware_hides_schema_tool_once_locked() -> None:
     updated = asyncio.run(middleware.before_llm_request(request))
 
     assert [tool.name for tool in updated.tools or []] == ["run_sql"]
-    assert "schema_locked: true" in (updated.system_prompt or "")
-    assert "`schema_retrieve` is locked for this turn" in (updated.system_prompt or "")
-    assert "Enter SQL draft mode now" in (updated.system_prompt or "")
-    assert "Search Mode Selection Rules" not in (updated.system_prompt or "")
+    assert updated.system_prompt is None
     assert updated.metadata["last_schema_summary"]["query"] == "product"
     assert updated.metadata["schema_governance"]["lock_reason"] == "enough_schema"
+    assert updated.metadata["schema_runtime_recap"]
+
+
+def test_schema_governance_runtime_notice_is_emitted_via_sql_middleware() -> None:
+    schema_manager = SchemaGovernanceManager(SchemaGovernancePolicy())
+    schema_state = asyncio.run(schema_manager.get_state("conv-1"))
+    schema_state.schema_locked = True
+    schema_state.lock_reason = "enough_schema"
+    schema_state.last_schema_summary = {
+        "summary_text": "schema_retrieve[hybrid] query='product' -> 1 table(s): production.product",
+        "query": "product",
+        "total_results": 1,
+        "selected_tables": ["production.product"],
+        "schema_locked": True,
+        "lock_reason": "enough_schema",
+    }
+
+    schema_middleware = SchemaGovernanceMiddleware(schema_manager)
+    sql_middleware = SqlGovernanceMiddleware(SqlGovernanceManager())
+    request = LlmRequest(
+        messages=[LlmMessage(role="user", content="need sql")],
+        tools=[
+            ToolSchema(name="schema_retrieve", description="schema", parameters={}),
+            ToolSchema(name="run_sql", description="sql", parameters={}),
+        ],
+        user=_make_user(),
+        system_prompt="base prompt",
+        metadata={
+            "conversation_id": "conv-1",
+            "request_id": "req-1",
+            "tool_iterations": 2,
+            "max_tool_iterations": 10,
+        },
+    )
+
+    updated = asyncio.run(schema_middleware.before_llm_request(request))
+    updated = asyncio.run(sql_middleware.before_llm_request(updated))
+
+    assert any(
+        msg.role == "user"
+        and "## Runtime Context Notice" in msg.content
+        and "schema_retrieve unavailable this turn: yes" in msg.content
+        and "lock reason: enough_schema" in msg.content
+        for msg in updated.messages
+    )
+    assert any(
+        msg.role == "user"
+        and "Schema recap:" in msg.content
+        and "schema_retrieve[hybrid] query='product'" in msg.content
+        for msg in updated.messages
+    )
 
 
 def test_schema_context_enhancer_skips_search_rules_when_locked() -> None:
@@ -344,7 +398,8 @@ def test_schema_context_enhancer_prefers_explicit_last_schema_summary() -> None:
 
     updated = asyncio.run(enhancer.enhance_user_messages(messages, _make_user()))
 
-    assert updated[0].role == "system"
+    assert updated[0].role == "user"
+    assert "## Schema Context" in updated[0].content
     assert "Results: 0 table(s)" in updated[0].content
     assert "lock_reason" not in updated[0].content
 
@@ -380,7 +435,8 @@ def test_schema_context_enhancer_prefers_schema_retrieve_context_snapshot() -> N
 
     updated = asyncio.run(enhancer.enhance_user_messages(messages, _make_user()))
 
-    assert updated[0].role == "system"
+    assert updated[0].role == "user"
+    assert "## Schema Context" in updated[0].content
     assert "Search Mode: expand" in updated[0].content
     assert "Results: 1 table(s)" in updated[0].content
     assert "production.product" in updated[0].content

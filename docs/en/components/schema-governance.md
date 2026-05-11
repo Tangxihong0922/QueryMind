@@ -2,16 +2,17 @@
 
 Schema governance manages the conversation-scoped `schema_retrieve` loop.
 It keeps schema discovery separate from SQL drafting and exposes a compact
-snapshot for prompt construction and request-time filtering.
+snapshot for request-time filtering and message-side runtime notices while the
+system prompt stays stable.
 
 ## Core Pieces
 
 - `SchemaGovernanceManager`: owns policy, mutable state, lock heuristics, recap gating, and request snapshots.
 - `SchemaGovernanceHook`: observes `schema_retrieve` results after tool execution and writes the refreshed snapshot back into `result.metadata`.
-- `SchemaGovernanceMiddleware`: merges the snapshot into `request.metadata`, appends the governance block, injects recaps when needed, and can hide `schema_retrieve` from `request.tools`.
-- `SchemaGovernanceEnhancer`: prompt-side helper that appends the fixed governance block from `policy.system_prompt_block` without touching state.
+- `SchemaGovernanceMiddleware`: merges the snapshot into `request.metadata`, prepares recap metadata for downstream runtime notices, and can hide `schema_retrieve` from `request.tools`.
+- `SchemaGovernanceEnhancer`: compatibility helper that no longer mutates the prompt in the default runtime wiring.
 
-`build_schema_governance_stack()` returns the reusable bundle of policy, manager, hook, middleware, and enhancer.
+`build_schema_governance_stack()` returns the reusable bundle of policy, manager, hook, middleware, and compatibility enhancer.
 
 ## Policy
 
@@ -111,20 +112,32 @@ When the lock reason is `schema_retrieve_empty_results`, the snapshot also adds:
 
 ### `build_prompt_block(...)`
 
-`build_prompt_block(...)` renders the request-time prompt block.
-It uses the locked prompt when `schema_locked` is true, otherwise it uses `policy.system_prompt_block`.
-The block then appends the latest schema summary when available, or the lock reason when the conversation is locked without a summary.
+`build_prompt_block(...)` renders the stable tail guidance used by the system prompt.
+It uses the locked prompt when `schema_locked` is true, otherwise it uses
+`policy.system_prompt_block`.
+The helper still appends the latest schema summary when available, or the lock
+reason when the conversation is locked without a summary.
 
-For the empty-results lock, the block also adds the special guidance that read-only metadata discovery is still allowed for that turn.
+For the empty-results lock, the helper also adds the special guidance that
+read-only metadata discovery is still allowed for that turn.
+The default runtime now surfaces volatile schema state through message-side
+notices instead of carrying it in the system prompt.
 
 ## Request-Time Flow
 
 The runtime uses the manager in two places:
 
-- `Agent._prepare_turn_prompt()` merges the snapshot into the turn metadata, hides `schema_retrieve` when locked, and appends the prompt block before the final system prompt is built.
-- `SchemaGovernanceMiddleware.before_llm_request()` repeats the metadata merge, appends the governance block, injects a recap when needed, and removes `schema_retrieve` from `request.tools` when the conversation is locked.
+- `Agent._prepare_turn_prompt()` merges the snapshot into the turn metadata,
+  hides `schema_retrieve` when locked, and keeps the system prompt stable.
+- `SchemaGovernanceMiddleware.before_llm_request()` repeats the metadata merge,
+  stores recap text for the downstream runtime notice, and removes
+  `schema_retrieve` from `request.tools` when the conversation is locked.
+- `SqlGovernanceMiddleware.before_llm_request()` later consumes the schema
+  snapshot and prepends the user-side runtime notice that exposes the live
+  schema summary and lock reason together with the SQL state.
 
-The middleware only adds the extra recap block when the system prompt does not already advertise `schema_locked: true`.
+The middleware only adds recap payloads when the current request has not already
+been summarized for that turn.
 
 The hook closes the loop by updating `result.metadata` after each `schema_retrieve` call, so the next turn can reuse the latest schema state.
 
@@ -186,21 +199,20 @@ prompt assembly, and tool filtering. The facts come from `src/my_agent.py`,
 |   "- `schema_retrieve` is locked for this turn."                                                  |
 |   "- Enter SQL draft mode now."                                                                    |
 |   "- Call `run_sql` instead of exploring more schema."                                            |
-| Output: request.metadata + request-time governance block                                            |
+| Output: request.metadata + snapshot for downstream runtime notice                                   |
 +====================================================================================================+
                                               |
                                               v
 +====================================================================================================+
-| 3) Agent._prepare_turn_prompt() + SchemaGovernanceEnhancer                                         |
+| 3) Agent._prepare_turn_prompt()                                                                    |
 |----------------------------------------------------------------------------------------------------|
-| Input: user_message + tool_schemas + request.metadata + system_prompt                              |
+| Input: user_message + tool_schemas + request.metadata + stable system_prompt                       |
 | Logic:                                                                                             |
 |   - merge the snapshot into turn metadata                                                           |
-|   - append the governance block into the system prompt                                              |
-|   - `SchemaGovernanceEnhancer` only appends `policy.system_prompt_block`, without changing state    |
-|   - when `## Schema Governance` is already present, the enhancer returns unchanged                 |
-| Result: the final system prompt carries the `schema_locked: true` / `false` guidance              |
-| Example: after lock, the system prompt keeps pushing SQL draft mode                                 |
+|   - hide `schema_retrieve` when governance says the turn is locked                                  |
+|   - keep the system prompt byte-stable except for the short tail rules                              |
+| Result: visible tools narrow while dynamic schema state stays out of the system prompt              |
+| Example: after lock, the schema state is carried by metadata and runtime notices                   |
 +====================================================================================================+
                                               |
                                               v
@@ -210,12 +222,13 @@ prompt assembly, and tool filtering. The facts come from `src/my_agent.py`,
 | Input: request.metadata + request.tools + request.system_prompt                                    |
 | Logic:                                                                                             |
 |   - merge the snapshot again                                                                        |
-|   - inject a recap block when needed                                                                |
+|   - store recap text for the downstream runtime notice                                             |
 |   - remove `schema_retrieve` when `should_hide_schema_tool()` is true                               |
 |   - the metadata-discovery exception only applies to empty-result locks                             |
 | eval-sql_126 result:                                                                               |
 |   - next turn keeps only `run_sql`                                                                  |
-|   - `schema_retrieve` is no longer exposed to the LLM                                              |
+|   - `schema_retrieve` is no longer exposed to the LLM                                               |
+|   - the SQL middleware prepends the user-side runtime notice that makes lock reason visible         |
 | Output: final request.system_prompt + request.tools + request.metadata                              |
 +====================================================================================================+
 ```

@@ -3,8 +3,7 @@ from __future__ import annotations
 LLM middleware that narrows schema_retrieve visibility once governance says so.
 """
 
-import re
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .base import LlmMiddleware
 from ..agent.governance import SchemaGovernanceManager
@@ -13,28 +12,8 @@ if TYPE_CHECKING:
     from ..llm.models import LlmRequest, LlmResponse
 
 
-def _append_prompt_block(existing: Optional[str], block: str) -> str:
-    existing = (existing or "").rstrip()
-    block = block.strip()
-    if not block:
-        return existing
-    if block in existing:
-        return existing
-    if not existing:
-        return block
-    return f"{existing}\n\n{block}"
-
-
-_SCHEMA_LOCK_STATE_RE = re.compile(r"schema_locked:\s*(true|false)", re.IGNORECASE)
-
-
-def _extract_schema_locked(system_prompt: Optional[str]) -> bool:
-    match = _SCHEMA_LOCK_STATE_RE.search(system_prompt or "")
-    return bool(match and match.group(1).lower() == "true")
-
-
 class SchemaGovernanceMiddleware(LlmMiddleware):
-    """Enforce schema governance at request time."""
+    """Enforce schema governance at request time and surface metadata."""
 
     def __init__(self, manager: SchemaGovernanceManager):
         self._manager = manager
@@ -77,27 +56,17 @@ class SchemaGovernanceMiddleware(LlmMiddleware):
         if snapshot:
             metadata.update(snapshot)
 
-        request.metadata = metadata
-
-        governance_block = await self._manager.build_prompt_block(
-            conversation_id=conversation_id
-        )
-        if governance_block:
-            request.system_prompt = _append_prompt_block(
-                request.system_prompt, governance_block
-            )
-
         if await self._manager.should_inject_recap(
             conversation_id=conversation_id,
             request_id=request_id,
             tool_iterations=tool_iterations,
             max_tool_iterations=max_tool_iterations,
         ):
-            if not _extract_schema_locked(request.system_prompt):
-                request.system_prompt = _append_prompt_block(
-                    request.system_prompt,
-                    self._build_recap_block(snapshot),
-                )
+            recap_block = self._build_recap_block(snapshot).strip()
+            if recap_block:
+                metadata["schema_runtime_recap"] = recap_block
+
+        request.metadata = metadata
 
         hide_schema_tool, _ = await self._manager.should_hide_schema_tool(
             conversation_id=conversation_id

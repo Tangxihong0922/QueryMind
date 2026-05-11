@@ -1,14 +1,13 @@
 from __future__ import annotations
 """
-Schema context enhancer for injecting schema retrieval rules and results into LLM context.
+Schema context enhancer for injecting schema retrieval results into LLM context.
 
-This enhancer injects:
-1. Search mode selection rules into system prompt
-2. Schema retrieval results into LLM messages
+This enhancer now keeps schema context on the message side only. Search-mode
+rules belong in the stable system prompt, while dynamic schema snapshots are
+preserved as real tool results or advisory messages.
 """
 
 import logging
-import re
 from typing import TYPE_CHECKING, List, Optional
 
 from .base import LlmContextEnhancer
@@ -20,76 +19,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-_SCHEMA_LOCK_STATE_RE = re.compile(r"schema_locked:\s*(true|false)", re.IGNORECASE)
-
-
-def _extract_schema_locked(system_prompt: str) -> Optional[bool]:
-    match = _SCHEMA_LOCK_STATE_RE.search(system_prompt or "")
-    if not match:
-        return None
-    return match.group(1).lower() == "true"
-
-
-# Search mode selection rules for system prompt injection
-SCHEMA_RETRIEVE_RULES = """
-## Schema Retrieval Tool - Search Mode Selection Rules
-
-When using the 'schema_retrieve' tool, select the appropriate search mode based on query semantics:
-
-### When seed_tables is NOT provided, choose from:
-
-- **hybrid** (Balanced mode, default)
-  - Use for: Most general business queries
-  - Examples: "find order-related data", "what tables contain customer information"
-
-- **vector** (Semantic priority)
-  - Use for: Simple queries without specific table relationship descriptions
-  - Examples: "find tables related to customer analysis", "what tables are about sales"
-
-- **graph** (Relationship exploration)
-  - Use for: Complex cross-table aggregations requiring FK relationship exploration
-  - Examples: "find all related tables from orders", "check foreign key relationships of products table"
-
-### When seed_tables IS provided (injected by system):
-
-- **expand** (Seed expansion)
-  - Use for: User query can be solved by finding more related tables based on seed_tables through FK relationships
-  - Examples: Given orders table, "find all tables related to orders"
-  - Note: Fall back to other modes when expand cannot satisfy the query
-
-### Stable Graph Hints:
-
-- **graph_hint=domain**: Use when the user explicitly names a business domain
-- **graph_hint=fields**: Use when the user asks about explicit columns / field names
-- **graph_hint=expand**: Use only when seed_tables are available from prior schema_retrieve output
-- **graph_hint=none**: Use when no graph-specific evidence is present
-
-### Tool Parameters:
-- query: Required. Natural language business query.
-- search_mode: Optional. hybrid/vector/graph/expand. Auto-selected based on rules above if not specified.
-- graph_hint: Optional. none/domain/fields/expand. Use to make graph intent explicit.
-- required_fields: Optional. Explicit field names mentioned by the user; keep empty if none.
-- limit: Optional. Max results to return (default: 10)
-- similarity_threshold: Optional. Vector similarity threshold (default: 0.4)
-- domain_filter: Optional. Business domain filter (e.g., 'Order', 'Inventory')
-- seed_tables: Optional. Seed table names for expand mode (provided by system when applicable)
-"""
-
-
 class SchemaContextEnhancer(LlmContextEnhancer):
-    """Enhancer for injecting schema retrieval rules and results into LLM context.
-
-    This enhancer:
-    1. Injects search mode selection rules into system prompt
-    2. Formats and injects schema retrieval results into messages
-    3. Prefers turn-local schema snapshots over history replay when available
-
-    The rules help the LLM make informed decisions about search mode selection.
-
-    Example:
-        >>> enhancer = SchemaContextEnhancer()
-        >>> enhanced_prompt = await enhancer.enhance_system_prompt(prompt, message, user)
-    """
+    """Enhancer for formatting schema retrieval results into messages."""
 
     def __init__(
         self,
@@ -114,27 +45,6 @@ class SchemaContextEnhancer(LlmContextEnhancer):
         user_message: str,
         user: "User"
     ) -> str:
-        """Enhance system prompt with schema retrieval rules.
-
-        This method appends the search mode selection rules to the system prompt,
-        helping the LLM make informed decisions about when and how to use the
-        schema retrieval tool.
-
-        Args:
-            system_prompt: The original system prompt
-            user_message: The initial user message
-            user: The user making the request
-
-        Returns:
-            Enhanced system prompt with schema retrieval rules
-        """
-        schema_locked = _extract_schema_locked(system_prompt)
-        if schema_locked is True:
-            return system_prompt
-
-        # Append the rules to system prompt when schema discovery is still open.
-        if SCHEMA_RETRIEVE_RULES not in system_prompt:
-            return system_prompt + "\n\n" + SCHEMA_RETRIEVE_RULES
         return system_prompt
 
     def _extract_schema_summary(self, message: "LlmMessage") -> Optional[dict]:
@@ -245,14 +155,17 @@ class SchemaContextEnhancer(LlmContextEnhancer):
             if not schema_context:
                 return messages
 
-            # Create a system message with schema context
-            if messages:
-                schema_message = type(messages[0])(
-                    role="system",
-                    content=f"【Current Retrieved Schema Information】\n\n{schema_context}"
-                )
-                return [schema_message] + messages
-            return messages
+            from ..llm import LlmMessage
+
+            schema_message = LlmMessage(
+                role="user",
+                content=f"## Schema Context\n\n{schema_context}",
+                metadata={
+                    "advisory_type": "schema_context",
+                    "tool_name": self._tool_name,
+                },
+            )
+            return [schema_message, *messages]
 
         except Exception as e:
             logger.warning(f"Failed to format schema context: {e}")

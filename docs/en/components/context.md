@@ -14,6 +14,8 @@ Those paths solve different problems and should stay separate from the prompt ch
 | Prompt-facing | `SystemPromptBuilder`, `LlmContextEnhancer` | `system_prompt` and the final `LlmRequest.messages` list |
 | Tool-facing | `ToolContextEnricher` | `ToolContext.metadata` |
 
+Prompt-facing runtime notices are now message-side first: schema lock notices, schema recaps, SQL anchor previews, freeze reasons, and memory advisories are injected as `LlmMessage(role=\"user\")` notices so the system prompt can stay stable.
+
 Prompt-facing details live in [`prompt-chain.md`](./prompt-chain.md).
 
 For the concrete turn-by-turn walk-through, see
@@ -56,8 +58,8 @@ The full `sql_126` Agent Loop trace lives in [`agent-loop.md`](./agent-loop.md).
 | 4) _prepare_turn_prompt()                                                                          |
 |----------------------------------------------------------------------------------------------------|
 | SystemPromptBuilder.build_system_prompt(user, visible_tool_schemas)                                |
-| schema governance may add a prompt block or hide the schema tool                                   |
-| LlmContextEnhancer.enhance_system_prompt(): memory examples                                        |
+| schema governance may hide the schema tool; runtime notices are injected later via middleware      |
+| LlmContextEnhancer.enhance_system_prompt(): stable prompt only                                     |
 | output: visible_tool_schemas + system_prompt + prepared_metadata                                   |
 +=============================================+======================================================+
                                                 |
@@ -75,7 +77,8 @@ The full `sql_126` Agent Loop trace lives in [`agent-loop.md`](./agent-loop.md).
 
 The important boundaries are:
 - `ToolContextEnricher` writes `ToolContext.metadata` first, then fetches visible tool schemas; it affects execution state only, not the prompt.
-- `_prepare_turn_prompt()` is responsible for `SystemPromptBuilder` + the governance block + `enhance_system_prompt()`, and produces the current turn's `system_prompt` and `visible_tool_schemas`.
+- `_prepare_turn_prompt()` is responsible for `SystemPromptBuilder` plus stable prompt shaping and tool visibility, and produces the current turn's `system_prompt` and `visible_tool_schemas`.
+- runtime governance details are appended later as message-side notices by middleware, not by mutating the system prompt
 - `ConversationFilter` trims and reorders conversation history before it becomes `LlmMessage` objects.
 - `LlmContextEnhancer.enhance_user_messages()` is the final message-side hook, and only then is `LlmRequest` materialized.
 
@@ -109,6 +112,8 @@ That enricher:
 - `lock_reason`
 
 This is execution state, not prompt policy. The enricher exists so a later `schema_retrieve` call can continue from the previous structured result without rebuilding that state in prose.
+
+When schema lock or SQL governance state needs to be visible to the model, the middleware layer injects it as a `user` advisory message. That keeps the prompt cache-friendly while still exposing live runtime state to the LLM.
 
 ## Conversation Filters
 

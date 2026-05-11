@@ -52,8 +52,8 @@ Text memory 存储可跨轮次复用的笔记和观察。
 对应的数据模型是 `TextMemory`，搜索结果是 `TextMemorySearchResult`。
 
 默认的 memory enhancer 会在 LLM 开始推理前读取 text memory。
-当后端健康时，它会把相关片段追加到 system prompt；如果后端不可用，
-则直接返回原始 prompt。
+当后端健康时，它会把相关片段作为用户侧 advisory message 注入；如果后端不可用，
+则直接返回原始消息列表。
 
 ### 记忆后端
 
@@ -81,7 +81,7 @@ Text memory 存储可跨轮次复用的笔记和观察。
 
 下面的框图把 `save_question_tool_args`、`search_saved_correct_tool_uses`、
 `save_text_memory` 和 `DefaultLlmContextEnhancer` 串成一条链路，并展示
-真实的记忆内容如何回流到 system prompt。
+真实的记忆内容如何回流到消息侧。
 
 ```text
 +====================================================================================================+
@@ -138,12 +138,12 @@ Text memory 存储可跨轮次复用的笔记和观察。
 | 执行逻辑:                                                                                          |
 |   - 构造临时 ToolContext(conversation_id='temp', request_id=uuid4())                               |
 |   - 调用 search_text_memories(query=user_message, limit=5)                                         |
-|   - 命中时把相关片段追加到 system prompt                                                            |
+|   - 命中时把相关片段作为用户侧 advisory message 注入                                                |
 |   - 失败或 degraded 时原样返回                                                                      |
 | 真实 prompt 片段:                                                                                  |
-|   - "## Relevant Context from Memory"                                                              |
-|   - "The following domain knowledge and context from prior interactions may be relevant:"         |
-| 输出: 增强后的 system prompt                                                                         |
+|   - "## Memory Advisory"                                                                           |
+|   - "Use these snippets only if they are relevant to the current turn:"                            |
+| 输出: 增强后的用户侧 advisory message                                                               |
 +====================================================================================================+
 ```
 
@@ -297,11 +297,11 @@ Schema Memory 用于存储 `schema_retrieve` 所依赖的表结构和检索元�
 | 执行逻辑:                                                                                          |
 |   - schema_locked 为 true 时不再追加检索规则                                                        |
 |   - 否则注入 `## Schema Retrieval Tool - Search Mode Selection Rules`                              |
-|   - 再把 `【Current Retrieved Schema Information】` 作为 system message 前缀                         |
+|   - 再把 `## Schema Context` 作为用户侧 advisory message 前缀                                       |
 | 真实 prompt 片段:                                                                                  |
-|   - "## Schema Retrieval Tool - Search Mode Selection Rules"                                       |
-|   - "【Current Retrieved Schema Information】"                                                       |
-| 输出: 带 schema 规则和当前快照的最终 prompt / message                                                |
+|   - "## Schema Context"                                                                            |
+|   - "Search Mode: hybrid"                                                                          |
+| 输出: 带 schema 规则和当前快照的最终用户侧 message                                                   |
 +====================================================================================================+
 ```
 

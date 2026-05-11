@@ -1480,7 +1480,6 @@ You can:
         """Resolve the visible tools and system prompt for the current turn."""
         visible_tool_schemas = list(tool_schemas)
         merged_metadata = dict(request_metadata or {})
-        governance_block = ""
 
         if self.schema_governance_manager is not None:
             governance_snapshot = await self.schema_governance_manager.build_request_metadata(
@@ -1499,15 +1498,9 @@ You can:
                     if tool.name != self.schema_governance_manager.policy.schema_tool_name
                 ]
 
-            governance_block = await self.schema_governance_manager.build_prompt_block(
-                conversation_id=conversation_id
-            )
-
         system_prompt = await self.system_prompt_builder.build_system_prompt(
             user, visible_tool_schemas
         )
-        if governance_block:
-            system_prompt = _append_prompt_block(system_prompt, governance_block)
 
         if self.llm_context_enhancer and system_prompt is not None:
             enhancement_span = None
