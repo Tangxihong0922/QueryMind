@@ -27,6 +27,7 @@ from .sql_governance_shape import (
     _profile_category_hints,
     _profile_gap_categories,
     _resolve_sql_family_state,
+    _sql_repair_strategy_from_snapshot,
     _safe_bool,
     _safe_float,
     _safe_int,
@@ -278,6 +279,33 @@ def _build_runtime_profile_snapshot(
     }
 
 
+def _sql_active_shape_from_state(state: "SqlGovernanceState") -> Dict[str, Any]:
+    return dict(
+        state.last_sql_features
+        or state.frozen_sql_shape
+        or state.best_sql_shape
+        or {}
+    )
+
+
+def _sql_repair_strategy_snapshot(
+    state: "SqlGovernanceState",
+) -> Dict[str, Any]:
+    active_shape = _sql_active_shape_from_state(state)
+    sql_family = str(
+        state.sql_family
+        or active_shape.get("sql_family")
+        or _shape_family_signature(active_shape)
+        or ""
+    ).strip().lower()
+    return _sql_repair_strategy_from_snapshot(
+        sql_family=sql_family,
+        features=active_shape,
+        row_grain_state=state.row_grain_state,
+        gap_categories=state.last_gap_categories,
+    )
+
+
 def _sql_anchor_tier_from_state(
     state: "SqlGovernanceState",
     *,
@@ -346,6 +374,13 @@ def _sql_should_emit_recap(
         or bool(state.last_gap_categories)
         or (anchor_family and current_family and anchor_family != current_family)
     )
+
+    if state.last_sql_result_success is False and (
+        has_drift
+        or state.last_rejection_reason_count > 0
+        or state.sql_attempts >= 1
+    ):
+        return True
 
     if anchor_tier in {"candidate", "validated"}:
         if has_drift or state.turn_local_repair_mode:
@@ -582,6 +617,9 @@ class SqlGovernanceManager:
                 current,
                 policy=self.policy,
             )
+            repair_snapshot = _sql_repair_strategy_snapshot(current)
+            if repair_snapshot.get("repair_strategy") == "structural_rewrite":
+                current.turn_local_repair_mode = False
 
             freeze_threshold = max(
                 self.policy.freeze_min_tool_iterations,
@@ -629,6 +667,8 @@ class SqlGovernanceManager:
                 "last_rejection_reason": current.last_rejection_reason,
                 "last_rejection_reason_count": current.last_rejection_reason_count,
                 "turn_local_repair_mode": current.turn_local_repair_mode,
+                "repair_strategy": repair_snapshot.get("repair_strategy"),
+                "repair_reason": repair_snapshot.get("repair_reason"),
             }
 
             if current.last_tool_iterations is not None and current.last_tool_iterations >= freeze_threshold:
@@ -704,6 +744,7 @@ class SqlGovernanceManager:
 
             last_sql_shape = dict(current.last_sql_features)
             runtime_profile = _build_runtime_profile_snapshot(current)
+            repair_snapshot = _sql_repair_strategy_snapshot(current)
             feature_names = _dedupe_preserve_order(
                 current.last_sql_features.get("feature_names") or []
             )
@@ -743,6 +784,9 @@ class SqlGovernanceManager:
                     "last_rejection_reason": current.last_rejection_reason,
                     "last_rejection_reason_count": current.last_rejection_reason_count,
                     "turn_local_repair_mode": current.turn_local_repair_mode,
+                    "repair_strategy": repair_snapshot.get("repair_strategy"),
+                    "repair_reason": repair_snapshot.get("repair_reason"),
+                    "repair_signals": list(repair_snapshot.get("repair_signals") or []),
                     "sql_family": current.sql_family,
                     "sql_family_candidates": list(current.sql_family_candidates),
                     "row_grain_state": dict(current.row_grain_state),
@@ -810,6 +854,7 @@ class SqlGovernanceManager:
         state = await self.get_state(conversation_id)
         async with self._lock:
             current = self._states[state.conversation_id]
+            repair_snapshot = _sql_repair_strategy_snapshot(current)
             return build_sql_governance_prompt_block(
                 profile=current.profile,
                 missing_categories=current.last_gap_categories,
@@ -818,9 +863,12 @@ class SqlGovernanceManager:
                 frozen_sql_signature=current.frozen_sql_signature,
                 best_sql_text=current.best_sql_text,
                 frozen_sql_text=current.frozen_sql_text,
+                last_sql_shape=_sql_active_shape_from_state(current),
                 anchor_tier=_sql_anchor_tier_from_state(current, policy=self.policy),
                 sql_family=_sql_anchor_family_from_state(current),
                 turn_local_repair_mode=current.turn_local_repair_mode,
+                repair_strategy=repair_snapshot.get("repair_strategy"),
+                repair_reason=repair_snapshot.get("repair_reason"),
             )
 
     async def build_recap_block(
@@ -832,11 +880,14 @@ class SqlGovernanceManager:
         state = await self.get_state(conversation_id)
         async with self._lock:
             current = self._states[state.conversation_id]
+            repair_snapshot = _sql_repair_strategy_snapshot(current)
             if not _sql_should_emit_recap(current, policy=self.policy):
                 return ""
             return build_sql_governance_recap_block(
                 None,
                 current.last_gap_categories,
+                repair_strategy=repair_snapshot.get("repair_strategy"),
+                repair_reason=repair_snapshot.get("repair_reason"),
                 sql_family=_sql_anchor_family_from_state(current),
                 row_grain_state=current.row_grain_state,
                 last_sql_shape=current.last_sql_features,

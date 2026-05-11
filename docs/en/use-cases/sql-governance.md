@@ -1,7 +1,8 @@
 # SQL Governance Use Case
 
 This page shows how SQL governance turns a broad SQL drafting problem into a
-controlled loop with profiling, freeze decisions, and local repair.
+controlled loop with profiling, freeze decisions, local repair, and structural
+rewrite routing for aggregation / rollup / multi-CTE turns.
 
 ## Scenario
 
@@ -25,12 +26,13 @@ stable skeleton or to steer into local repair.
 5. `SqlGovernanceManager.build_request_metadata(...)` exposes the current
    `sql_governance`, `runtime_profile`, `last_sql_summary`, `last_sql_shape`,
    `sql_family`, `sql_family_candidates`, and `row_grain_state` for the next
-   turn.
-6. `SqlGovernanceMiddleware.before_llm_request(...)` appends the SQL
-   governance prompt block and injects a recap when the turn has drifted,
-   failed, or run long enough.
-7. Once the evidence is strong enough, the manager freezes the skeleton and the
-   next turn can focus on repair rather than re-exploration.
+   turn, along with `repair_strategy`, `repair_reason`, and `repair_signals`.
+6. `SqlGovernanceMiddleware.before_llm_request(...)` folds those snapshots into
+   `request.metadata`, then prepends a message-side runtime notice; it also
+   injects a recap when the turn has drifted, failed, or run long enough.
+7. Once the evidence is strong enough, the manager freezes the skeleton. If
+   the turn is classified as `structural_rewrite`, the next turn rewrites the
+   grouped summary or CTE shape instead of doing local repair.
 
 ## ASCII Diagram
 
@@ -142,7 +144,7 @@ facts come from `src/QueryMind/core/agent/sql_governance.py`,
 | Input: request.metadata + request.system_prompt + request.messages                                  |
 | Logic:                                                                                             |
 |   - merge the latest snapshot                                                                      |
-|   - append the SQL governance prompt block                                                         |
+|   - prepend a message-side runtime notice                                                          |
 |   - inject a recap block when needed                                                               |
 |   - adjust the next turn based on current anchor / repair mode                                     |
 | sql_126 visible context:                                                                           |
@@ -154,7 +156,7 @@ facts come from `src/QueryMind/core/agent/sql_governance.py`,
 +====================================================================================================+
 | 7) Next LLM / tool selection                                                                       |
 |----------------------------------------------------------------------------------------------------|
-| Model sees: system prompt + governance block + metadata snapshot                                   |
+| Model sees: a stable system-prompt tail + message-side runtime notice + metadata snapshot          |
 | Result: continue repairing if there is drift, or finish once the SQL shape is stable              |
 | sql_126 result: the final `ORDER BY CASE ...` version is completed and the query turn ends         |
 +====================================================================================================+
@@ -168,6 +170,7 @@ The manager tracks:
 - `metadata_query_failures`;
 - SQL text signatures and canonical signatures;
 - `best_sql_support_count`;
+- `repair_strategy`, `repair_reason`, and `repair_signals`;
 - row-grain alignment;
 - `same_success_sql_canonical_streak`;
 - `turn_local_repair_mode`;
@@ -179,7 +182,7 @@ Freeze is triggered when the current candidate has enough support and the
 evaluation threshold is met. After freeze:
 
 - the current skeleton is treated as the anchor;
-- the runtime can prefer local repair over broad re-drafting;
+- the runtime can prefer local repair; structural-rewrite turns can rebuild the grouped summary or CTE shape instead of staying local;
 - recap messages can steer the model toward the frozen shape.
 
 ## Why This Matters

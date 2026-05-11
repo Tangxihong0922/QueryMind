@@ -1,7 +1,8 @@
 # SQL Governance 用例
 
 本页展示 SQL governance 如何把一个宽泛的 SQL 起草问题收敛成一个
-受控循环：画像推断、冻结决策，以及局部修补。
+受控循环：画像推断、冻结决策、局部修补，以及 aggregation / rollup / 多 CTE
+这类结构性 turn 的重写分流。
 
 ## 场景
 
@@ -25,11 +26,14 @@
 6. `SqlGovernanceManager.build_request_metadata(...)` 会把当前的
    `sql_governance`、`runtime_profile`、`last_sql_summary`、
    `last_sql_shape`、`sql_family`、`sql_family_candidates` 和
-   `row_grain_state` 暴露给下一轮。
-7. `SqlGovernanceMiddleware.before_llm_request(...)` 会追加 SQL governance
-   prompt block，并在轮次漂移、失败或运行过长时插入 recap。
-8. 一旦证据足够，manager 会冻结 skeleton，下一轮就可以专注于修补，
-   而不是重新大范围探索。
+   `row_grain_state` 暴露给下一轮，同时把 `repair_strategy`、`repair_reason`
+   和 `repair_signals` 一并带上。
+7. `SqlGovernanceMiddleware.before_llm_request(...)` 会把这些 snapshot 合并进
+   `request.metadata`，再预置一条 message-side runtime notice；当轮次漂移、
+   失败或运行过长时，还会插入 recap。
+8. 一旦证据足够，manager 会冻结 skeleton；如果当前 turn 被判定为
+   `structural_rewrite`，下一轮会优先重写 grouped summary / CTE 形状，而
+   不是继续做局部修补。
 
 ## ASCII 流程图
 
@@ -141,7 +145,7 @@
 | 输入：request.metadata + request.system_prompt + request.messages                                   |
 | 逻辑：                                                                                             |
 |   - 读取并合并最新 snapshot                                                                        |
-|   - 追加 SQL governance prompt block                                                               |
+|   - 预置 message-side runtime notice                                                               |
 |   - 必要时插入 recap block                                                                         |
 |   - 依据 current anchor / repair mode 调整下一轮提示                                              |
 | sql_126 可见上下文：                                                                               |
@@ -153,7 +157,7 @@
 +====================================================================================================+
 | 7) 下一轮 LLM / tool selection                                                                     |
 |----------------------------------------------------------------------------------------------------|
-| 模型看到：system prompt + governance block + metadata snapshot                                     |
+| 模型看到：稳定 system prompt tail + message-side runtime notice + metadata snapshot               |
 | 结果：如果还有 drift 就继续修补；如果已经稳定，就结束该 SQL 起草轮次                               |
 | sql_126 结果：最终稳定的 `ORDER BY CASE ...` 版本完成，query turn 结束                              |
 +====================================================================================================+
@@ -167,6 +171,7 @@ manager 会跟踪这些信号：
 - `metadata_query_failures`；
 - SQL 文本签名和 canonical signature；
 - `best_sql_support_count`；
+- `repair_strategy`、`repair_reason` 和 `repair_signals`；
 - row grain 是否对齐；
 - `same_success_sql_canonical_streak`；
 - `turn_local_repair_mode`；
@@ -178,7 +183,7 @@ manager 会跟踪这些信号：
 freeze 之后：
 
 - 当前 skeleton 会被视为 anchor；
-- runtime 可以优先做局部修补，而不是重新起草整条 SQL；
+- runtime 可以优先做局部修补；如果当前 turn 属于 aggregation / rollup / 多 CTE 这类结构性形状，则会优先走结构重写；
 - recap 消息可以把模型拉回冻结的形状上。
 
 ## 为什么重要

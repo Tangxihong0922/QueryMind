@@ -17,6 +17,7 @@ from QueryMind.core.agent.sql_governance import (  # noqa: E402
     sql_governance_rejection_reason,
     sql_semantics_rejection_reason,
 )
+from QueryMind.core.agent.sql_governance_prompt import build_sql_governance_prompt_block  # noqa: E402
 from QueryMind.core.evaluation.base import SqlTestCase  # noqa: E402
 from QueryMind.core.evaluation.runtime import EvaluationRuntime, NoOpAgentMemory  # noqa: E402
 from QueryMind.core.llm import LlmMessage, LlmRequest  # noqa: E402
@@ -90,6 +91,19 @@ def test_sql_governance_profile_inference_covers_set_operation_and_time_series()
     assert "time_series" in profile.categories
 
 
+def test_sql_governance_profile_inference_covers_detail_expression_tags() -> None:
+    profile = build_sql_governance_profile(
+        tags=["case_when", "null_handling", "comparison", "distinct"],
+        query="case when coalesce compare distinct",
+        source="case",
+    )
+
+    assert "case_when" in profile.categories
+    assert "null_handling" in profile.categories
+    assert "comparison" in profile.categories
+    assert "distinct" in profile.categories
+
+
 def test_analyze_sql_shape_is_none_safe(monkeypatch) -> None:
     import QueryMind.core.agent.sql_governance_shape as sql_governance_shape_module
 
@@ -103,6 +117,23 @@ def test_analyze_sql_shape_is_none_safe(monkeypatch) -> None:
 
     assert shape.has_select is True
     assert shape.statement_count == 1
+    assert shape.cte_count == 0
+
+
+def test_analyze_sql_shape_fallback_counts_ctes(monkeypatch) -> None:
+    import QueryMind.core.agent.sql_governance_shape as sql_governance_shape_module
+
+    monkeypatch.setattr(
+        sql_governance_shape_module,
+        "_parse_sqlglot_statements",
+        lambda *args, **kwargs: [None],
+    )
+
+    shape = analyze_sql_shape("WITH a AS (SELECT 1) SELECT * FROM a")
+
+    assert shape.has_select is True
+    assert shape.statement_count == 1
+    assert shape.cte_count == 1
 
 
 def test_sql_governance_rejects_metadata_introspection() -> None:
@@ -146,6 +177,7 @@ def test_sql_semantics_rejects_aggregate_without_group_by() -> None:
 
     assert reason is not None
     assert "GROUP BY" in reason
+    assert "candidate skeleton" not in reason.lower()
 
 
 def test_sql_semantics_allows_correlated_subquery_for_join_intent() -> None:
@@ -237,14 +269,16 @@ def test_sql_governance_middleware_injects_baseline_prompt_without_static_checkl
 
     updated = asyncio.run(middleware.before_llm_request(request))
 
-    assert "SQL Governance" in (updated.system_prompt or "")
-    assert "Avoid metadata introspection queries" in (updated.system_prompt or "")
-    assert "Keep the current row grain" in (updated.system_prompt or "")
-    assert "Task Profile" not in (updated.system_prompt or "")
-    assert "Missing From Last Attempt" not in (updated.system_prompt or "")
+    assert updated.system_prompt == "base prompt"
     assert "sql_governance_profile" not in (updated.metadata or {})
     assert "sql_profile" not in (updated.metadata or {})
     assert updated.metadata.get("sql_governance", {}).get("sql_family") is not None
+    assert any(
+        msg.role == "user"
+        and "## Runtime Context Notice" in msg.content
+        and "SQL governance:" in msg.content
+        for msg in updated.messages
+    )
 
 
 def test_sql_governance_recap_includes_set_operation_and_time_series_guidance() -> None:
@@ -270,6 +304,47 @@ def test_sql_governance_recap_includes_set_operation_and_time_series_guidance() 
 
     assert "set operation semantics stable" in recap.lower()
     assert "time grain stable" in recap.lower()
+
+
+def test_sql_governance_prompt_includes_detail_expression_guidance() -> None:
+    profile = build_sql_governance_profile(
+        tags=["case_when", "null_handling", "comparison", "distinct"],
+        query="case when coalesce compare distinct",
+        source="case",
+    )
+    prompt = build_sql_governance_prompt_block(
+        profile,
+        anchor_tier="candidate",
+        sql_family="detail",
+        turn_local_repair_mode=True,
+        best_sql_text="SELECT CASE WHEN x THEN y END FROM t",
+    )
+
+    assert "case branches" in prompt.lower()
+    assert "null / coalesce semantics" in prompt.lower()
+    assert "comparison predicate stable" in prompt.lower()
+    assert "deduplicated" in prompt.lower()
+
+
+def test_sql_governance_recap_includes_detail_expression_guidance() -> None:
+    recap = build_sql_governance_recap_block(
+        build_sql_governance_profile(
+            tags=["case_when", "null_handling", "comparison", "distinct"],
+            query="case when coalesce compare distinct",
+            source="case",
+        ),
+        ["case_when", "null_handling", "comparison", "distinct"],
+        sql_family="detail",
+        row_grain_state={
+            "expected": "detail",
+            "observed": "detail",
+            "status": "aligned",
+        },
+        last_sql_shape={"has_order_by": True},
+        last_sql_text="SELECT CASE WHEN x THEN y END FROM t ORDER BY x",
+    )
+
+    assert "case / coalesce / comparison / deduplication" in recap.lower()
 
 
 def test_sql_governance_middleware_injects_recap_after_failed_sql_attempt() -> None:
@@ -302,8 +377,13 @@ def test_sql_governance_middleware_injects_recap_after_failed_sql_attempt() -> N
     )
     updated = asyncio.run(middleware.before_llm_request(followup))
 
-    assert "SQL Self-Check Reminder" not in (updated.system_prompt or "")
-    assert "Avoid metadata introspection queries" in (updated.system_prompt or "")
+    assert updated.system_prompt == "base prompt"
+    assert any(
+        msg.role == "user"
+        and "## Runtime Context Notice" in msg.content
+        and "SQL recap:" in msg.content
+        for msg in updated.messages
+    )
 
 
 def test_sql_governance_recap_is_empty_without_anchor_or_drift() -> None:
@@ -361,9 +441,14 @@ def test_sql_governance_middleware_injects_recap_after_shape_gap() -> None:
         manager.build_recap_block(conversation_id="conv-2")
     )
 
-    assert "SQL Self-Check Reminder" in (updated.system_prompt or "")
-    assert "row grain stable" in (updated.system_prompt or "").lower()
-    assert "window shape" in (updated.system_prompt or "").lower()
+    assert updated.system_prompt == "base prompt"
+    assert any(
+        msg.role == "user"
+        and "SQL recap:" in msg.content
+        and "row grain stable" in msg.content.lower()
+        and "window shape" in msg.content.lower()
+        for msg in updated.messages
+    )
     assert "window shape" in recap_block.lower()
     assert "LAG" not in recap_block
     assert "ROW_NUMBER" not in recap_block
@@ -413,9 +498,13 @@ def test_sql_governance_middleware_injects_grouped_output_positive_recap_after_s
     )
     updated = asyncio.run(middleware.before_llm_request(followup))
 
-    assert "row grain" in (updated.system_prompt or "").lower()
-    assert "grouped summary" in (updated.system_prompt or "").lower()
-    assert "GROUP BY" not in (updated.system_prompt or "")
+    assert updated.system_prompt == "base prompt"
+    assert any(
+        msg.role == "user"
+        and "row grain" in msg.content.lower()
+        and "grouped summary" in msg.content.lower()
+        for msg in updated.messages
+    )
 
 
 def test_sql_governance_middleware_merges_runtime_snapshot_into_metadata() -> None:
@@ -496,7 +585,13 @@ def test_sql_governance_profile_seeds_turn_local_family_state_before_first_sql()
     assert governance.get("sql_family_candidates", [])[0] == "navigation"
     assert row_grain_state.get("expected") == "detail"
     assert row_grain_state.get("status") == "aligned"
-    assert "Keep the current row grain" in (updated.system_prompt or "")
+    assert updated.system_prompt == "base prompt"
+    assert any(
+        msg.role == "user"
+        and "SQL governance:" in msg.content
+        and "anchor tier: candidate" not in msg.content
+        for msg in updated.messages
+    )
 
 
 def test_sql_governance_middleware_shows_candidate_anchor_and_local_repair_mode() -> None:
@@ -540,7 +635,77 @@ def test_sql_governance_middleware_shows_candidate_anchor_and_local_repair_mode(
     assert "Local repair mode" in prompt_block
     assert "frozen" not in prompt_block.lower()
     assert snapshot["sql_governance"]["turn_local_repair_mode"] is True
+    assert snapshot["sql_governance"]["repair_strategy"] == "local_repair"
     assert snapshot["sql_governance"]["same_success_sql_canonical_streak"] >= 2
+
+
+def test_sql_governance_structural_rewrite_lane_surfaces_cte_and_group_by_signals() -> None:
+    policy = SqlGovernancePolicy(
+        freeze_trigger_ratio=0.95,
+        freeze_min_tool_iterations=10,
+        freeze_min_best_sql_support=3,
+    )
+    manager = SqlGovernanceManager(policy)
+    middleware = SqlGovernanceMiddleware(manager)
+    sql = (
+        "WITH base AS ("
+        "SELECT department, sales FROM sales"
+        "), filtered AS ("
+        "SELECT department, sales FROM base"
+        ") "
+        "SELECT department, SUM(sales) AS total_sales "
+        "FROM filtered "
+        "GROUP BY department"
+    )
+
+    shape = analyze_sql_shape(sql)
+    assert shape.cte_count == 2
+
+    for index in (1, 2):
+        asyncio.run(
+            manager.observe_sql_result(
+                conversation_id="conv-structural-rewrite",
+                request_id=f"req-{index}",
+                result_metadata={
+                    "tool_name": "run_sql",
+                    "conversation_id": "conv-structural-rewrite",
+                    "request_id": f"req-{index}",
+                    "executed_sql": sql,
+                    "dialect": "postgres",
+                    "tool_iterations": index,
+                    "max_tool_iterations": 20,
+                },
+                success=True,
+            )
+        )
+
+    prompt_block = asyncio.run(
+        manager.build_prompt_block(
+            conversation_id="conv-structural-rewrite",
+            request_id="req-3",
+        )
+    )
+    snapshot = asyncio.run(
+        manager.build_request_metadata(conversation_id="conv-structural-rewrite")
+    )
+    request = _make_sql_request(
+        conversation_id="conv-structural-rewrite",
+        request_id="req-3",
+        message="show department totals",
+    )
+    updated = asyncio.run(middleware.before_llm_request(request))
+
+    assert snapshot["sql_governance"]["repair_strategy"] == "structural_rewrite"
+    assert snapshot["sql_governance"]["turn_local_repair_mode"] is False
+    assert "Structural rewrite mode" in prompt_block
+    assert "candidate skeleton" not in prompt_block.lower()
+    assert any(
+        msg.role == "user"
+        and "repair strategy: structural_rewrite" in msg.content.lower()
+        and "cte_count=2" in msg.content.lower()
+        and "group_by_items=department" in msg.content.lower()
+        for msg in updated.messages
+    )
 
 
 def test_sql_governance_freezes_valid_anchor_without_profile() -> None:

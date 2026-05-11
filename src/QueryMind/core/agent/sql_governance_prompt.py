@@ -58,7 +58,10 @@ def _profile_category_hints(category: str) -> List[str]:
         "grouping": "Keep non-aggregated projections aligned with the grouped summary.",
         "join": "Preserve join coverage and avoid shrinking the result too early.",
         "ordering": "Add only the requested ordering.",
-        "distinct": "Use DISTINCT only if the result must be deduplicated.",
+        "distinct": "Keep the current projection stable and use DISTINCT only if the result must be deduplicated.",
+        "case_when": "Keep the current projection stable and only adjust the CASE branches.",
+        "null_handling": "Keep the current projection stable and only adjust NULL / COALESCE semantics.",
+        "comparison": "Keep the comparison predicate stable and only adjust the operator or NULL semantics.",
         "subquery": "A nested form is acceptable when it keeps the main path stable.",
         "filtering": "Keep the predicate set tight and avoid widening the projection.",
         "set_operation": "Keep UNION / INTERSECT / EXCEPT semantics intact; do not collapse them into plain filtering.",
@@ -97,6 +100,12 @@ def build_sql_governance_profile(
         inferred.append("ordering")
     if "distinct" in tag_pool:
         inferred.append("distinct")
+    if "case_when" in tag_pool:
+        inferred.append("case_when")
+    if "null_handling" in tag_pool:
+        inferred.append("null_handling")
+    if "comparison" in tag_pool:
+        inferred.append("comparison")
     if "subquery" in tag_pool:
         inferred.append("subquery")
     if any(tag in tag_pool for tag in {"filtering", "date_filter", "numeric_filter", "text_filter", "null_handling", "comparison"}):
@@ -685,11 +694,16 @@ def build_sql_governance_prompt_block(
     frozen_sql_signature: Optional[str] = None,
     best_sql_text: Optional[str] = None,
     frozen_sql_text: Optional[str] = None,
+    last_sql_shape: Optional[Dict[str, Any]] = None,
     anchor_tier: Optional[str] = None,
     sql_family: Optional[str] = None,
     turn_local_repair_mode: bool = False,
+    repair_strategy: Optional[str] = None,
+    repair_reason: Optional[str] = None,
 ) -> str:
     """Render a reusable SQL governance prompt block."""
+    repair_strategy = str(repair_strategy or "").strip().lower()
+    repair_reason = str(repair_reason or "").strip()
     if sql_exploration_frozen:
         frozen_preview = _collapse_sql(frozen_sql_text or best_sql_text or "")
         if len(frozen_preview) > 160:
@@ -713,17 +727,40 @@ def build_sql_governance_prompt_block(
         "- Avoid metadata introspection queries unless they are explicitly allowed.",
         "- Keep the current row grain stable and call `run_sql` once the table path is clear.",
     ]
+    if repair_strategy == "structural_rewrite":
+        prompt_parts.extend(
+            [
+                "",
+                "- Structural rewrite mode is active: rebuild the grouped summary or CTE shape from scratch instead of preserving the current skeleton.",
+            ]
+        )
+        if repair_reason:
+            prompt_parts.append(f"- Repair reason: {repair_reason}")
     guidance_categories = _dedupe_preserve_order(
         [
             *[
                 category
                 for category in (profile.categories if profile else [])
-                if category in {"set_operation", "time_series"}
+                if category in {
+                    "set_operation",
+                    "time_series",
+                    "case_when",
+                    "null_handling",
+                    "comparison",
+                    "distinct",
+                }
             ],
             *[
                 category
                 for category in (missing_categories or [])
-                if category in {"set_operation", "time_series"}
+                if category in {
+                    "set_operation",
+                    "time_series",
+                    "case_when",
+                    "null_handling",
+                    "comparison",
+                    "distinct",
+                }
             ],
         ]
     )
@@ -737,18 +774,28 @@ def build_sql_governance_prompt_block(
             anchor_preview = f"{anchor_preview[:157]}..."
         anchor_label = "Candidate anchor" if anchor_tier == "candidate" else "Validated anchor"
         family_suffix = f" for the {sql_family} family" if sql_family else ""
-        if anchor_preview:
-            prompt_parts.append(
-                f"- {anchor_label}{family_suffix}: {anchor_preview}. Keep the current skeleton stable and only make local fixes."
-            )
+        if repair_strategy == "structural_rewrite":
+            if anchor_preview:
+                prompt_parts.append(
+                    f"- {anchor_label}{family_suffix}: {anchor_preview}. Treat this only as a reference; rebuild the SQL shape from scratch."
+                )
+            else:
+                prompt_parts.append(
+                    f"- {anchor_label}{family_suffix}: treat this only as a reference; rebuild the SQL shape from scratch."
+                )
         else:
-            prompt_parts.append(
-                f"- {anchor_label}{family_suffix}: keep the current skeleton stable and only make local fixes."
-            )
-        if turn_local_repair_mode:
-            prompt_parts.append(
-                "- Local repair mode is active: keep the same canonical path and only repair the last drift."
-            )
+            if anchor_preview:
+                prompt_parts.append(
+                    f"- {anchor_label}{family_suffix}: {anchor_preview}. Keep the current skeleton stable and only make local fixes."
+                )
+            else:
+                prompt_parts.append(
+                    f"- {anchor_label}{family_suffix}: keep the current skeleton stable and only make local fixes."
+                )
+            if turn_local_repair_mode:
+                prompt_parts.append(
+                    "- Local repair mode is active: keep the same canonical path and only repair the last drift."
+                )
     return "\n".join(prompt_parts).strip()
 
 
@@ -759,6 +806,8 @@ def _build_sql_governance_positive_recap(
     last_sql_shape: Optional[Dict[str, Any]] = None,
     missing_categories: Optional[Iterable[str]] = None,
     last_sql_text: Optional[str] = None,
+    repair_strategy: Optional[str] = None,
+    repair_reason: Optional[str] = None,
     turn_local_repair_mode: bool = False,
     rejection_reason_streak: int = 0,
 ) -> str:
@@ -766,6 +815,8 @@ def _build_sql_governance_positive_recap(
     shape = dict(last_sql_shape or {})
     row_state = dict(row_grain_state or {})
     family = str(sql_family or "").strip().lower()
+    repair_strategy = str(repair_strategy or "").strip().lower()
+    repair_reason = str(repair_reason or "").strip()
     categories = {
         str(category).strip().lower()
         for category in (missing_categories or [])
@@ -788,15 +839,11 @@ def _build_sql_governance_positive_recap(
     has_where = bool(shape.get("has_where"))
     has_set_operation = bool(shape.get("has_set_operation"))
     has_time_series = bool(shape.get("has_time_series"))
-    date_filter_cue = bool(
-        re.search(
-            r"\b(date|date_part|year|month|quarter|current_date|now|interval|today|yesterday)\b",
-            _normalize_text(last_sql_text or ""),
-        )
-    )
+    cte_count = int(shape.get("cte_count") or 0)
     expected_row_grain = str(row_state.get("expected") or "").strip().lower()
     observed_row_grain = str(row_state.get("observed") or "").strip().lower()
     row_grain_status = str(row_state.get("status") or "").strip().lower()
+    row_grain_reason = str(row_state.get("reason") or "").strip().lower()
     navigation_cue = _strong_navigation_window_cue(last_sql_text or "")
     ranking_cue = _strong_ranking_window_cue(last_sql_text or "")
     rollup_cue = _strong_rollup_cue(last_sql_text or "")
@@ -807,9 +854,34 @@ def _build_sql_governance_positive_recap(
             _normalize_text(last_sql_text or ""),
         )
     )
+    date_filter_cue = bool(
+        re.search(
+            r"\b(date|date_part|year|month|quarter|current_date|now|interval|today|yesterday)\b",
+            _normalize_text(last_sql_text or ""),
+        )
+    )
+    has_time_grain_cue = bool(
+        re.search(
+            r"\b(time series|time-series|trend|trends|over time|monthly|quarterly|yearly|daily|weekly|mtd|qtd|ytd|mom|mom growth|yoy|year over year|month over month)\b",
+            _normalize_text(last_sql_text or ""),
+        )
+    )
 
-    repair_mode = turn_local_repair_mode or rejection_reason_streak >= 2
-    if repair_mode:
+    structural_mode = repair_strategy == "structural_rewrite"
+    repair_mode = (turn_local_repair_mode or rejection_reason_streak >= 2) and not structural_mode
+    if structural_mode:
+        if expected_row_grain == "subtotal" or has_rollup or has_grouping_sets or has_grouping or rollup_cue or categories & {"rollup"}:
+            row_sentence = "This is a structural rewrite turn; rebuild the subtotal grain from scratch."
+        elif expected_row_grain == "grouped" or has_group_by or grouping_cue or categories & {"aggregation", "grouping"}:
+            if cte_count >= 2:
+                row_sentence = "This is a structural rewrite turn; rebuild the grouped summary and CTE shape from scratch."
+            else:
+                row_sentence = "This is a structural rewrite turn; rebuild the grouped summary from scratch."
+        elif cte_count >= 2:
+            row_sentence = "This is a structural rewrite turn; rebuild the CTE-backed SQL shape from scratch."
+        else:
+            row_sentence = "This is a structural rewrite turn; rebuild the SQL shape from scratch."
+    elif repair_mode:
         if expected_row_grain == "subtotal" or has_rollup or has_grouping_sets or has_grouping or rollup_cue or categories & {"rollup"}:
             row_sentence = "You already have a usable candidate skeleton; keep the subtotal grain stable first."
         elif expected_row_grain == "grouped" or has_group_by or grouping_cue or categories & {"aggregation", "grouping"}:
@@ -818,14 +890,7 @@ def _build_sql_governance_positive_recap(
             row_sentence = "You already have a usable candidate skeleton; keep the coverage intact first."
         else:
             row_sentence = "You already have a usable candidate skeleton; keep the current row grain stable first."
-    elif (
-        row_grain_status == "mismatch"
-        or expected_row_grain in {"grouped", "subtotal"}
-        or observed_row_grain in {"summary", "mixed"}
-        or has_aggregation
-        or has_group_by
-        or has_outer_join_null_filter
-    ):
+    elif row_grain_status == "mismatch" or row_grain_reason:
         if expected_row_grain == "subtotal" or has_rollup or has_grouping_sets or has_grouping or rollup_cue or categories & {"rollup"}:
             row_sentence = "Keep the subtotal grain stable first."
         elif expected_row_grain == "grouped" or has_group_by or grouping_cue or categories & {"aggregation", "grouping"}:
@@ -837,42 +902,63 @@ def _build_sql_governance_positive_recap(
     else:
         row_sentence = "Keep the current row grain stable first."
 
-    family_sentence = ""
-    if family in {"navigation", "ranking"} or has_window or navigation_cue or ranking_cue or categories & {"window", "ranking"}:
-        if family == "navigation" or has_navigation_window or navigation_cue:
-            family_sentence = "Then keep the same window shape stable and preserve the local row-to-row comparison path."
-        elif family == "ranking" or has_ranking_window or ranking_cue:
-            family_sentence = "Then keep the same window shape stable and preserve the intended row ordering."
+    family_sentences: List[str] = []
+    if structural_mode:
+        if expected_row_grain == "subtotal" or has_rollup or has_grouping_sets or has_grouping or categories & {"rollup"}:
+            family_sentences.append("Then keep the rebuilt subtotal grain explicit and only add subtotal logic when the question asks for it.")
+        elif expected_row_grain == "grouped" or has_group_by or grouping_cue or categories & {"aggregation", "grouping"}:
+            family_sentences.append("Then keep the rebuilt grouped summary at the requested grain and avoid widening it.")
+        elif cte_count >= 2:
+            family_sentences.append("Then keep the rebuilt CTE path focused on the final grouped result.")
         else:
-            family_sentence = "Then keep the current window shape stable."
-    elif family == "rollup" or has_rollup or has_grouping_sets or has_grouping or rollup_cue or categories & {"rollup"}:
-        family_sentence = "Then keep the grouped summary stable and add subtotal logic only when the question explicitly asks for it."
+            family_sentences.append("Then keep the rebuilt SQL shape focused on the requested grain.")
+    elif family in {"navigation", "ranking"} or has_window or navigation_cue or ranking_cue or categories & {"window", "ranking"}:
+        if family == "navigation" or has_navigation_window or navigation_cue:
+            family_sentences.append("Then keep the same window shape stable and preserve the local row-to-row comparison path.")
+        elif family == "ranking" or has_ranking_window or ranking_cue:
+            family_sentences.append("Then keep the same window shape stable and preserve the intended row ordering.")
+        else:
+            family_sentences.append("Then keep the current window shape stable.")
+    if family == "rollup" or has_rollup or has_grouping_sets or has_grouping or rollup_cue or categories & {"rollup"}:
+        family_sentences.append("Then keep the grouped summary stable and add subtotal logic only when the question explicitly asks for it.")
     elif family in {"aggregation", "grouping"} or has_aggregation or has_group_by or grouping_cue or categories & {"aggregation", "grouping"}:
-        family_sentence = "Then keep the grouped summary stable and do not widen the result beyond the requested grain."
+        family_sentences.append("Then keep the grouped summary stable and do not widen the result beyond the requested grain.")
     elif family == "join" or has_join or join_cue or categories & {"join"}:
         if has_outer_join or has_outer_join_null_filter:
-            family_sentence = "Then preserve the existing coverage and avoid shrinking it."
+            family_sentences.append("Then preserve the existing coverage and avoid shrinking it.")
         elif has_subquery:
-            family_sentence = "Then keep the current path stable; a nested form is acceptable if it preserves coverage better."
+            family_sentences.append("Then keep the current path stable; a nested form is acceptable if it preserves coverage better.")
         else:
-            family_sentence = "Then keep the current join path stable."
+            family_sentences.append("Then keep the current join path stable.")
     elif family == "subquery" or has_subquery or categories & {"subquery"}:
-        family_sentence = "Then keep the main path stable and use nesting only if it preserves coverage better."
+        family_sentences.append("Then keep the main path stable and use nesting only if it preserves coverage better.")
     elif family == "set_operation" or has_set_operation or categories & {"set_operation"}:
-        family_sentence = "Then keep the set operation semantics stable and preserve the UNION / INTERSECT / EXCEPT structure."
-    elif family == "time_series" or has_time_series or categories & {"time_series"}:
-        family_sentence = "Then keep the time grain stable and preserve the temporal ordering or grouping."
+        family_sentences.append("Then keep the set operation semantics stable and preserve the UNION / INTERSECT / EXCEPT structure.")
+    elif family == "time_series" or has_time_grain_cue or has_time_series or categories & {"time_series"}:
+        family_sentences.append("Then keep the time grain stable and preserve the temporal ordering or grouping.")
     elif family == "ordering" or has_order_by or categories & {"ordering"}:
-        family_sentence = "Then keep the current projection stable and add only the requested ordering."
+        family_sentences.append("Then keep the current projection stable and add only the requested ordering.")
+    if family == "detail" and categories & {"case_when", "null_handling", "comparison", "distinct"}:
+        family_sentences.append(
+            "Then keep the current projection stable and only adjust the CASE / COALESCE / comparison / deduplication logic."
+        )
     elif family == "filtering" or has_where or categories & {"filtering"}:
         if date_filter_cue:
-            family_sentence = "Then keep the original projection stable and only tighten the date predicate."
+            family_sentences.append("Then keep the original projection stable and only tighten the date predicate.")
         else:
-            family_sentence = "Then keep the original projection stable and only tighten the relevant filters."
+            family_sentences.append("Then keep the original projection stable and only tighten the relevant filters.")
     elif last_sql_text:
-        family_sentence = "Then keep the current SQL shape stable and repair only the last observed drift."
+        family_sentences.append("Then keep the current SQL shape stable and repair only the last observed drift.")
 
-    sentences = [sentence for sentence in [row_sentence, family_sentence] if sentence]
+    if "set_operation" in categories and not any("set operation semantics stable" in sentence.lower() for sentence in family_sentences):
+        family_sentences.append("Then keep the set operation semantics stable and preserve the UNION / INTERSECT / EXCEPT structure.")
+    if "time_series" in categories and not any("time grain stable" in sentence.lower() for sentence in family_sentences):
+        family_sentences.append("Then keep the time grain stable and preserve the temporal ordering or grouping.")
+    if "filtering" in categories and not any("original projection stable" in sentence.lower() for sentence in family_sentences):
+        family_sentences.append("Then keep the original projection stable and only tighten the relevant filters.")
+
+    sentences = [row_sentence, *family_sentences]
+    sentences = [sentence for sentence in sentences if sentence]
     if not sentences:
         return ""
     return ". ".join(sentence.rstrip(". ") for sentence in sentences).strip() + "."
@@ -886,6 +972,8 @@ def build_sql_governance_recap_block(
     row_grain_state: Optional[Dict[str, Any]] = None,
     last_sql_shape: Optional[Dict[str, Any]] = None,
     last_sql_text: Optional[str] = None,
+    repair_strategy: Optional[str] = None,
+    repair_reason: Optional[str] = None,
     sql_exploration_frozen: bool = False,
     turn_local_repair_mode: bool = False,
     rejection_reason_streak: int = 0,
@@ -900,6 +988,8 @@ def build_sql_governance_recap_block(
         last_sql_shape=last_sql_shape,
         missing_categories=missing,
         last_sql_text=last_sql_text,
+        repair_strategy=repair_strategy,
+        repair_reason=repair_reason,
         turn_local_repair_mode=turn_local_repair_mode,
         rejection_reason_streak=rejection_reason_streak,
     )

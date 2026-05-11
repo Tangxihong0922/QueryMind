@@ -2,15 +2,16 @@
 
 SQL governance manages the SQL drafting loop after schema discovery has started.
 It keeps the task profile, SQL shape, best anchor, and freeze/repair transition
-separate from schema exploration.
+separate from schema exploration, and surfaces live summary / anchor / freeze
+state as message-side runtime notices while the system prompt stays stable.
 
 ## Core Pieces
 
 - `SqlGovernanceManager`: owns policy, state, snapshot assembly, recap gating, and freeze decisions.
 - `SqlGovernanceHook`: records `run_sql` outcomes after tool execution and writes the refreshed snapshot back into `result.metadata`.
-- `SqlGovernanceMiddleware`: infers or reuses the current profile, appends the governance block, merges request metadata, and injects recap blocks when the turn has drifted or run long enough.
+- `SqlGovernanceMiddleware`: infers or reuses the current profile, merges request metadata, prepends the user-side runtime notice, and injects recap blocks when the turn has drifted or run long enough; the runtime notice also carries repair strategy / reason / signals.
 
-There is no separate SQL enhancer. Prompt text is rendered through manager helpers and inserted by middleware.
+There is no separate SQL enhancer. Prompt text is rendered through manager helpers for the stable system-prompt tail, while volatile SQL state is exposed by middleware as message-side runtime notices.
 
 `build_sql_governance_stack()` returns the reusable bundle of policy, manager, hook, and middleware.
 
@@ -23,6 +24,7 @@ There is no separate SQL enhancer. Prompt text is rendered through manager helpe
 
 `build_sql_governance_profile()`, `infer_profile_from_message()`, `build_sql_governance_prompt_block()`, and `build_sql_governance_recap_block()` live in that split.
 `analyze_sql_text()` and `analyze_sql_shape()` use `sqlglot` to extract SQL structure.
+The helper stack now also distinguishes `local_repair` from `structural_rewrite`, and it treats `case_when`, `null_handling`, `comparison`, and `distinct` as conservative detail-expression families.
 
 The analysis covers:
 
@@ -121,6 +123,9 @@ Otherwise it returns:
   - `last_rejection_reason`
   - `last_rejection_reason_count`
   - `turn_local_repair_mode`
+  - `repair_strategy`
+  - `repair_reason`
+  - `repair_signals`
   - `sql_family`
   - `sql_family_candidates`
   - `row_grain_state`
@@ -159,7 +164,8 @@ It does not emit a recap once `sql_exploration_frozen` is true.
 ### `build_prompt_block(...)` and `build_recap_block(...)`
 
 `build_prompt_block(...)` and `build_recap_block(...)` render prompt text through the helper modules.
-`build_prompt_block(...)` passes the current profile, missing categories, frozen state, freeze reason, frozen and best anchor text, anchor tier, SQL family, and turn-local repair mode into the prompt renderer.
+`build_prompt_block(...)` passes the current profile, missing categories, frozen state, freeze reason, frozen and best anchor text, anchor tier, SQL family, and turn-local repair mode into the prompt renderer, but the default runtime keeps that guidance on the stable system-prompt tail rather than using it for live state.
+When `repair_strategy` is `structural_rewrite`, the prompt asks the model to rebuild the grouped summary or CTE shape from scratch; when the profile matches `case_when`, `null_handling`, `comparison`, or `distinct`, it stays conservative and only asks for CASE / COALESCE / comparison / deduplication edits.
 `build_recap_block(...)` renders the reactive recap text when the current state says the turn needs one.
 
 ## Freeze and Repair
@@ -178,7 +184,7 @@ The validated anchor check also requires enough support for the best SQL candida
 
 When the state freezes, the manager copies the best SQL anchor into the frozen snapshot and records a freeze reason that includes the iteration count.
 
-`turn_local_repair_mode` becomes true when the anchor is candidate or validated, the state is not frozen, the row grain is aligned, and either the same successful canonical SQL repeats or the same rejection reason repeats.
+`turn_local_repair_mode` becomes true when the anchor is candidate or validated, the state is not frozen, the row grain is aligned, and either the same successful canonical SQL repeats or the same rejection reason repeats; if `_sql_repair_strategy_from_snapshot()` classifies the turn as `structural_rewrite`, the flag is forced off so aggregation / rollup / multi-CTE turns rewrite instead of local-repairing.
 
 ## Request-Time Flow
 
@@ -257,13 +263,13 @@ target to `HumanResources.Employee`, and SQL governance then takes over.
 +====================================================================================================+
 | 5) sql_governance_prompt.py                                                                        |
 |----------------------------------------------------------------------------------------------------|
-| Renders prompt text and recap text                                                                 |
+| Renders stable guidance text and recap text                                                         |
 | Real prompt excerpt:                                                                               |
 |   "## SQL Governance"                                                                              |
 |   "- Avoid metadata introspection queries unless they are explicitly allowed."                     |
 |   "- Keep the current row grain stable and call `run_sql` once the table path is clear."           |
 | sql_126 semantics: profile source=message, categories=["ordering"]                                |
-| Output: a governance prompt block plus a recap block only when drift / mismatch / rejection repeats|
+| Output: a stable guidance block plus a recap block only when drift / mismatch / rejection repeats  |
 +=============================================+======================================================+
                                                 |
                                                 v
@@ -274,8 +280,9 @@ target to `HumanResources.Employee`, and SQL governance then takes over.
 | Order:                                                                                             |
 |   - read `sql_governance_profile` / `sql_profile` / `runtime_profile`                             |
 |   - call `register_request_profile(...)`                                                            |
-|   - append the SQL governance prompt block                                                          |
 |   - merge the latest snapshot back into `request.metadata`                                         |
+|   - prepend a single user-side runtime notice with schema recap, SQL anchor preview, freeze reason, |
+|     row grain, and SQL recap                                                                        |
 |   - insert a recap block when needed                                                                |
 | sql_126 visible context:                                                                           |
 |   request.metadata = {sql_governance:{sql_attempts=3,...},                                         |
@@ -288,7 +295,7 @@ target to `HumanResources.Employee`, and SQL governance then takes over.
 +====================================================================================================+
 | 7) Next LLM turn / tool selection                                                                  |
 |----------------------------------------------------------------------------------------------------|
-| Model sees: system prompt + governance block + metadata snapshot                                   |
+| Model sees: stable system prompt + runtime notice + metadata snapshot                               |
 | Result: continue refining or finish the SQL draft                                                  |
 | sql_126 outcome: the agent stabilizes on the final `ORDER BY CASE ...` form and ends the turn      |
 +====================================================================================================+
@@ -297,7 +304,7 @@ target to `HumanResources.Employee`, and SQL governance then takes over.
 The boundary is simple: `run_sql` writes back into `result.metadata` first,
 `SqlGovernanceManager` turns that into a state snapshot, and
 `SqlGovernanceMiddleware` injects that state into the next `request.metadata`
-and system prompt.
+and prepends the user-side runtime notice instead of mutating the system prompt.
 
 ## What This Page Covers
 

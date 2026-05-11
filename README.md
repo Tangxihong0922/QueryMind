@@ -61,10 +61,20 @@ When the loop runs, QueryMind can stream progress updates, schema results, SQL r
 
 It builds on that foundation with differences in runtime structure, governance, memory, and business database integration compared to Vanna 2.0.
 
-- **Schema governance** - schema governance standardizes schema retrieval traces, tracks discovered database context, and keeps the agent grounded in the right business schema.
-- **SQL governance** - SQL governance standardizes SQL writing patterns, feeds execution feedback into the next reasoning turn, and helps the agent recover from SQL semantic false-negative traps.
+- **Schema governance** - schema governance standardizes schema retrieval traces, tracks discovered database context, and surfaces lock / recap state as runtime notices while keeping the agent grounded in the right business schema.
+- **SQL governance** - SQL governance standardizes SQL writing patterns, feeds execution feedback into the next reasoning turn, and surfaces anchor / freeze / recap state as runtime notices to help the agent recover from SQL semantic false-negative traps.
 - **Two memory planes** - agent memory and schema memory serve different roles: agent memory captures reusable tool-use experience, while schema memory grounds SQL generation with Neo4j + Mem0 hybrid retrieval over database knowledge.
 - **Schema management** - schema management panel and deterministic slash commands serves as the supporting infrastructure for schema memory and schema retrieval tool, grounding the agent in real-world business databases before the normal LLM/tool loop begins.
+
+### 📝 Changelog
+<details>
+<summary> <b>🔥 2026-05-11</b> </summary>
+- Unified QueryMind's context assembly around a stable system prompt, message-side runtime notices, and tool-result metadata.
+- Moved dynamic schema lock, schema summary, SQL anchor / freeze / recap, and memory advisory content out of the system prompt path.
+- Kept schema_retrieve visibility on the request-time filter path instead of mutating the tool registry.
+- Added a structural rewrite lane for aggregation / rollup / multi-CTE SQL turns so local repair stays focused on window / join / filtering cases.
+- Added detail-family guardrails for `case_when`, `null_handling`, `comparison`, and `distinct` so projection-preserving turns stay conservative.
+</details>
 
 ## 🔄 QueryMind's Agent Loop
 ![QueryMind agent loop](docs/figures/components/agent-loop.png)
@@ -231,4 +241,4 @@ The handbook expands the README into components, advanced-features, use-case, an
 
 QueryMind is released under the MIT License. See [LICENSE](LICENSE).
 
-This project is developed for personal learning and research purposes. Special thanks to Vanna for being an important reference point and source of inspiration for this work.
+This project is developed for personal learning and research purposes. Special thanks to [Vanna](https://github.com/vanna-ai/vanna) for being an important reference point and source of inspiration for this work.

@@ -50,20 +50,20 @@ agent 会在非流式和流式两条路径上都按列表顺序执行它们。
 
 实际上，middleware 层就是请求时策略放置的位置：
 
-- `before_llm_request()` 可以追加或改写 metadata、system prompt block 和可见工具；
+- `before_llm_request()` 可以追加或改写 metadata、system prompt、message-side runtime notice 和可见工具；
 - `after_llm_response()` 可以归一化或补充模型响应；
 - 同一条 middleware 链会被普通请求和流式请求共用。
 
 治理相关的 middleware 直接用到了这个路径：
 
-- `SchemaGovernanceMiddleware` 会注入 schema-governance prompt block，在
-  schema 循环需要重述目标时插入 recap，并且在会话锁定后隐藏
-  `schema_retrieve`；
-- `SqlGovernanceMiddleware` 会注册或推断 SQL profile，追加 SQL
-  governance 文本，在 SQL 循环漂移时插入 recap，并把当前 snapshot
-  保存在 request metadata 里。
+- `SchemaGovernanceMiddleware` 会合并治理 metadata，在需要时把 schema recap 作为
+  message-side runtime notice 注入，并在会话锁定后隐藏 `schema_retrieve`；
+- `SqlGovernanceMiddleware` 会注册或推断 SQL profile，把 anchor preview、
+  freeze reason、repair strategy / reason / signals、row grain、recap 等
+  runtime notice 注入消息侧，并把当前 snapshot 保存在 request metadata 里。
 
-所以 hooks 负责 tool-result 一侧的治理，middlewares 负责 request-shaping 一侧的治理。
+所以 hooks 负责 tool-result 一侧的治理，middlewares 负责 request-shaping
+以及 message-side runtime notice 的治理。
 
 ## 恢复策略
 
@@ -105,8 +105,8 @@ tool error 这一半接口是给自定义 tool runner 或其他执行循环准�
 这种分层就是为什么治理页可以保持短而精确：
 
 - schema governance 用 hooks 和 middlewares 管理 schema_retrieve 循环；
-- SQL governance 用 hooks 和 middlewares 管理 SQL profile 推断、recap
-  插入和 freeze 行为；
+- SQL governance 用 hooks 和 middlewares 管理 SQL profile 推断、runtime notice、
+  recap 插入和 freeze 行为；
 - 恢复层负责处理短暂故障，不把故障逻辑混进 prompt 文本。
 
 ## 源码映射
