@@ -155,6 +155,7 @@ class EvaluationRunStore:
         root_dir: Path,
         *,
         dataset_hash: Optional[str] = None,
+        evaluator_names: Optional[List[str]] = None,
         only_incomplete: bool = True,
     ) -> Optional["EvaluationRunStore"]:
         candidates: List[Tuple[datetime, Path, ResumeCheckpoint]] = []
@@ -173,6 +174,10 @@ class EvaluationRunStore:
                 continue
 
             if dataset_hash and checkpoint.dataset_hash != dataset_hash:
+                continue
+            if evaluator_names is not None and list(checkpoint.evaluator_names) != list(
+                evaluator_names
+            ):
                 continue
             if only_incomplete and checkpoint.status == "completed":
                 continue

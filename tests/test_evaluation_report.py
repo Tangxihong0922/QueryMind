@@ -21,6 +21,7 @@ def _make_result(
     agent_success: bool,
     score: float,
     execution_time_ms: float,
+    reported_execution_time_ms: float | None = None,
     difficulty: str = "medium",
     category: str = "analytics",
     source: str = "generated",
@@ -58,7 +59,9 @@ def _make_result(
         score=score,
         passed=passed,
         reason="ok" if passed else "failed",
-        execution_time_ms=execution_time_ms,
+        execution_time_ms=reported_execution_time_ms
+        if reported_execution_time_ms is not None
+        else execution_time_ms,
     )
 
 
@@ -97,9 +100,11 @@ def test_save_html_includes_models_filter_and_two_decimal_rates(tmp_path: Path) 
     assert "Agent Model" in html
     assert "Judge Model" in html
     assert "deepseek-v4-flash" in html
+    assert "Average Eval Agent Time" in html
     assert 'id="pass-filter"' in html
     assert 'id="sql-execution-filter"' in html
     assert "<th>SQL Execution</th>" in html
+    assert "<th>Avg Eval Agent Time (ms)</th>" in html
     assert '<option value="PASS">PASS</option>' in html
     assert '<option value="FAIL">FAIL</option>' in html
     assert '<option value="SUCCESS">SUCCESS</option>' in html
@@ -111,3 +116,28 @@ def test_save_html_includes_models_filter_and_two_decimal_rates(tmp_path: Path) 
     assert "row.dataset.sqlExecution === sqlExecution" in html
     assert "50.00%" in html
     assert "50.0%" not in html
+
+
+def test_average_execution_time_uses_agent_runtime(tmp_path: Path) -> None:
+    report = EvaluationReport(
+        dataset_name="demo dataset",
+        results=[
+            _make_result(
+                test_case_id="case-1",
+                passed=True,
+                agent_success=True,
+                score=1.0,
+                execution_time_ms=120.0,
+                reported_execution_time_ms=999.0,
+            )
+        ],
+        evaluator_names=["sql_accuracy"],
+    )
+
+    assert report.average_execution_time() == 120.0
+
+    output_path = tmp_path / "evaluation_report.html"
+    report.save_html(output_path)
+    html = output_path.read_text(encoding="utf-8")
+
+    assert "Average Eval Agent Time" in html

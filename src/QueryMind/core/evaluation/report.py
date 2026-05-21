@@ -38,10 +38,16 @@ class EvaluationReport(BaseModel):
             return 0.0
         return sum(item.score for item in self.results) / len(self.results)
 
-    def average_execution_time(self) -> float:
+    def average_agent_execution_time(self) -> float:
+        """Average runtime of the evaluated agent only."""
         if not self.results:
             return 0.0
-        return sum(item.execution_time_ms for item in self.results) / len(self.results)
+        return sum(item.agent_result.execution_time_ms for item in self.results) / len(
+            self.results
+        )
+
+    def average_execution_time(self) -> float:
+        return self.average_agent_execution_time()
 
     def execution_success_rate(self) -> float:
         if not self.results:
@@ -98,7 +104,9 @@ class EvaluationReport(BaseModel):
                     "pass_count": sum(1 for item in items if item.passed),
                     "pass_rate": sum(1 for item in items if item.passed) / len(items),
                     "average_score": sum(item.score for item in items) / len(items),
-                    "average_execution_time_ms": sum(item.execution_time_ms for item in items)
+                    "average_execution_time_ms": sum(
+                        item.agent_result.execution_time_ms for item in items
+                    )
                     / len(items),
                     "issue_tags": dict(
                         Counter(tag for item in items for tag in item.issue_tags)
@@ -158,7 +166,7 @@ class EvaluationReport(BaseModel):
         print(f"Pass Rate: {self.pass_rate():.2%}")
         print(f"Average Score: {self.average_score():.2f}")
         print(f"Execution Success Rate: {self.execution_success_rate():.2%}")
-        print(f"Average Time: {self.average_execution_time():.0f}ms")
+        print(f"Average Eval Agent Time: {self.average_execution_time():.0f}ms")
         print(f"{'=' * 80}\n")
 
     def save_json(self, path: str | Path) -> None:
@@ -204,7 +212,7 @@ class EvaluationReport(BaseModel):
                         f"{result.score:.4f}",
                         result.reason,
                         ",".join(result.issue_tags),
-                        f"{result.execution_time_ms:.2f}",
+                        f"{result.agent_result.execution_time_ms:.2f}",
                         self._format_evaluator_breakdown(result),
                         result.agent_artifact.sql_text if result.agent_artifact else "",
                         result.ground_truth_artifact.sql_text if result.ground_truth_artifact else "",
@@ -222,9 +230,10 @@ class EvaluationReport(BaseModel):
             f"- Evaluators: {', '.join(self.evaluator_names) if self.evaluator_names else 'n/a'}",
             f"- Pass rate: {self.pass_rate():.2%}",
             f"- Average score: {self.average_score():.2f}",
+            f"- Average Eval Agent Time: {self.average_execution_time():.0f}ms",
             "",
             "## Evaluator Summary",
-            "| Evaluator | Cases | Pass Rate | Avg Score | Avg Time (ms) |",
+            "| Evaluator | Cases | Pass Rate | Avg Score | Avg Eval Agent Time (ms) |",
             "|---|---:|---:|---:|---:|",
         ]
         for summary in self.evaluator_summaries():
@@ -239,7 +248,7 @@ class EvaluationReport(BaseModel):
                 [
                     "",
                     f"## {self._classification_label(field)} Breakdown",
-                    "| Value | Cases | Pass Rate | Avg Score | Avg Time (ms) |",
+                    "| Value | Cases | Pass Rate | Avg Score | Avg Eval Agent Time (ms) |",
                     "|---|---:|---:|---:|---:|",
                 ]
             )
@@ -314,7 +323,7 @@ class EvaluationReport(BaseModel):
             classification_sections.append(
                 f"<section class='summary-block'><h3>{html.escape(self._classification_label(field))} Breakdown</h3>"
                 "<table>"
-                "<thead><tr><th>Value</th><th>Cases</th><th>Pass Rate</th><th>Avg Score</th><th>Avg Time (ms)</th></tr></thead>"
+                "<thead><tr><th>Value</th><th>Cases</th><th>Pass Rate</th><th>Avg Score</th><th>Avg Eval Agent Time (ms)</th></tr></thead>"
                 f"<tbody>{''.join(table_rows)}</tbody>"
                 "</table></section>"
             )
@@ -403,11 +412,12 @@ tbody tr:nth-child(even) {{ background: #fcfcfc; }}
   <div class="metric"><div class="label">Pass Rate</div><div class="value">{self.pass_rate():.2%}</div></div>
   <div class="metric"><div class="label">Average Score</div><div class="value">{self.average_score():.2f}</div></div>
   <div class="metric"><div class="label">Execution Success Rate</div><div class="value">{self.execution_success_rate():.2%}</div></div>
+  <div class="metric"><div class="label">Average Eval Agent Time</div><div class="value">{self.average_execution_time():.0f}ms</div></div>
 </div>
 <section>
 <h2>Evaluator Summary</h2>
 <table>
-<thead><tr><th>Evaluator</th><th>Cases</th><th>Pass Rate</th><th>Avg Score</th><th>Avg Time (ms)</th></tr></thead>
+<thead><tr><th>Evaluator</th><th>Cases</th><th>Pass Rate</th><th>Avg Score</th><th>Avg Eval Agent Time (ms)</th></tr></thead>
 <tbody>
 {''.join(evaluator_rows)}
 </tbody>
@@ -490,8 +500,12 @@ window.addEventListener('DOMContentLoaded', applyFilters);
                     "pass_count": pass_count,
                     "pass_rate": pass_count / count if count else 0.0,
                     "average_score": sum(item.score for item in items) / count if count else 0.0,
-                    "average_execution_time_ms": sum(item.execution_time_ms for item in items)
-                    / count if count else 0.0,
+                    "average_execution_time_ms": sum(
+                        item.agent_result.execution_time_ms for item in items
+                    )
+                    / count
+                    if count
+                    else 0.0,
                 }
             )
         return rows

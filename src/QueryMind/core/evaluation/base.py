@@ -168,6 +168,7 @@ class JudgeResult(BaseModel):
     reason: str
     issue_tags: List[str] = Field(default_factory=list)
     confidence: float = 0.0
+    execution_time_ms: float = 0.0
     raw_output: str = ""
     parsed_output: Dict[str, Any] = Field(default_factory=dict)
     parse_source: Optional[str] = None

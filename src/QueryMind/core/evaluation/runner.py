@@ -94,40 +94,61 @@ class EvaluationRunner:
     async def _run_single_test_case(self, test_case: SqlTestCase) -> EvaluationResult:
         async with self._semaphore:
             components: List[UiComponent] = []
-            start = time.perf_counter()
             error: Optional[str] = None
             conversation = None
             session = None
             user_id = "unknown"
             conversation_id = test_case.effective_conversation_id
+            execution_time_ms = 0.0
+            agent_start: float | None = None
+            trace_error: Optional[str] = None
 
             try:
                 runtime = await self.runtime_resolver.resolve(test_case)
                 session = await runtime.create_session(test_case)
                 user_id = session.user.id
                 conversation_id = session.conversation_id
+                agent_start = time.perf_counter()
                 async for component in session.agent.send_message(
                     request_context=session.request_context,
                     message=test_case.query,
                     conversation_id=session.conversation_id,
                 ):
                     components.append(component)
-                conversation = await session.conversation_store.get_conversation(
-                    session.conversation_id, session.user
-                )
+                execution_time_ms = (time.perf_counter() - agent_start) * 1000
             except Exception as exc:
                 error = str(exc)
                 logger.exception("Evaluation failed for test_case=%s", test_case.id)
-                if session is not None:
-                    try:
-                        conversation = await session.conversation_store.get_conversation(
-                            session.conversation_id, session.user
-                        )
-                    except Exception:
-                        conversation = None
+                if agent_start is not None:
+                    execution_time_ms = (time.perf_counter() - agent_start) * 1000
 
-            execution_time_ms = (time.perf_counter() - start) * 1000
+            if session is not None and conversation is None:
+                try:
+                    conversation = await session.conversation_store.get_conversation(
+                        session.conversation_id, session.user
+                    )
+                except Exception as exc:
+                    trace_error = str(exc)
+                    logger.exception(
+                        "Trace retrieval failed for test_case=%s",
+                        test_case.id,
+                    )
+                    conversation = None
+
+            if error is None and trace_error is not None:
+                error = trace_error
+
             tool_calls, final_answer = self._extract_trace(conversation)
+
+            metadata = {
+                "component_count": len(components),
+                "conversation_message_count": len(conversation.messages)
+                if conversation
+                else 0,
+                "agent_run_time_ms": execution_time_ms,
+            }
+            if trace_error is not None:
+                metadata["trace_load_error"] = trace_error
 
             agent_result = AgentResult(
                 test_case_id=test_case.id,
@@ -138,12 +159,7 @@ class EvaluationRunner:
                 tool_calls=tool_calls,
                 execution_time_ms=execution_time_ms,
                 error=error,
-                metadata={
-                    "component_count": len(components),
-                    "conversation_message_count": len(conversation.messages)
-                    if conversation
-                    else 0,
-                },
+                metadata=metadata,
             )
 
             if self.progress_callback and hasattr(self.progress_callback, "on_agent_done"):
