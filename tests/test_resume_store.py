@@ -73,3 +73,25 @@ def test_report_output_dir_includes_judge_suffix_when_models_differ(tmp_path: Pa
     )
 
     assert store.report_output_dir(tmp_path / "eval_output" / "eval_results") == expected
+
+
+def test_find_latest_filters_by_evaluator_names(tmp_path: Path) -> None:
+    old_store = _make_store(tmp_path, run_id="20260423_000000_old")
+    old_store.checkpoint.evaluator_names = ["sql_accuracy", "expected_outcome"]
+    old_store.checkpoint.updated_at = "2024-01-01T00:00:00+00:00"
+    old_store._write_checkpoint()
+
+    new_store = _make_store(tmp_path, run_id="20260423_000001_new")
+    new_store.checkpoint.evaluator_names = ["sql_accuracy"]
+    new_store.checkpoint.updated_at = "2024-01-02T00:00:00+00:00"
+    new_store._write_checkpoint()
+
+    found = EvaluationRunStore.find_latest(
+        tmp_path,
+        dataset_hash="hash",
+        evaluator_names=["sql_accuracy"],
+        only_incomplete=True,
+    )
+
+    assert found is not None
+    assert found.checkpoint.evaluator_names == ["sql_accuracy"]

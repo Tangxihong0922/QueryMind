@@ -40,6 +40,27 @@ my-evaluation \
   --report-output-dir eval_output/eval_results
 ```
 
+默认情况下，评估会同时运行 `sql_accuracy` 和 `expected_outcome` 两个 evaluator。
+
+如果你只想评估 `sql_accuracy`，可以显式跳过 `expected_outcome`：
+
+```bash
+my-evaluation \
+  --skip-expected-outcome \
+  --dataset-path src/evals/datasets/basic.yaml \
+  --resume-root eval_output/resume_points \
+  --report-output-dir eval_output/eval_results
+```
+
+也可以通过环境变量切换到单 evaluator 模式：
+
+```bash
+EVAL_SKIP_EXPECTED_OUTCOME=true my-evaluation \
+  --dataset-path src/evals/datasets/basic.yaml \
+  --resume-root eval_output/resume_points \
+  --report-output-dir eval_output/eval_results
+```
+
 继续上次未完成的评测：
 
 ```bash
@@ -60,6 +81,7 @@ python evals/generate_report.py --latest --resume-root evals/resume_points
 - `EVAL_MAX_TOOL_ITERATIONS`：evaluation 中 Agent 的工具调用轮数上限，默认 `25`
 - `EVAL_PASS_THRESHOLD`：`sql_accuracy` 的通过阈值
 - `EVAL_PREVIEW_ROWS`：Judge 预览行数
+- `EVAL_SKIP_EXPECTED_OUTCOME`：跳过 `expected_outcome`，只保留 `sql_accuracy`
 - `EVAL_PROGRESS`：是否显示进度条
 - `EVAL_CONSOLE_LOG_LEVEL` / `EVAL_FILE_LOG_LEVEL`：日志级别
 - `EVAL_RECOVERY_*`：LLM 重试退避策略
@@ -124,7 +146,7 @@ for each test_case
     |
     +--> sql_accuracy evaluator (LLM-as-judge)
     |
-    +--> expected_outcome evaluator (deterministic rules)
+    +--> expected_outcome evaluator (deterministic rules, 可选)
     |
     v
 单条结果立即落盘
@@ -179,20 +201,22 @@ EvaluationReport
 
 `EvaluationRunner` 会在单条样本结束后立即提取轨迹，生成 `AgentResult`，再把结果交给 evaluator；同时通过 `result_callback` 立刻写入 `results.jsonl`，保证中途退出时已有结果不丢失。
 
-### Evaluator 双层评估（LLM-as-judge）
+### Evaluator 评估模式
 
-源码里当前有两个 evaluator：
+源码里当前提供两个 evaluator：
 
 - `sql_accuracy`
 - `expected_outcome`（源码名；文档里也可理解为 `expected_accuracy` 行为契约层）
 
-评估顺序在 [`my_evaluation.py`](../../my_evaluation.py) 中固定为：
+默认评估模式是双 evaluator：
 
 ```text
 sql_accuracy -> expected_outcome
 ```
 
-`EvaluationRunner` 仍把第一个 evaluator 作为 canonical result，所以当前 canonical 结果是 `sql_accuracy`。
+如果你通过 `--skip-expected-outcome` 或 `EVAL_SKIP_EXPECTED_OUTCOME=true` 切到单 evaluator 模式，则只会运行 `sql_accuracy`。这时 `checkpoint.json`、report 里的 `evaluator_names`，以及 `results.jsonl` 中的评估结果，都会只保留 `sql_accuracy`。
+
+`EvaluationRunner` 仍把第一个 evaluator 作为 canonical result，所以在双 evaluator 模式下 canonical 结果仍然是 `sql_accuracy`。
 
 #### 2.4.1 `sql_accuracy`
 
@@ -288,6 +312,8 @@ passed = score >= EVAL_PASS_THRESHOLD
 
 这一层不是 LLM judge，而是确定性的行为契约检查，核心实现位于 [`src/QueryMind/core/evaluation/outcome.py`](../../src/QueryMind/core/evaluation/outcome.py) 的 `ExpectedOutcomeEvaluator`、`_ordered_subsequence_match()`、`_fragment_matches()` 和 `_answer_surface_text()`。
 
+默认的双 evaluator 模式会运行这一层；如果你只想看 `sql_accuracy`，这一层可以被直接跳过。
+
 当前规则是：
 
 - `tools_called`
@@ -317,6 +343,7 @@ passed = score >= EVAL_PASS_THRESHOLD
 报告会包含：
 
 - 整体 pass rate、average score、execution success rate、平均耗时
+- 平均耗时只统计 eval agent 的运行时间，不包含 judge 的耗时
 - 每个 evaluator 的汇总
 - 按 `difficulty`、`category`、`source`、`query_language` 的分类统计
 - 每条样本的 evaluator breakdown
@@ -336,6 +363,8 @@ HTML 报告支持按这四个维度做筛选，表格行也带有对应的 `data
 - 用 `--resume-latest` 继续最近未完成的 run
 - 用 `--resume-run-id <run_id>` 继续指定 run
 
+checkpoint 里会记录当前的 evaluator 组合，所以双 evaluator 模式和 `sql_accuracy_only` 模式不能互相接着 resume；如果你切换了评估模式，需要从对应模式的新 run 重新开始。
+
 恢复时会按 `test_case.id` 去重，所以不会重复写入已经完成的样本。
 
 独立的 [`src/evals/generate_report.py`](../../src/evals/generate_report.py) 还能直接从已有 resume point 生成报告，即使该 run 还没完全完成也可以出报表。
@@ -351,7 +380,8 @@ HTML 报告支持按这四个维度做筛选，表格行也带有对应的 `data
 <details open>
 <summary>相关源码文件</summary>
 
-- [`my_evaluation.py`](../../my_evaluation.py) - 评估入口、resume、report 生成、双 evaluator 编排
+- [`my_evaluation.py`](../../my_evaluation.py) - 兼容入口脚本，转发到 `QueryMind.evaluation_cli`
+- [`src/QueryMind/evaluation_cli.py`](../../src/QueryMind/evaluation_cli.py) - 评估入口实现、resume 校验、双 evaluator / 单 evaluator 编排
 - [`src/evals/generate_report.py`](../../src/evals/generate_report.py) - 独立报告生成脚本
 - [`src/evals/bootstrap.py`](../../src/evals/bootstrap.py) - 环境变量加载、LLM 构建、runtime 构建、日志与进度条
 - [`src/evals/reporting.py`](../../src/evals/reporting.py) - 报告产物落盘
@@ -372,4 +402,4 @@ HTML 报告支持按这四个维度做筛选，表格行也带有对应的 `data
 
 ## 小结
 
-当前 evaluation 模块的目标很清晰：评估多步推理、工具调用和 Schema Memory 驱动的 SQL 生成能力，并通过 `sql_accuracy` + `expected_outcome` 两层结果把“结果正确”和“行为合理”分开看。
+当前 evaluation 模块的目标很清晰：评估多步推理、工具调用和 Schema Memory 驱动的 SQL 生成能力。默认会通过 `sql_accuracy` + `expected_outcome` 两层结果把“结果正确”和“行为合理”分开看，也可以在需要时只保留 `sql_accuracy` 来专注 SQL 正确性与运行耗时。

@@ -473,6 +473,7 @@ class SqlAccuracyEvaluator(Evaluator):
                 test_case,
                 agent_artifact,
                 ground_truth_artifact,
+                execution_time_ms=judge_result.execution_time_ms,
             )
             if fallback_result is not None:
                 logger.warning(
@@ -501,6 +502,7 @@ class SqlAccuracyEvaluator(Evaluator):
                 "dialect": test_case.dialect,
                 "run_sql_calls": len(agent_result.get_tool_calls("run_sql")),
                 "judge_parse_source": judge_result.parse_source,
+                "judge_execution_time_ms": judge_result.execution_time_ms,
             },
         )
 
@@ -524,9 +526,11 @@ class SqlAccuracyEvaluator(Evaluator):
             ),
         )
 
+        start = time.perf_counter()
         try:
             response = await self.judge_llm.send_request(request)
         except Exception as exc:
+            execution_time_ms = (time.perf_counter() - start) * 1000
             logger.warning(
                 "Judge LLM request failed for test_case=%s after retries: %s",
                 judge_input.trace_summary.get("test_case_id", judge_input.database_id),
@@ -538,6 +542,7 @@ class SqlAccuracyEvaluator(Evaluator):
                 reason=f"Judge request failed after retries: {exc}",
                 issue_tags=["judge_request_failed"],
                 confidence=0.0,
+                execution_time_ms=execution_time_ms,
                 raw_output="",
                 parsed_output={"error": str(exc)},
             )
@@ -547,6 +552,7 @@ class SqlAccuracyEvaluator(Evaluator):
         try:
             parsed, parse_source = _parse_judge_output(raw_output)
         except Exception as exc:
+            execution_time_ms = (time.perf_counter() - start) * 1000
             logger.warning(
                 "Judge output parse failed for test_case=%s: %s",
                 judge_input.trace_summary.get("test_case_id", judge_input.database_id),
@@ -558,11 +564,13 @@ class SqlAccuracyEvaluator(Evaluator):
                 reason="Judge output could not be parsed as JSON",
                 issue_tags=["judge_parse_failure"],
                 confidence=0.0,
+                execution_time_ms=execution_time_ms,
                 raw_output=raw_output,
                 parsed_output={},
                 parse_source="failed",
             )
 
+        execution_time_ms = (time.perf_counter() - start) * 1000
         issue_tags = self._normalize_issue_tags(
             [str(tag) for tag in parsed.get("issue_tags", []) if str(tag).strip()]
         )
@@ -580,6 +588,7 @@ class SqlAccuracyEvaluator(Evaluator):
             reason=reason,
             issue_tags=issue_tags,
             confidence=confidence,
+            execution_time_ms=execution_time_ms,
             raw_output=raw_output,
             parsed_output=parsed,
             parse_source=parse_source,
@@ -590,6 +599,8 @@ class SqlAccuracyEvaluator(Evaluator):
         test_case: SqlTestCase,
         agent_artifact: Optional[SqlExecutionArtifact],
         ground_truth_artifact: Optional[SqlExecutionArtifact],
+        *,
+        execution_time_ms: float = 0.0,
     ) -> Optional[JudgeResult]:
         """Use execution artifacts when the judge output is not parseable."""
         if agent_artifact is None or ground_truth_artifact is None:
@@ -610,6 +621,7 @@ class SqlAccuracyEvaluator(Evaluator):
                 ),
                 issue_tags=["formatting_only"],
                 confidence=0.0,
+                execution_time_ms=execution_time_ms,
                 raw_output="",
                 parsed_output={"fallback": "artifact_match"},
                 parse_source="artifact_fallback",
@@ -624,6 +636,7 @@ class SqlAccuracyEvaluator(Evaluator):
             ),
             issue_tags=["wrong_semantics"],
             confidence=0.0,
+            execution_time_ms=execution_time_ms,
             raw_output="",
             parsed_output={
                 "fallback": "artifact_mismatch",

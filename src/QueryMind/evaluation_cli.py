@@ -90,6 +90,11 @@ def parse_args() -> argparse.Namespace:
         "--provider",
         help="Override the LLM provider for both agent and judge (deepseek or minimax)",
     )
+    parser.add_argument(
+        "--skip-expected-outcome",
+        action="store_true",
+        help="Only run sql_accuracy and skip expected_outcome checks",
+    )
     return parser.parse_args()
 
 
@@ -108,6 +113,43 @@ def load_dataset(dataset_path: Path) -> EvaluationDataset:
     return EvaluationDataset.from_json(dataset_path)
 
 
+def should_include_expected_outcome(args: argparse.Namespace) -> bool:
+    env_value = os.getenv("EVAL_SKIP_EXPECTED_OUTCOME", "false").strip().lower()
+    if args.skip_expected_outcome or env_value in {"1", "true", "on", "yes"}:
+        return False
+    return True
+
+
+def build_evaluator_names(*, include_expected_outcome: bool) -> list[str]:
+    names = ["sql_accuracy"]
+    if include_expected_outcome:
+        names.append("expected_outcome")
+    return names
+
+
+def build_evaluators(
+    *,
+    runtime_resolver: DictEvaluationRuntimeResolver,
+    judge_llm,
+    pass_threshold: float,
+    preview_rows: int,
+    allow_write_sql: bool,
+    include_expected_outcome: bool,
+):
+    evaluators = [
+        SqlAccuracyEvaluator(
+            runtime_resolver=runtime_resolver,
+            judge_llm=judge_llm,
+            pass_threshold=pass_threshold,
+            preview_rows=preview_rows,
+            allow_write_sql=allow_write_sql,
+        )
+    ]
+    if include_expected_outcome:
+        evaluators.append(ExpectedOutcomeEvaluator())
+    return evaluators
+
+
 def _build_config_snapshot(
     *,
     dataset_path: Path,
@@ -120,6 +162,8 @@ def _build_config_snapshot(
     preview_rows: int,
     max_concurrency: int,
     allow_write_sql: bool,
+    evaluator_names: list[str],
+    include_expected_outcome: bool,
 ) -> dict[str, object]:
     recovery = build_recovery_strategy()
     return {
@@ -137,6 +181,9 @@ def _build_config_snapshot(
         "pass_threshold": pass_threshold,
         "preview_rows": preview_rows,
         "max_concurrency": max_concurrency,
+        "evaluator_names": evaluator_names,
+        "include_expected_outcome": include_expected_outcome,
+        "evaluation_mode": "full" if include_expected_outcome else "sql_accuracy_only",
         "recovery": {
             "max_retries": recovery.max_retries,
             "base_delay_ms": recovery.base_delay_ms,
@@ -167,21 +214,31 @@ def _resolve_run_store(
                 "Resume run dataset hash does not match the current dataset. "
                 "Use the same dataset to resume."
             )
+        if list(store.checkpoint.evaluator_names or []) != evaluator_names:
+            raise ValueError(
+                "Resume run evaluator configuration does not match the current evaluation mode."
+            )
         return store
 
     if args.resume_latest:
         store = EvaluationRunStore.find_latest(
             resume_root,
             dataset_hash=dataset_hash_value,
+            evaluator_names=evaluator_names,
             only_incomplete=True,
         )
         if store is None:
             raise FileNotFoundError(
-                f"No incomplete resume point found in {resume_root} for this dataset"
+                f"No incomplete resume point found in {resume_root} for this dataset "
+                "and evaluator configuration"
             )
         if store.checkpoint.dataset_hash != dataset_hash_value:
             raise ValueError(
                 "Latest resume point dataset hash does not match the current dataset"
+            )
+        if list(store.checkpoint.evaluator_names or []) != evaluator_names:
+            raise ValueError(
+                "Latest resume point evaluator configuration does not match the current evaluation mode."
             )
         return store
 
@@ -220,9 +277,12 @@ async def main_async(args: argparse.Namespace) -> None:
 
     resume_root = Path(args.resume_root).expanduser()
     dataset_hash_value = dataset_hash(dataset_path)
+    include_expected_outcome = should_include_expected_outcome(args)
+    evaluator_names = build_evaluator_names(
+        include_expected_outcome=include_expected_outcome,
+    )
 
     emit_status("▶ Resolving resume point...")
-    provisional_evaluator_names = ["sql_accuracy", "expected_outcome"]
     store = _resolve_run_store(
         args,
         resume_root=resume_root,
@@ -230,7 +290,7 @@ async def main_async(args: argparse.Namespace) -> None:
         dataset_name=dataset.name,
         dataset_description=dataset.description,
         dataset_hash_value=dataset_hash_value,
-        evaluator_names=provisional_evaluator_names,
+        evaluator_names=evaluator_names,
         total_test_cases=len(dataset.test_cases),
     )
 
@@ -266,16 +326,14 @@ async def main_async(args: argparse.Namespace) -> None:
     max_concurrency = args.max_concurrency or int(os.getenv("EVAL_MAX_CONCURRENCY", "2"))
     allow_write_sql = os.getenv("EVAL_ALLOW_WRITE_SQL", "false").lower() == "true"
 
-    evaluator = SqlAccuracyEvaluator(
+    evaluators = build_evaluators(
         runtime_resolver=resolver,
         judge_llm=judge_llm,
         pass_threshold=pass_threshold,
         preview_rows=preview_rows,
         allow_write_sql=allow_write_sql,
+        include_expected_outcome=include_expected_outcome,
     )
-    outcome_evaluator = ExpectedOutcomeEvaluator()
-    evaluators = [evaluator, outcome_evaluator]
-    evaluator_names = [e.name for e in evaluators]
 
     store.checkpoint.evaluator_names = evaluator_names
     store.checkpoint.total_test_cases = len(dataset.test_cases)
@@ -290,6 +348,8 @@ async def main_async(args: argparse.Namespace) -> None:
         preview_rows=preview_rows,
         max_concurrency=max_concurrency,
         allow_write_sql=allow_write_sql,
+        evaluator_names=evaluator_names,
+        include_expected_outcome=include_expected_outcome,
     )
     store.hydrate_completed_ids()
     store.mark_status("running")
