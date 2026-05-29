@@ -262,7 +262,9 @@ Judge 的输入字段包括：
 - 再尝试 raw 输出回收
 - 解析结果会记录 `JudgeResult.parse_source`
 
-如果最终仍然无法解析，就会落到 `judge_parse_failure`。
+如果最终仍然无法解析，`_run_judge()` 会先返回 `judge_parse_failure`
+结果；随后 `evaluate()` 通常会根据执行产物再走 artifact fallback，
+把最终结果改写成 `formatting_only` 或 `wrong_semantics`。
 
 当前分数逻辑是：
 
@@ -281,7 +283,10 @@ passed = score >= EVAL_PASS_THRESHOLD
 
 - `issue_tags` 里重复项会被去重后再扣分
 - 未知 `issue_tag` 默认按 `0.1` 罚分
-- 如果 Judge 输出无法解析，直接记为 `judge_parse_failure`，分数为 `0.0`
+- 如果 Judge 输出无法解析，Evaluator 会先尝试 artifact fallback：
+  - 两边的 `column_names`、`row_count`、`preview_rows`、`truncated`
+    完全一致时，视为 `formatting_only`，分数为 `0.95`
+  - 否则视为 `wrong_semantics`，分数为 `0.5`
 
 | issue_tag | 罚分 | 规则说明 |
 |---|---:|---|
@@ -289,7 +294,7 @@ passed = score >= EVAL_PASS_THRESHOLD
 | `execution_error` | `1.0` | Agent 的 SQL 可提取，但执行失败或抛错。 |
 | `ground_truth_failure` | `1.0` | 标准答案 SQL 本身执行失败，无法建立对比基准。 |
 | `dataset_error` | `1.0` | 数据集或样本结构异常，属于数据层问题。 |
-| `judge_parse_failure` | `1.0` | Judge 输出无法解析为结构化 JSON。 |
+| `judge_parse_failure` | `1.0` | Judge 输出无法解析为结构化 JSON；正常主流程通常会继续走 artifact fallback。 |
 | `wrong_semantics` | `0.5` | 语义明显不对，但未被更具体的 tag 覆盖；如果 Judge 明确判失败且没给 tag，系统会自动补这个 tag。 |
 | `wrong_result_preview` | `0.3` | 前几行结果明显不一致，属于结果内容层面的偏差。 |
 | `wrong_columns` | `0.2` | 返回列集合或列语义不一致，但整体可能仍接近。 |

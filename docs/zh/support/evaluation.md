@@ -257,14 +257,54 @@ checkpoint 会写到：
 5. 请求 judge LLM 评分
 6. 根据 issue tag 转成最终分数
 
-评分逻辑使用 issue-tag penalty。常见 tag 包括：
+评分逻辑不是直接相信 Judge 返回的 `passed`，而是先把结果转换成
+`issue_tags`，再按罚分表重算 `score`，最后和 `pass_threshold`
+比较。这里有几个关键点：
 
-- `wrong_result_preview`
-- `wrong_columns`
-- `wrong_order_by`
-- `formatting_only`
-- `missing_sql`
-- `execution_error`
+- `issue_tags` 会先去重，同一问题不会重复扣分。
+- 如果一次出现多个 tag，Evaluator 只保留一个“主问题”：
+  `missing_sql / execution_error / ground_truth_failure / dataset_error / judge_parse_failure -> wrong_semantics -> wrong_result_preview -> wrong_columns -> wrong_order_by -> formatting_only`。
+- 最终分数公式是 `score = clamp(1.0 - sum(penalty(tag)), 0.0, 1.0)`。
+- 未知 tag 默认按 `0.1` 罚分。
+- 默认阈值是 `EVAL_PASS_THRESHOLD=0.7`，所以 `formatting_only`
+  和单独的 `wrong_order_by` 通常仍会通过。
+
+更贴近代码的执行顺序是：
+
+1. 先执行 ground-truth SQL 和 agent SQL。
+2. 如果 agent 过程本身报错，直接 `score=0.0`、`issue_tags=["agent_failure"]`。
+3. 如果没有捕获到可用的 `run_sql` 调用，直接 `score=0.0`、
+   `issue_tags=["missing_sql"]`。
+4. 如果 ground-truth SQL 执行失败，直接 `score=0.0`、
+   `issue_tags=["ground_truth_failure"]`。
+5. 如果 agent SQL 执行失败，直接 `score=0.0`、
+   `issue_tags=["execution_error"]`。
+6. 如果 Judge 请求本身失败，直接 `score=0.0`、
+   `issue_tags=["judge_request_failed"]`。
+7. 如果 Judge 输出无法解析，Evaluator 会先尝试 artifact fallback：
+   - 两边的 `column_names`、`row_count`、`preview_rows`、`truncated`
+     完全一致：`score=0.95`、`issue_tags=["formatting_only"]`
+   - 否则：`score=0.5`、`issue_tags=["wrong_semantics"]`
+
+| issue_tag | 罚分 | 规则说明 |
+|---|---:|---|
+| `missing_sql` | `1.0` | Agent 没有产出可用的 `run_sql` 调用。 |
+| `execution_error` | `1.0` | Agent 的 SQL 可提取，但执行失败或抛错。 |
+| `ground_truth_failure` | `1.0` | 标准答案 SQL 本身执行失败，无法建立对比基准。 |
+| `dataset_error` | `1.0` | 数据集或样本结构异常，属于防御性标签。 |
+| `judge_parse_failure` | `1.0` | Judge 输出无法解析为结构化 JSON；正常主流程通常会继续走 artifact fallback。 |
+| `wrong_semantics` | `0.5` | 语义明显不对，或解析失败后的保守降级。 |
+| `wrong_result_preview` | `0.3` | 前几行结果明显不一致，属于结果内容层面的偏差。 |
+| `wrong_columns` | `0.2` | 返回列集合或列语义不一致，但整体可能仍接近。 |
+| `wrong_order_by` | `0.1` | 主要问题是排序不一致，通常是轻量扣分。 |
+| `formatting_only` | `0.05` | 结果语义一致，只是别名、空白、SQL 格式等表面差异。 |
+
+因此可以粗略理解为：
+
+- `formatting_only` 一般仍会通过
+- `wrong_order_by` 单独出现时通常是 `0.9`
+- `wrong_columns` 或 `wrong_result_preview` 往往会落在阈值边缘
+- `missing_sql`、`execution_error`、`judge_request_failed` 这类直接失败
 
 对 `sql_126` 来说，锚定结果是：
 
