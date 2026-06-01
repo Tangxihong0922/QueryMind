@@ -34,6 +34,68 @@ stable skeleton or to steer into local repair.
    the turn is classified as `structural_rewrite`, the next turn rewrites the
    grouped summary or CTE shape instead of doing local repair.
 
+## Harness Strategy
+
+1. Keep profile inference separate from the runtime notice
+   - The middleware first reuses a profile from `sql_governance_profile`,
+     `sql_profile`, `runtime_profile`, `sql_runtime_profile`, or
+     `sql_governance`; if none is present, it infers one from the last user
+     message.
+   - It then appends governance state as a tail `Runtime Context Notice`
+     instead of rewriting the system prompt.
+   - Why this matters: the system prompt stays stable while runtime state can
+     change with the conversation, so the prompt itself does not drift.
+   - Typical failure mode: missing profiles, a profile that does not match the
+     real SQL family, or dynamic state leaking into the system prompt.
+
+2. Recap correction at 70% of `max_tool_iterations`
+   - `recap_trigger_ratio=0.7`, `recap_min_tool_iterations=4`; recap is sent at
+     most once per `request_id`.
+   - When tool usage gets close to the budget, or drift / repeated rejection
+     appears, the middleware injects a recap that restates the anchor, row
+     grain, and current repair direction.
+   - Why this matters: SQL drafting often gets stuck in “one more tiny tweak”
+     mode late in the turn, and recap pulls the model back to the current
+     skeleton.
+   - Typical failure mode: repeated `information_schema` queries, bouncing
+     between near-identical SQL variants, or still not producing a stable
+     shape near the end.
+
+3. Freeze only when the evidence is strong enough
+   - `freeze_trigger_ratio=0.65`, `freeze_min_tool_iterations=8`, and
+     `freeze_min_best_sql_support=2`; freeze is only allowed when the anchor is
+     `validated`, `row_grain_state.status=aligned`, and
+     `best_sql_gap_categories` is empty.
+   - Why this matters: freeze is not “looks close enough,” it is “has been
+     validated enough times to become the anchor.”
+   - Typical failure mode: one lucky query gets frozen too early, and every
+     later turn keeps nudging the wrong anchor instead of fixing the real issue.
+
+4. Split `turn_local_repair_mode` from `structural_rewrite`
+   - When the anchor is candidate/validated, the row grain is aligned, and
+     repeated success or repeated rejection suggests a small fix, local repair
+     is allowed.
+   - Once `_sql_repair_strategy_from_snapshot(...)` decides the turn is a
+     `structural_rewrite`, the prompt asks for a rebuilt grouped summary or CTE
+     shape instead of preserving the old skeleton.
+   - Why this matters: some problems are predicate-level fixes, while others
+     are skeleton-level rewrites; the harness needs to route those cases
+     differently.
+   - Typical failure mode: aggregation / rollup / multi-CTE tasks keep changing
+     WHERE clauses when the real problem is the GROUP BY or CTE structure.
+
+5. Use metadata-query and canonical-streak signals to decide whether to keep repairing
+   - `metadata_query_failures` tracks SQL that is still doing metadata
+     introspection; `same_success_sql_canonical_streak` and
+     `last_rejection_reason_count` help decide whether to keep local repair or
+     change pace.
+   - Why this matters: the harness needs to separate “reconnaissance SQL” from
+     the real answer. If the same canonical shape keeps succeeding, local
+     repair is reasonable; if rejection repeats, the turn should change shape.
+   - Typical failure mode: the model keeps running `information_schema`
+     queries, or keeps resubmitting nearly identical SQL without turning the
+     judge feedback into a new action.
+
 ## ASCII Diagram
 
 The diagram below turns the SQL drafting narrative into a concrete loop. The

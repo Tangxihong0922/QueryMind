@@ -35,6 +35,57 @@
    `structural_rewrite`，下一轮会优先重写 grouped summary / CTE 形状，而
    不是继续做局部修补。
 
+## Harness 策略
+
+1. 画像推断和 runtime notice 分离
+   - middleware 先从 `sql_governance_profile`、`sql_profile`、`runtime_profile`、
+     `sql_runtime_profile` 或 `sql_governance` 里复用画像；如果都没有，再从最后一条
+     user message 里推断。
+   - 随后它把治理信息追加为消息尾部的 `Runtime Context Notice`，而不是改写
+     system prompt。
+   - 这样做的原因：system prompt 保持稳定，runtime 侧信息可以随会话状态变化，
+     避免 prompt 本身抖动。
+   - 针对典型失败模式：画像缺失、profile 与真实 SQL 家族不一致、系统 prompt 被动态
+     状态污染。
+
+2. 70% `max_tool_iterations` 的 recap 纠偏
+   - `recap_trigger_ratio=0.7`，`recap_min_tool_iterations=4`；对同一个 `request_id`
+     只发一次 recap。
+   - 当工具轮次接近预算上限，或者出现 drift / repeated rejection 时，middleware
+     会插入 recap，重申 anchor、row grain 和当前 repair 方向。
+   - 这样做的原因：SQL 起草最容易在后半程陷入“再改一点点”的循环，recap 可以把模型
+     拉回到当前候选骨架上。
+   - 针对典型失败模式：反复查 `information_schema`、在近似 SQL 之间来回摆动、最后几轮
+     仍不输出稳定形状。
+
+3. 65% 冻结门槛，且必须有证据支撑
+   - `freeze_trigger_ratio=0.65`、`freeze_min_tool_iterations=8`、
+     `freeze_min_best_sql_support=2`，并且只有在 anchor 被判定为 `validated`、
+     `row_grain_state.status=aligned`、`best_sql_gap_categories` 为空时才允许冻结。
+   - 这样做的原因：freeze 不是“看起来差不多就锁”，而是“已经被重复验证过才锁”，
+     避免一次偶然命中的 SQL 形状变成错误模板。
+   - 针对典型失败模式：一条偶然正确的 query 过早冻结、后续所有轮次都围着错误 anchor
+     微调。
+
+4. `turn_local_repair_mode` 和 `structural_rewrite` 分流
+   - 当 anchor 是 candidate/validated、row grain 对齐，且重复成功或重复 rejection
+     说明只需要小修时，才允许 local repair。
+   - 一旦 `_sql_repair_strategy_from_snapshot(...)` 判断是 `structural_rewrite`，
+     prompt 就会要求重建 grouped summary 或 CTE 形状，而不是保留旧 skeleton。
+   - 这样做的原因：有些问题是谓词级别的小修，有些问题是骨架级别的大改；把两类问题分开，
+     才能让 harness 走对路径。
+   - 针对典型失败模式：聚合/rollup/multi-CTE 题目里反复改 WHERE 条件，但真正的问题是
+     GROUP BY / CTE 结构错了。
+
+5. Metadata query 和 canonical streak 一起判定是否要继续修补
+   - `metadata_query_failures` 会记录仍然在做元数据 introspection 的 SQL；
+     `same_success_sql_canonical_streak` 和 `last_rejection_reason_count` 则用来判断当前是不是
+     该继续 local repair。
+   - 这样做的原因：harness 需要把“侦察性 SQL”与“真正答案”分开；如果同一个 canonical
+     形状连续成功，说明可以局部修补，如果连续 rejection，则说明该换节奏了。
+   - 针对典型失败模式：模型一直跑 `information_schema`，或者一遍遍重发几乎相同的 SQL，
+     却没有把 judge 的拒绝信号转成下一轮动作。
+
 ## ASCII 流程图
 
 下面这张图把 SQL 起草闭环按用例叙述串起来。事实源来自

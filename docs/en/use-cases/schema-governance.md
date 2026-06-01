@@ -30,6 +30,60 @@ The flow relies on conversation-scoped state, not on prose memory.
 6. The next turn can continue from the stored schema state instead of starting
    over.
 
+## Harness Strategy
+
+1. Session-level call budget and tool visibility lock for `schema_retrieve`
+   - `schema_retrieve_max_calls=3`, counted across the whole conversation, not
+     reset every turn.
+   - `consecutive_no_new_tables=2` or `consecutive_empty_results=2` enters
+     `schema_locked`.
+   - Once `schema_locked=True`, the next `before_llm_request` removes
+     `schema_retrieve` from `request.tools`, so the LLM cannot see it for a
+     while.
+   - Why this matters: it turns schema exploration into a bounded phase and
+     keeps the model from spending most of its budget on “just keep looking for
+     tables.”
+   - Typical failure mode: repeated paraphrases that keep returning the same
+     result set, or empty results that lead to blind retry loops.
+
+2. Lock after two useful hits
+   - `schema_retrieve_successes_to_lock=2`, so two useful hits can lock the
+     conversation early.
+   - Why this matters: once the key tables and join path are visible, more
+     retrieval usually adds noise rather than reducing uncertainty.
+   - Typical failure mode: the model already has the target table but keeps
+     “completing” schema discovery and gets distracted by extra tables or
+     columns.
+
+3. Recap correction at 70% of `max_tool_iterations`
+   - `recap_trigger_ratio=0.7`, `recap_min_tool_iterations=4`; recap is sent at
+     most once per `request_id`.
+   - The middleware injects a recap when tool usage is close to the budget
+     limit, and it restates the move from discovery to SQL drafting.
+   - Why this matters: long runs often drift in the last 20% of the budget
+     instead of converging; the recap pulls the model back to the main line.
+   - Typical failure mode: tool count keeps rising while information gain drops
+     to near zero, or the model keeps bouncing between schema search and SQL
+     draft mode.
+
+4. Keep a metadata-discovery escape hatch for empty-result locks
+   - When the lock reason is `schema_retrieve_empty_results`, the snapshot also
+     marks `allow_metadata_query=True`.
+   - Why this matters: an empty result does not always mean the schema is fully
+     known; sometimes the query was simply too narrow. A read-only metadata
+     path can recover the turn.
+   - Typical failure mode: the first query is too narrow, and a hard lock would
+     remove the last chance to find candidate tables and join paths.
+
+5. Use repeated-query and failure counts as a final guardrail
+   - `schema_retrieve_same_query_limit=2` and
+     `schema_retrieve_max_failures=2` catch repeated wording and repeated
+     failure loops.
+   - Why this matters: if the model is just rephrasing the same search or keeps
+     failing without changing strategy, more freedom only magnifies the loop.
+   - Typical failure mode: near-duplicate queries keep appearing, or two failed
+     attempts pass with no new information.
+
 ## ASCII Diagram
 
 The diagram below turns the narrative into a concrete request-time loop. The

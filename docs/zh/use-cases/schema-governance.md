@@ -26,6 +26,51 @@ prompt 侧的 `SchemaGovernanceEnhancer` 只负责追加 prompt-chain 页面里
    提示。
 6. 下一轮就能直接沿用已保存的 schema 状态，而不是重新开始。
 
+## Harness 策略
+
+1. Schema Retrieve 工具会话内调用预算与工具可见性锁
+   - `schema_retrieve_max_calls=3`，按会话累计计数，不是每轮重置。
+   - `consecutive_no_new_tables=2` 或 `consecutive_empty_results=2` 时进入
+     `schema_locked`。
+   - 一旦 `schema_locked=True`，下一轮 `before_llm_request` 会把
+     `schema_retrieve` 从 `request.tools` 里移除，让 LLM 暂时看不到这个工具。
+   - 这样做的原因：把 schema 探索收口成有终点的阶段，避免模型把大量预算消耗在
+     “继续找表”上。
+   - 针对典型失败模式：同义改写反复搜、结果一直不变、空结果后继续盲搜。
+
+2. 2 次有效命中就提前收口
+   - `schema_retrieve_successes_to_lock=2`，两次有效命中后直接锁定。
+   - 这样做的原因：关键表和 join path 一旦已经出现，继续检索大多只会引入噪声，
+     降低后续 SQL 起草的稳定性。
+   - 针对典型失败模式：模型已经拿到目标表，却还想“补全 schema”，最后被更多表名和
+     字段干扰。
+
+3. 70% `max_tool_iterations` 的 recap 纠偏
+   - `recap_trigger_ratio=0.7`，`recap_min_tool_iterations=4`；recap 对同一个
+     `request_id` 只发一次，默认配置下 `schema_retrieve` 累计到 3 次也会提前重申目标。
+   - 当工具轮次接近预算上限，middleware 会插入 recap，重新强调“现在该写 SQL 并调用
+     `run_sql`”。
+   - 这样做的原因：长链路最容易在最后 20% 的预算里继续探索，而不是收敛；recap
+     可以把注意力拉回主线。
+   - 针对典型失败模式：工具次数越来越多但信息增量趋近于零，或者在 schema 和 SQL
+     之间来回切换。
+
+4. 空结果锁定下保留 metadata discovery 例外
+   - 当锁因是 `schema_retrieve_empty_results` 时，snapshot 会额外标记
+     `allow_metadata_query=True`。
+   - 这样做的原因：空结果不一定代表 schema 已经足够，往往只是查询表达式太窄；
+     保留只读 metadata discovery 可以提供救回路径。
+   - 针对典型失败模式：第一个查询范围太小，直接锁死会让模型失去找到候选表和
+     join path 的机会。
+
+5. 重复查询和失败计数一起兜底
+   - `schema_retrieve_same_query_limit=2`、`schema_retrieve_max_failures=2`，
+     分别拦住重复问法和连续失败。
+   - 这样做的原因：当模型只是换个说法重复搜，或者连续失败两次仍没有调整策略时，
+     继续放开只会放大循环。
+   - 针对典型失败模式：同一类 query 反复出现、轻微 paraphrase 但结果等价、两次失败后
+     没有任何新信息。
+
 ## ASCII 流程图
 
 下面这张图按用例叙述串起 schema governance 的完整闭环。事实源来自
