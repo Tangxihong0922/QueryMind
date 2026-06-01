@@ -237,7 +237,10 @@ The handbook expands the README into components, advanced-features, use-case, an
 ### Future Actions
 
 1. Explore Agentic RL on top of QueryMind.
-2. Keep tightening the agent with evaluation results and governance feedback.
+2. Improve schema retrieval query rewriting so complex user questions can be split into multiple schema-retrieve calls, reducing the chance that multi-table or multi-field descriptions get compressed into a single query and fall into a retrieval dead-end.
+3. Explore alternative schema retrieval / indexing architectures, including PageIndex-style reasoning-first, vector-light or vector-free RAG approaches and stronger multi-hop schema retrieval over the business schema graph.
+4. Add business-level scoping options, such as manual business-domain selection, to narrow the schema-retrieve search space before retrieval starts.
+5. Keep tightening the agent with evaluation results and governance feedback.
 
 <a id="license"></a>
 

@@ -238,7 +238,10 @@ python webcomponent_demo.py --api-base http://127.0.0.1:8000
 ### 未来计划
 
 1. 在 QueryMind 之上探索 Agentic RL。
-2. 持续结合评测结果和治理反馈打磨 Agent。
+2. 优化 schema retrieval 的 query 改写逻辑，让复杂的用户问题可以拆成多次 schema-retrieve 调用，减少多表 / 多字段描述被压缩成单句 query 后陷入检索 dead-end 的概率。
+3. 探索替代性的 schema retrieval / indexing 架构，包括 PageIndex 风格的推理优先、轻向量或无向量 RAG 范式，以及更强的基于业务 schema 图的多跳检索。
+4. 增加业务层面的收敛选项，例如人工选择业务领域，在检索开始前先缩小 schema-retrieve 的搜索范围。
+5. 持续结合评测结果和治理反馈打磨 Agent。
 
 <a id="license"></a>
 
