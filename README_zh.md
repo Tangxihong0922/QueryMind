@@ -6,6 +6,17 @@ QueryMind 是一个面向真实 Text2SQL 场景的 LLM Agent 框架，提供 age
 [![README_EN](https://img.shields.io/badge/README-English%20version-0ea5e9.svg)](README.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+## 企业经营数据问答个人版
+
+本 Fork 由 [luyan9513](https://github.com/luyan9513) 持续维护，作为企业经营数据问答方向的个人主项目。项目保留 QueryMind 上游的 Agent、Schema Memory 和 SQL Governance 基础，并完成以下个人改造与验证：
+
+- 主 Agent 使用 DeepSeek，Mem0 LLM 与 `BAAI/bge-m3` Embedding 接入硅基流动。
+- 在只读 PostgreSQL 账号下通过 `pg_catalog` 抽取主外键，支持复合外键和跨 Schema 关系。
+- 实现 LLM 会话标题、历史自动刷新、Workflow 消息持久化和失败回退。
+- 在 AdventureWorks 68 张表、456 个字段上完成验证，Python 全量测试 117 项通过。
+
+上游能力、个人贡献、验证证据和后续路线见[项目归属与证据说明](docs/portfolio/ownership.md)。
+
 https://github.com/user-attachments/assets/e87fc532-ef82-4765-96a7-e693924de5c7
 
 <table>

@@ -6,6 +6,17 @@ QueryMind is an agent framework for building LLM-powered agents specialized in r
 [![README_zh](https://img.shields.io/badge/README-简体中文-0ea5e9.svg)](README_zh.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+## Enterprise Portfolio Edition
+
+This fork is maintained by [luyan9513](https://github.com/luyan9513) as an enterprise analytics portfolio project. It keeps QueryMind's upstream agent, schema-memory, and SQL-governance foundation while adding a verified local business-data workflow and independently maintained improvements:
+
+- DeepSeek for the main agent, with SiliconFlow-backed Mem0 LLM and `BAAI/bge-m3` embeddings.
+- Read-only PostgreSQL PK/FK extraction through `pg_catalog`, including composite and cross-schema relationships.
+- Persistent LLM-generated conversation titles, automatic history refresh, workflow message storage, and graceful fallback.
+- AdventureWorks validation across 68 tables and 456 fields, with 117 Python tests passing.
+
+See [Portfolio Ownership and Evidence](docs/portfolio/ownership.md) for the upstream boundary, personal contributions, verification evidence, and roadmap.
+
 https://github.com/user-attachments/assets/e87fc532-ef82-4765-96a7-e693924de5c7
 
 <table>
