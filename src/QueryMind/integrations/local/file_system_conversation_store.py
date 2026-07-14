@@ -57,6 +57,7 @@ class FileSystemConversationStore(ConversationStore):
             "user": conversation.user.model_dump(mode="json"),
             "created_at": conversation.created_at.isoformat(),
             "updated_at": conversation.updated_at.isoformat(),
+            "metadata": conversation.metadata,
         }
 
         metadata_path = self._get_metadata_path(conversation.id)
@@ -147,6 +148,7 @@ class FileSystemConversationStore(ConversationStore):
                 messages=messages,
                 created_at=datetime.fromisoformat(metadata["created_at"]),
                 updated_at=datetime.fromisoformat(metadata["updated_at"]),
+                metadata=metadata.get("metadata", {}),
             )
 
             return conversation
@@ -242,6 +244,7 @@ class FileSystemConversationStore(ConversationStore):
                     messages=messages,
                     created_at=datetime.fromisoformat(metadata["created_at"]),
                     updated_at=datetime.fromisoformat(metadata["updated_at"]),
+                    metadata=metadata.get("metadata", {}),
                 )
                 conversations.append(conversation)
             except (json.JSONDecodeError, ValueError, KeyError) as e:

@@ -914,7 +914,8 @@ export class QueryMindChat extends LitElement {
       }
 
       @media (max-width: 880px) {
-        .chat-layout {
+        .chat-layout,
+        :host([workspace-mode]) .chat-layout {
           grid-template-columns: 1fr;
           height: min(600px, 85vh);
           max-height: 85vh;
@@ -1316,6 +1317,12 @@ export class QueryMindChat extends LitElement {
 
       // Stream the response
       await this.handleStreamingResponse(request);
+
+      this.dispatchEvent(new CustomEvent('conversation-updated', {
+        detail: { conversationId: this.activeConversationId },
+        bubbles: true,
+        composed: true
+      }));
       return true; // Success
 
     } catch (error) {

@@ -46,6 +46,7 @@ from QueryMind.core.audit import AuditLogger
 from QueryMind.capabilities.agent_memory import AgentMemory
 from QueryMind.capabilities.schema_memory import SchemaMemory
 from QueryMind.capabilities.schema_management import SchemaManagementService
+from .conversation_title import ensure_conversation_title
 
 import logging
 
@@ -299,6 +300,22 @@ def _append_prompt_block(existing: Optional[str], block: str) -> str:
     if not existing:
         return block
     return f"{existing}\n\n{block}"
+
+
+def _workflow_history_text(components: List[UiComponent]) -> str:
+    """Extract a readable assistant message from deterministic workflow UI."""
+    parts: List[str] = []
+    for component in components:
+        rich_component = component.rich_component
+        rich_content = getattr(rich_component, "content", None)
+        simple_text = getattr(component.simple_component, "text", None)
+        candidate = rich_content if isinstance(rich_content, str) else simple_text
+        if not isinstance(candidate, str):
+            continue
+        candidate = candidate.strip()
+        if candidate and candidate not in parts:
+            parts.append(candidate)
+    return "\n\n".join(parts)
 
 
 class Agent:
@@ -726,14 +743,17 @@ class Agent:
                     if workflow_result.conversation_mutation:
                         await workflow_result.conversation_mutation(conversation)
 
-                    # Stream components
+                    # Stream components and keep a readable history snapshot.
+                    workflow_components: List[UiComponent] = []
                     if workflow_result.components:
                         if isinstance(workflow_result.components, list):
                             for component in workflow_result.components:
+                                workflow_components.append(component)
                                 yield component
                         else:
                             # AsyncGenerator
                             async for component in workflow_result.components:
+                                workflow_components.append(component)
                                 yield component
 
                     # Finalize response (status bar + chat input)
@@ -750,8 +770,18 @@ class Agent:
                         )
                     )
 
+                    # A deterministic workflow is still a real user turn. Persist
+                    # it so first-message commands also appear in chat history.
+                    conversation.add_message(Message(role="user", content=message))
+                    workflow_text = _workflow_history_text(workflow_components)
+                    if workflow_text:
+                        conversation.add_message(
+                            Message(role="assistant", content=workflow_text)
+                        )
+
                     # Save conversation if auto-save enabled
                     if self.config.auto_save_conversations:
+                        await ensure_conversation_title(conversation, self.llm_service)
                         await self.conversation_store.update_conversation(conversation)
 
                     if self.observability_provider and trigger_span:
@@ -1407,6 +1437,7 @@ You can:
                     },
                 )
 
+            await ensure_conversation_title(conversation, self.llm_service)
             await self.conversation_store.update_conversation(conversation)
 
             if self.observability_provider and save_span:

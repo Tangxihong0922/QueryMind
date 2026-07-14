@@ -26,7 +26,12 @@ def _normalize_display_text(text: str, max_length: int) -> str:
 
 
 def _conversation_title(conversation: Any) -> str:
-    """Build a stable display title from the first user message."""
+    """Use the persisted LLM title, falling back to the first user message."""
+    metadata = getattr(conversation, "metadata", {}) or {}
+    generated_title = str(metadata.get("title") or "").strip()
+    if generated_title:
+        return _normalize_display_text(generated_title, 72)
+
     for message in getattr(conversation, "messages", []):
         if getattr(message, "role", None) == "user" and getattr(message, "content", ""):
             return _normalize_display_text(message.content, 72)

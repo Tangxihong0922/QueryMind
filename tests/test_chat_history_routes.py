@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -108,3 +108,32 @@ def test_get_and_delete_conversation():
 
     missing = client.get("/api/querymind/v1/chat/conversations/conv_delete")
     assert missing.status_code == 404
+
+
+def test_list_conversations_prefers_persisted_llm_title():
+    store = MemoryConversationStore()
+    user = User(
+        id="admin",
+        username="admin",
+        email="admin@local",
+        group_memberships=["admin"],
+    )
+
+    async def _seed() -> None:
+        conversation = await store.create_conversation(
+            "conv_titled",
+            user,
+            "请统计过去十二个月每月的订单金额并分析趋势",
+        )
+        conversation.metadata["title"] = "月度订单趋势分析"
+        conversation.metadata["title_source"] = "llm"
+        await store.update_conversation(conversation)
+
+    import asyncio
+
+    asyncio.run(_seed())
+
+    response = _build_client(store).get("/api/querymind/v1/chat/conversations")
+
+    assert response.status_code == 200
+    assert response.json()["conversations"][0]["title"] == "月度订单趋势分析"

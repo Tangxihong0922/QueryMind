@@ -440,6 +440,14 @@
     });
 
     newChatBtn?.addEventListener('click', startNewChat);
+
+    chat?.addEventListener('conversation-updated', async (event) => {
+      const conversationId = event.detail?.conversationId;
+      if (conversationId) {
+        activeConversationId = conversationId;
+      }
+      await loadHistory();
+    });
   </script>
 </body>
 </html>
