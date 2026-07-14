@@ -53,6 +53,7 @@
     "@storybook/web-components-vite": "^8.6.14",
     "@types/marked": "^5.0.2",
     "@types/plotly.js-dist-min": "^2.3.4",
+    "playwright": "^1.61.1",
     "storybook": "^8.6.14",
     "typescript": "^5.9.2",
     "vite": "^7.1.5"
