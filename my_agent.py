@@ -84,6 +84,30 @@ DEFAULT_AGENT_HOST = os.getenv("QUERYMIND_AGENT_HOST", "0.0.0.0")
 DEFAULT_AGENT_PORT = int(os.getenv("QUERYMIND_AGENT_PORT", "8000"))
 
 
+def resolve_agent_llm_settings() -> tuple[str, str | None, str | None, dict | None]:
+    """Resolve the main agent LLM, including OpenAI-compatible providers."""
+    siliconflow_api_key = os.getenv("SILICONFLOW_API_KEY")
+    api_key = (
+        os.getenv("AGENT_LLM_API_KEY")
+        or os.getenv("DEEPSEEK_API_KEY")
+        or siliconflow_api_key
+    )
+    base_url = os.getenv("AGENT_LLM_BASE_URL")
+    if not base_url:
+        base_url = os.getenv("DEEPSEEK_BASE_URL")
+    if not base_url and siliconflow_api_key:
+        base_url = os.getenv("SILICONFLOW_BASE_URL", "https://api.siliconflow.cn/v1")
+
+    model = os.getenv("AGENT_LLM_MODEL")
+    if not model:
+        model = "deepseek-v4-flash"
+
+    extra_body = None
+    if base_url and "api.deepseek.com" in base_url:
+        extra_body = DEEPSEEK_EXTRA_BODY
+    return model, api_key, base_url, extra_body
+
+
 class SimpleUserResolver(UserResolver):
     async def resolve_user(self, request_context: RequestContext) -> User:
         return User(
@@ -137,21 +161,24 @@ def register_tools(registry: ToolRegistry, schema_memory: Neo4jMem0SchemaMemory)
 
 def build_agent() -> Agent:
     recovery_strategy = ExponentialBackoffStrategy()
+    agent_model, agent_api_key, agent_base_url, agent_extra_body = (
+        resolve_agent_llm_settings()
+    )
 
     llm_service = OpenAILlmService(
-        model="deepseek-v4-flash",
-        api_key=os.getenv("DEEPSEEK_API_KEY"),
-        base_url=os.getenv("DEEPSEEK_BASE_URL"),
+        model=agent_model,
+        api_key=agent_api_key,
+        base_url=agent_base_url,
         error_recovery_strategy=recovery_strategy,
-        extra_body=DEEPSEEK_EXTRA_BODY,
+        extra_body=agent_extra_body,
     )
     schema_enrich_llm_service = OpenAILlmService(
-        model="deepseek-v4-flash",
-        api_key=os.getenv("DEEPSEEK_API_KEY"),
-        base_url=os.getenv("DEEPSEEK_BASE_URL"),
+        model=agent_model,
+        api_key=agent_api_key,
+        base_url=agent_base_url,
         response_format=build_enrich_response_format(),
         error_recovery_strategy=recovery_strategy,
-        extra_body=DEEPSEEK_EXTRA_BODY,
+        extra_body=agent_extra_body,
     )
 
     agent_memory = Mem0AgentMemory(config=create_config_from_env())

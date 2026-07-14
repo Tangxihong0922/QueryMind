@@ -21,6 +21,7 @@ class EmbedderConfig:
     api_key: Optional[str] = None
     base_url: Optional[str] = None
     embedding_dims: int = 1536  # Renamed to match Mem0's BaseEmbedderConfig
+    send_embedding_dims: bool = True
     additional_config: Dict[str, Any] = field(default_factory=dict)
     
     @classmethod
@@ -34,6 +35,7 @@ class EmbedderConfig:
             api_key=data.get("api_key"),
             base_url=data.get("base_url"),
             embedding_dims=data.get("embedding_dims", data.get("embedding_dim", 1536)),
+            send_embedding_dims=data.get("send_embedding_dims", True),
             additional_config=data.get("additional_config", {}),
         )
     
@@ -45,7 +47,7 @@ class EmbedderConfig:
         if self.base_url:
             # Use openai_base_url for OpenAI-compatible APIs (ModelScope, Ollama, etc.)
             config["openai_base_url"] = self.base_url
-        if self.embedding_dims:
+        if self.embedding_dims and self.send_embedding_dims:
             config["embedding_dims"] = self.embedding_dims
         config.update(self.additional_config)
         return {"provider": self.provider, "config": config}
@@ -82,8 +84,7 @@ class LLMConfig:
         """
         Convert to Mem0 LLM config format.
         
-        For minimax and vllm providers, the base_url is mapped to the provider-specific
-        field name (minimax_base_url / vllm_base_url) as expected by Mem0's LLM classes.
+        Map the generic base URL to the field expected by each Mem0 provider.
         """
         config = {"model": self.model}
         if self.api_key:
@@ -94,6 +95,8 @@ class LLMConfig:
                 config["minimax_base_url"] = self.base_url
             elif self.provider == "vllm":
                 config["vllm_base_url"] = self.base_url
+            elif self.provider == "openai":
+                config["openai_base_url"] = self.base_url
             else:
                 config["base_url"] = self.base_url
         config.update(self.additional_config)
@@ -235,7 +238,10 @@ class Mem0VectorConfig:
         
         Environment variables:
             # Embedder (LLM)
-            - OPENAI_API_KEY: API key (optional)
+            - EMBEDDING_API_KEY: Embedder API key (optional)
+            - LLM_API_KEY: LLM API key (optional)
+            - SILICONFLOW_API_KEY: Shared fallback for SiliconFlow-compatible endpoints
+            - OPENAI_API_KEY: Backward-compatible fallback
             - EMBEDDING_PROVIDER: Embedder provider (default: openai)
             - EMBEDDING_MODEL: Embedder model (default: text-embedding-3-small)
             - EMBEDDING_BASE_URL: Custom embedder base URL (for Ollama, etc.)
@@ -249,20 +255,43 @@ class Mem0VectorConfig:
             - VECTOR_STORE_PROVIDER: Vector store provider (default: pgvector)
             - PGVECTOR_HOST/PGVECTOR_PORT/PGVECTOR_DATABASE/PGVECTOR_USERNAME/PGVECTOR_PASSWORD
         """
+        def first_env(*names: str) -> Optional[str]:
+            for name in names:
+                value = os.getenv(name)
+                if value not in (None, ""):
+                    return value
+            return None
+
         return cls(
             embedder=EmbedderConfig(
                 provider=os.getenv("EMBEDDING_PROVIDER", "openai"),
                 model=os.getenv("EMBEDDING_MODEL", "text-embedding-3-small"),
-                api_key=os.getenv("OPENAI_API_KEY"),
+                api_key=first_env(
+                    "EMBEDDING_API_KEY",
+                    "SILICONFLOW_API_KEY",
+                    "OPENAI_API_KEY",
+                ),
                 base_url=os.getenv("EMBEDDING_BASE_URL"),
                 embedding_dims=int(os.getenv("EMBEDDING_DIM", "1536")),
+                send_embedding_dims=os.getenv(
+                    "EMBEDDING_SEND_DIMENSIONS", "true"
+                ).lower() not in {"0", "false", "no"},
             ),
             llm=LLMConfig(
                 provider=os.getenv("LLM_PROVIDER", "openai"),
                 model=os.getenv("LLM_MODEL", "gpt-4o-mini"),
-                api_key=os.getenv("OPENAI_API_KEY"),
+                api_key=first_env(
+                    "LLM_API_KEY",
+                    "SILICONFLOW_API_KEY",
+                    "OPENAI_API_KEY",
+                ),
                 base_url=os.getenv("LLM_BASE_URL"),
-            ) if os.getenv("LLM_PROVIDER") or os.getenv("LLM_BASE_URL") or os.getenv("LLM_MODEL") else None,
+            ) if (
+                os.getenv("LLM_PROVIDER")
+                or os.getenv("LLM_BASE_URL")
+                or os.getenv("LLM_MODEL")
+                or os.getenv("LLM_API_KEY")
+            ) else None,
             vector_store=VectorStoreConfig(
                 provider=os.getenv("VECTOR_STORE_PROVIDER", "pgvector"),
                 host=os.getenv("PGVECTOR_HOST", "localhost"),

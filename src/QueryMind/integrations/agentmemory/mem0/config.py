@@ -19,6 +19,7 @@ class EmbedderConfig:
     api_key: Optional[str] = None
     base_url: Optional[str] = None  # For custom endpoints (Ollama, etc.)
     embedding_dims: int = 1536  # Renamed to match Mem0's BaseEmbedderConfig
+    send_embedding_dims: bool = True
     additional_config: Dict[str, Any] = field(default_factory=dict)
     
     @classmethod
@@ -32,6 +33,7 @@ class EmbedderConfig:
             api_key=data.get("api_key"),
             base_url=data.get("base_url"),
             embedding_dims=data.get("embedding_dims", data.get("embedding_dim", 1536)),
+            send_embedding_dims=data.get("send_embedding_dims", True),
             additional_config=data.get("additional_config", {}),
         )
     
@@ -45,7 +47,7 @@ class EmbedderConfig:
         if self.base_url:
             # Use openai_base_url for OpenAI-compatible APIs (ModelScope, Ollama, etc.)
             config["openai_base_url"] = self.base_url
-        if self.embedding_dims:
+        if self.embedding_dims and self.send_embedding_dims:
             config["embedding_dims"] = self.embedding_dims
         config.update(self.additional_config)
         
@@ -69,8 +71,7 @@ class LLMConfig:
         """
         Convert to Mem0 LLM config format.
         
-        For minimax and vllm providers, the base_url is mapped to the provider-specific
-        field name (minimax_base_url / vllm_base_url) as expected by Mem0's LLM classes.
+        Map the generic base URL to the field expected by each Mem0 provider.
         """
         config = {
             "model": self.model,
@@ -83,6 +84,8 @@ class LLMConfig:
                 config["minimax_base_url"] = self.base_url
             elif self.provider == "vllm":
                 config["vllm_base_url"] = self.base_url
+            elif self.provider == "openai":
+                config["openai_base_url"] = self.base_url
             else:
                 config["base_url"] = self.base_url
         config.update(self.additional_config)
@@ -311,7 +314,10 @@ def create_config_from_env() -> Mem0OSSConfig:
     Create Mem0OSSConfig from environment variables.
     
     Environment variables:
-        - OPENAI_API_KEY: OpenAI API key (for both LLM and embedder)
+        - MEM0_EMBEDDER_API_KEY / EMBEDDING_API_KEY: Embedder API key
+        - MEM0_LLM_API_KEY / LLM_API_KEY: Memory LLM API key
+        - SILICONFLOW_API_KEY: Shared fallback for SiliconFlow-compatible endpoints
+        - OPENAI_API_KEY: Backward-compatible fallback
         - MEM0_LLM_PROVIDER: LLM provider (default: openai)
         - MEM0_LLM_MODEL: LLM model (default: gpt-4o-mini)
         - MEM0_LLM_BASE_URL: LLM base URL (for minimax/vllm/ollama etc.)
@@ -336,14 +342,33 @@ def create_config_from_env() -> Mem0OSSConfig:
     embedder = EmbedderConfig(
         provider=_first_env("MEM0_EMBEDDER_PROVIDER", "EMBEDDING_PROVIDER", default="openai"),
         model=_first_env("MEM0_EMBEDDER_MODEL", "EMBEDDING_MODEL", default="text-embedding-3-small"),
-        api_key=os.getenv("OPENAI_API_KEY"),
+        api_key=_first_env(
+            "MEM0_EMBEDDER_API_KEY",
+            "EMBEDDING_API_KEY",
+            "SILICONFLOW_API_KEY",
+            "OPENAI_API_KEY",
+            default="",
+        ),
         base_url=_first_env("MEM0_EMBEDDER_BASE_URL", "EMBEDDING_BASE_URL", default=""),
         embedding_dims=int(_first_env("MEM0_EMBEDDING_DIM", "EMBEDDING_DIM", default="1536")),
+        send_embedding_dims=_first_env(
+            "MEM0_EMBEDDER_SEND_DIMENSIONS",
+            "EMBEDDING_SEND_DIMENSIONS",
+            default="true",
+        ).lower() not in {"0", "false", "no"},
     )
     
     # Determine API key based on provider
     llm_provider = _first_env("MEM0_LLM_PROVIDER", "LLM_PROVIDER", default="openai")
-    if llm_provider == "minimax":
+    configured_llm_api_key = _first_env(
+        "MEM0_LLM_API_KEY",
+        "LLM_API_KEY",
+        "SILICONFLOW_API_KEY",
+        default="",
+    )
+    if configured_llm_api_key:
+        llm_api_key = configured_llm_api_key
+    elif llm_provider == "minimax":
         llm_api_key = os.getenv("MINIMAX_API_KEY") or os.getenv("OPENAI_API_KEY")
     elif llm_provider == "vllm":
         llm_api_key = os.getenv("VLLM_API_KEY") or os.getenv("OPENAI_API_KEY") or "vllm-api-key"
