@@ -30,8 +30,7 @@ class PostgresSchemaExtractor(SchemaExtractor):
     Extracts table schemas from PostgreSQL using:
     - information_schema.tables
     - information_schema.columns
-    - information_schema.table_constraints
-    - information_schema.key_column_usage
+    - pg_catalog.pg_constraint (primary and foreign keys for read-only users)
     - pg_catalog.pg_indexes (for index info)
     
     Example:
@@ -280,19 +279,22 @@ class PostgresSchemaExtractor(SchemaExtractor):
             
             # Step 3: Get primary keys
             cursor.execute("""
-                SELECT 
-                    kcu.table_schema,
-                    kcu.table_name,
-                    kcu.column_name,
-                    kcu.ordinal_position
-                FROM information_schema.table_constraints tc
-                JOIN information_schema.key_column_usage kcu
-                    ON tc.constraint_name = kcu.constraint_name
-                    AND tc.table_schema = kcu.table_schema
-                WHERE tc.constraint_type = 'PRIMARY KEY'
-                AND tc.table_schema = ANY(%s)
-                AND tc.table_name = ANY(%s)
-                ORDER BY tc.table_schema, tc.table_name, kcu.ordinal_position
+                SELECT
+                    ns.nspname AS table_schema,
+                    tbl.relname AS table_name,
+                    att.attname AS column_name,
+                    key_col.ordinality AS ordinal_position
+                FROM pg_catalog.pg_constraint con
+                JOIN pg_catalog.pg_class tbl ON tbl.oid = con.conrelid
+                JOIN pg_catalog.pg_namespace ns ON ns.oid = tbl.relnamespace
+                JOIN LATERAL unnest(con.conkey) WITH ORDINALITY
+                    AS key_col(attnum, ordinality) ON TRUE
+                JOIN pg_catalog.pg_attribute att
+                    ON att.attrelid = tbl.oid AND att.attnum = key_col.attnum
+                WHERE con.contype = 'p'
+                AND ns.nspname = ANY(%s)
+                AND tbl.relname = ANY(%s)
+                ORDER BY ns.nspname, tbl.relname, key_col.ordinality
             """, (schema_names, table_names))
             
             pk_columns: Dict[str, set] = {}
@@ -305,22 +307,30 @@ class PostgresSchemaExtractor(SchemaExtractor):
             # Step 4: Get foreign keys
             cursor.execute("""
                 SELECT
-                    tc.table_schema,
-                    tc.table_name,
-                    kcu.column_name,
-                    ccu.table_schema AS foreign_table_schema,
-                    ccu.table_name AS foreign_table_name,
-                    ccu.column_name AS foreign_column_name
-                FROM information_schema.table_constraints tc
-                JOIN information_schema.key_column_usage kcu
-                    ON tc.constraint_name = kcu.constraint_name
-                    AND tc.table_schema = kcu.table_schema
-                JOIN information_schema.constraint_column_usage ccu
-                    ON tc.constraint_name = ccu.constraint_name
-                    AND ccu.table_schema = tc.table_schema
-                WHERE tc.constraint_type = 'FOREIGN KEY'
-                AND tc.table_schema = ANY(%s)
-                AND tc.table_name = ANY(%s)
+                    src_ns.nspname AS table_schema,
+                    src_tbl.relname AS table_name,
+                    src_att.attname AS column_name,
+                    ref_ns.nspname AS foreign_table_schema,
+                    ref_tbl.relname AS foreign_table_name,
+                    ref_att.attname AS foreign_column_name
+                FROM pg_catalog.pg_constraint con
+                JOIN pg_catalog.pg_class src_tbl ON src_tbl.oid = con.conrelid
+                JOIN pg_catalog.pg_namespace src_ns ON src_ns.oid = src_tbl.relnamespace
+                JOIN pg_catalog.pg_class ref_tbl ON ref_tbl.oid = con.confrelid
+                JOIN pg_catalog.pg_namespace ref_ns ON ref_ns.oid = ref_tbl.relnamespace
+                JOIN LATERAL unnest(con.conkey) WITH ORDINALITY
+                    AS src_key(attnum, ordinality) ON TRUE
+                JOIN LATERAL unnest(con.confkey) WITH ORDINALITY
+                    AS ref_key(attnum, ordinality)
+                    ON ref_key.ordinality = src_key.ordinality
+                JOIN pg_catalog.pg_attribute src_att
+                    ON src_att.attrelid = src_tbl.oid AND src_att.attnum = src_key.attnum
+                JOIN pg_catalog.pg_attribute ref_att
+                    ON ref_att.attrelid = ref_tbl.oid AND ref_att.attnum = ref_key.attnum
+                WHERE con.contype = 'f'
+                AND src_ns.nspname = ANY(%s)
+                AND src_tbl.relname = ANY(%s)
+                ORDER BY src_ns.nspname, src_tbl.relname, src_key.ordinality
             """, (schema_names, table_names))
             
             fk_by_table: Dict[str, List[Dict]] = {}
@@ -383,8 +393,10 @@ class PostgresSchemaExtractor(SchemaExtractor):
                     rel = TableRelationship(
                         from_table=table_name,
                         from_field=fk['column_name'],
+                        from_schema=schema_name,
                         to_table=fk['foreign_table_name'],
                         to_field=fk['foreign_column_name'],
+                        to_schema=fk['foreign_table_schema'],
                         description=f"{fk['column_name']} references {fk['foreign_table_schema']}.{fk['foreign_table_name']}.{fk['foreign_column_name']}",
                     )
                     relationships.append(rel)

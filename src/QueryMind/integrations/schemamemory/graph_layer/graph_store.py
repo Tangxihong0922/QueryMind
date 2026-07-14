@@ -78,6 +78,20 @@ def _build_relationship_pattern(
     return f":{'|'.join(types)}*{min_hops}..{max_hops}"
 
 
+def _resolve_relationship_table(
+    table_name: str,
+    explicit_schema: Optional[str],
+    default_schema: str,
+) -> tuple[str, str]:
+    """Resolve a relationship target while preserving older dotted table names."""
+    if explicit_schema:
+        return explicit_schema, table_name
+    if "." in table_name:
+        schema_name, unqualified_name = table_name.split(".", 1)
+        return schema_name, unqualified_name
+    return default_schema, table_name
+
+
 @dataclass
 class TableNode:
     """Represents a Table node in Neo4j."""
@@ -328,19 +342,30 @@ class Neo4jGraphStore:
             
             # 5. Create FK_TO relationships between tables
             for rel in schema.relationships:
+                from_schema, from_table = _resolve_relationship_table(
+                    rel.from_table,
+                    rel.from_schema,
+                    schema.schema_name,
+                )
+                to_schema, to_table = _resolve_relationship_table(
+                    rel.to_table,
+                    rel.to_schema,
+                    schema.schema_name,
+                )
                 tx.run("""
                     MATCH (from:Table {table_name: $from_table, schema_name: $from_schema})
-                    MATCH (to:Table {table_name: $to_table, schema_name: $to_schema})
-                    MERGE (from)-[r:FK_TO]->(to)
+                    MERGE (to:Table {table_name: $to_table, schema_name: $to_schema})
+                    MERGE (from)-[r:FK_TO {
+                        from_field: $from_field,
+                        to_field: $to_field
+                    }]->(to)
                     SET r.relationship_type = $rel_type,
-                        r.from_field = $from_field,
-                        r.to_field = $to_field,
                         r.description = $description
                 """,
-                    from_table=rel.from_table,
-                    from_schema=schema.schema_name,
-                    to_table=rel.to_table,
-                    to_schema=rel.to_table.split('.')[0] if '.' in rel.to_table else schema.schema_name,
+                    from_table=from_table,
+                    from_schema=from_schema,
+                    to_table=to_table,
+                    to_schema=to_schema,
                     rel_type=rel.relationship_type.value if hasattr(rel.relationship_type, 'value') else str(rel.relationship_type),
                     from_field=rel.from_field,
                     to_field=rel.to_field,

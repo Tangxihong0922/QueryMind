@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from QueryMind.integrations.schemamemory.graph_layer.graph_store import (  # noqa: E402
     _build_relationship_pattern,
+    _resolve_relationship_table,
 )
 
 
@@ -28,3 +29,24 @@ def test_build_relationship_pattern_can_restrict_to_single_type() -> None:
         min_hops=0,
         default_types=("FK_TO",),
     ) == ":FK_TO*0..3"
+
+
+def test_resolve_relationship_table_prefers_explicit_schema() -> None:
+    assert _resolve_relationship_table("person", "person", "sales") == (
+        "person",
+        "person",
+    )
+
+
+def test_resolve_relationship_table_supports_legacy_dotted_name() -> None:
+    assert _resolve_relationship_table("person.person", None, "sales") == (
+        "person",
+        "person",
+    )
+
+
+def test_resolve_relationship_table_falls_back_to_source_schema() -> None:
+    assert _resolve_relationship_table("currency", None, "sales") == (
+        "sales",
+        "currency",
+    )

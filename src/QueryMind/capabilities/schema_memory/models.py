@@ -73,8 +73,10 @@ class TableRelationship(BaseModel):
 
     from_table: str
     from_field: str
+    from_schema: Optional[str] = None
     to_table: str
     to_field: str
+    to_schema: Optional[str] = None
     relationship_type: RelationshipType = RelationshipType.ONE_TO_MANY
     description: Optional[str] = Field(  
         default=None,  
